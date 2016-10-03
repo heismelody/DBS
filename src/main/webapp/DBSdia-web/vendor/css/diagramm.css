@@ -1,0 +1,123 @@
+/*base begin*/
+html, body {
+    padding: 0px;
+    margin: 0px;
+    overflow: hidden;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+}
+body {
+    margin: 0px;
+    padding: 0px;
+    font-size: 13px;
+    color: #333;
+}
+body {
+    font-family: 'Microsoft Yahei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+.icon {
+  background: url(../images/diagram/sprite.png?9) no-repeat;
+  height: 20px;
+  width: 20px;
+}
+.ico-goback {
+    background-position: -40px -420px;
+}
+::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+    background: white;
+    border-left: 1px solid #e8e8e8;
+}
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+::-webkit-scrollbar-thumb {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #fff;
+    border-radius: 6px;
+    background: #c9c9c9;
+}
+::-webkit-scrollbar-thumb {
+    border-width: 2px;
+    border-style: solid;
+    border-color: #fff;
+    border-radius: 6px;
+    background-color: #c6c6c6;
+}
+/*base end*/
+
+/*header begin*/
+#header {
+  position: relative;
+  background-color: #F7F7F7;
+}
+#back {
+  height: 20px;
+  width: 20px;
+  position: absolute;
+  left: 2px;
+  top: 10px;
+  padding: 5px;
+  cursor: pointer;
+  display: block;
+}.ico-goback {
+  display: block;
+}
+/*header end*/
+
+/*design left-panel start*/
+#designer {
+    width: 100%;
+    position: relative;
+}
+.design-panel {
+    width: 162px;
+    overflow: hidden;
+    overflow-y: auto;
+    position: absolute;
+    background: #F6F6F6;
+    border-right: 1px solid #A2A2A2;
+}
+/*design left-panel end*/
+
+/*design right start*/
+.design-view {
+    position: relative;
+    margin-left: 163px;
+}
+.design-layout {
+    overflow: auto;
+    position: relative;
+    background: url(../images/diagram/canvasBackground.jpg) repeat;
+    z-index: 0;
+}
+.canvas-container {
+  width: 1500px;
+    height: 2100px;
+    padding: 1000px;
+    cursor: default;
+}
+.design-canvas {
+  position: relative;
+    background: #F2F2F2;
+    /*overflow: visible;*/
+    box-shadow: 3px 3px 6px #888;
+    z-index: 0;
+}
+/*design left end*/
+
+.design-layout {
+  height: 828px;
+}
+.design-panel {
+  height: 828px;
+}
+.design-canvas {
+  background-color: rgb(242, 242, 242);
+}

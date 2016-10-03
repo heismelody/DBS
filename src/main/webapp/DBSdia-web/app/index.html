@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Page Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="description" content="DBS diagram">
+    <link type="text/css" rel="stylesheet" href="../vendor/css/diagramm.css"></link>
+  </head>
+  <body>
+    <div class="container diagram-container">
+      <div id="header">
+        <div class="titlebar">
+          <div class="row row1">
+            <a id="back" href="#">
+              <span class="icon ico-goback"></span>
+            </a>
+            <span id="fileTitle">{{title}}</span>
+            <div id="toolBar" class="toolbar">
+              <ul id="menuBar" class="menu-bar">
+                <li id="menuBarFile" menu="menuListFile">File</li>
+                <li id="menuBarEdit" menu="menuListEdit">Edit</li>
+                <li id="menuBarView" menu="menuListView">View</li>
+                <li id="menuBarInsert" menu="menuListInsert">Insert</li>
+                <li id="menuBarPage" menu="menuListPage">Page</li>
+                <li id="menuBarSort" menu="menuListSort">Sort</li>
+                <li id="menuBarHelp" menu="menuListHelp">Help</li>
+              </ul>
+              <span id="saveingTip"></span>
+            </div>
+          </div>
+          <div class="share">
+            <div class="userLeftBtn"></div>
+            <div class="user"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="design">
+        <div class="design-panel"></div>
+        <div class="design-view">
+          <div class="design-layout">
+            <div class="canvas-container">
+              <div class="design-canvas">
+                <canvas id="designer_grids" width="1500" height="2100"></canvas>
+              </div>
+            </div>
+            <div class="img-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="footer"></div>
+      <div id="UIcontainer">
+
+      </div>
+    </div>
+
+  <script src="../vendor/sea-modules/jquery-3.1.1/jquery-3.1.1.js"></script>
+  <script src="../vendor/sea-modules/sea.js"></script>
+  <script src="../vendor/sea-modules/seajs.config.js"></script>
+  <script>
+    seajs.use("../static/diagrammain");
+  </script>
+  </body>
+</html>
