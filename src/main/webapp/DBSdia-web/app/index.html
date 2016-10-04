@@ -10,12 +10,15 @@
     <div class="container diagram-container">
       <div id="header">
         <div class="titlebar">
+
           <div class="row row1">
             <a id="back" href="#">
               <span class="icon ico-goback"></span>
             </a>
-            <span id="fileTitle">{{title}}</span>
-            <div id="toolBar" class="toolbar">
+            <div class="filetitle-container">
+              <span id="fileTitle">{{title}}</span>
+            </div>
+            <div class="menu-conatiner">
               <ul id="menuBar" class="menu-bar">
                 <li id="menuBarFile" menu="menuListFile">File</li>
                 <li id="menuBarEdit" menu="menuListEdit">Edit</li>
@@ -28,10 +31,122 @@
               <span id="saveingTip"></span>
             </div>
           </div>
+
           <div class="share">
-            <div class="userLeftBtn"></div>
-            <div class="user"></div>
+            <div class="userLeftBtn">
+              <div id="shareDownload" class="btn active">Download</div>
+              <div id="sharePublish" class="btn active">Publish</div>
+              <div id="shareShare" class="btn active">Share</div>
+            </div>
+            <div class="user">
+              <img src="../vendor/images/diagram/photo"/>Admin
+            </div>
           </div>
+
+          <div class="row row2 toolbar">
+            <div id="bar-theme" class="toolbar-button" title="Change theme">
+              <div class="icon theme"></div>
+            </div>
+            <div class="toolbar-devider"></div>
+            <div id="bar-undo" class="toolbar-button disabled" title="Undo (Ctrl+Z)">
+              <div class="icon undo"></div>
+            </div>
+            <div id="bar-redo" class="toolbar-button disabled" title="Redo (Ctrl+Y)">
+              <div class="icon redo"></div>
+            </div>
+            <div id="bar-brush" class="toolbar-button disabled" title="Brush (Ctrl+Shift+B)">
+              <div class="icon brush"></div>
+            </div>
+            <div class="toolbar-devider"></div>
+            <div id="bar-font-family" title="Font" class="toolbar-button disabled" style="width: 80px;">
+              <div class="text-content">Arial</div>
+              <div class="icon ico-dropdown"></div>
+            </div>
+            <div class="toolbar-small-devider"></div>
+            <div id="bar-font-size" title="Font size" class="spinner disabled" style="width: 50px;" min="12" max="100" old="13px">
+              <div class="spinner-input"><input disabled="disabled"></div>
+              <div class="buttons">
+                <div class="spinner-up"></div>
+                <div class="spinner-down"></div>
+              </div>
+            </div>
+            <div class="toolbar-small-devider"></div>
+            <div id="bar-font-bold" title="Bold (Ctrl+B)" class="toolbar-button disabled">
+              <div class="icon bold"></div>
+            </div>
+            <div id="bar-font-italic" title="Italic (Ctrl+I)" class="toolbar-button disabled">
+              <div class="icon italic"></div>
+            </div>
+            <div id="bar-font-underline" title="Underline (Ctrl+U)" class="toolbar-button disabled">
+              <div class="icon underline"></div>
+            </div>
+            <div id="bar-font-color" title="Text color" class="toolbar-button drop-button disabled">
+              <div class="icon fontcolor"></div>
+              <div class="btn-color" style="background-color: rgb(50,50,50)"></div>
+              <div class="icon ico-dropdown"></div>
+            </div>
+            <div id="bar-font-align" title="Align" class="toolbar-button drop-button disabled">
+              <div class="icon alignleft"></div>
+              <div class="icon ico-dropdown"></div>
+            </div>
+            <div class="toolbar-devider"></div>
+            <div id="bar-fill" title="Fill" class="toolbar-button drop-button disabled">
+              <div class="icon fillcolor"></div>
+              <div class="btn-color" style="background-color: rgb(255,255,255)"></div>
+              <div class="icon ico-dropdown"></div>
+            </div>
+            <div id="bar-line-color" title="Line color" class="toolbar-button drop-button disabled">
+              <div class="icon linecolor"></div>
+              <div class="btn-color" style="background-color: rgb(50,50,50)"></div>
+              <div class="icon ico-dropdown"></div>
+            </div>
+            <div id="bar-line-width" title="Line width" class="toolbar-button drop-button disabled">
+              <div class="icon linewidth"></div>
+              <div class="icon ico-dropdown"></div>
+            </div>
+            <div id="bar-line-style" title="Line dash" class="toolbar-button drop-button disabled">
+              <div class="icon linedash"></div>
+              <div class="icon ico-dropdown"></div>
+            </div>
+            <div class="toolbar-devider"></div>
+            <div id="bar-linkertype" title="Line type" class="toolbar-button drop-button disabled">
+              <div class="icon linkertype-broken"></div>
+              <div class="icon ico-dropdown"></div>
+            </div>
+            <div id="bar-beginarrow" title="Line beginning" class="toolbar-button drop-button disabled">
+              <div class="icon ico-arrow larrow-none"></div>
+              <div class="icon ico-dropdown"></div>
+            </div>
+            <div id="bar-endarrow" title="Line ending" class="toolbar-button drop-button disabled">
+              <div class="icon ico-arrow rarrow-none"></div>
+              <div class="icon ico-dropdown"></div>
+            </div>
+            <div class="toolbar-devider"></div>
+            <div id="bar-front" title="Bring To Front (Ctrl+] )" class="toolbar-button disabled">
+              <div class="icon ico-front"></div>
+            </div>
+            <div id="bar-back" title="Send To Back (Ctrl+[ )" class="toolbar-button disabled">
+              <div class="icon ico-back"></div>
+            </div>
+            <div class="toolbar-devider"></div>
+            <div id="bar-lock" title="Lock (Ctrl+L)" class="toolbar-button disabled">
+              <div class="icon ico-lock"></div>
+            </div>
+            <div id="bar-unlock" title="Unlock (Ctrl+Shift+L)" class="toolbar-button disabled">
+              <div class="icon ico-unlock"></div>
+            </div>
+            <div class="toolbar-small-devider"></div>
+            <div id="bar-link" title="Insert Link" class="toolbar-button disabled">
+              <div class="icon ico-link"></div>
+            </div>
+            <div class="toolbar-right">
+              <div id="bar-collapse" class="toolbar-button"><div class="icon collapse"></div></div>
+            </div>
+            <a id="bar-return" class="toolbar-button" href="/diagraming/back?id=574e502de4b0a2f2ddc54f91" title="Back" style="display:none;">
+              <span class="icon ico-goback"></span>
+            </a>
+          </div>
+
         </div>
       </div>
 
@@ -41,7 +156,7 @@
           <div class="design-layout">
             <div class="canvas-container">
               <div class="design-canvas">
-                <canvas id="designer_grids" width="1500" height="2100"></canvas>
+                <canvas id="designer-grids" width="1500" height="2100"></canvas>
               </div>
             </div>
             <div class="img-container"></div>
@@ -60,6 +175,12 @@
   <script src="../vendor/sea-modules/seajs.config.js"></script>
   <script>
     seajs.use("../static/diagrammain");
+
+    $(function () {
+        seajs.use([ "../static/diagrammain" ], function (exports) {
+            exports.init();
+        });
+    });
   </script>
   </body>
 </html>
