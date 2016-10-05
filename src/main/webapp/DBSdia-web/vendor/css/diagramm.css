@@ -334,6 +334,14 @@ input, textarea, div {
 .icon.expand{
 	background-position: 0px -620px;
 }
+.icon.collapse:hover {
+  border: 1px solid transparent;
+  border-color: #c6c6c6;
+}
+.icon.expand:hover {
+  border: 1px solid transparent;
+  border-color: #c6c6c6;
+}
 .icon.theme{
 	background-position: -20px -620px;
 }
