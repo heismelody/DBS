@@ -1,6 +1,10 @@
 define(function(require, exports, module) {
-    var comp = require('components.js');
+    var util = require('Util.js');
     var vue = require('Vue');
+    var Util = util.Util;
+    var json2 = require('json2');
+    var jQuerycollapseStorage = require('jQuerycollapseStorage');
+    var jQuerycollapse = require('jQuerycollapse');
 
     var init = function() {
       _initDom();
@@ -9,20 +13,23 @@ define(function(require, exports, module) {
 
     function _initDom() {
       (function initPanelHeight() {
-        let curClientWidth = comp.getClientHeight();
+        let curClientWidth = Util.getClientHeight();
 
         $('.design-panel').css('height',curClientWidth - 86);
         $('.design-layout').css('height',curClientWidth - 86);
       })();
 
-
+      (function initCanvasGrid() {
+        Util.drawGrid("designer-grids");
+      })();
     };
 
     function _initEvent() {
+      //console.log(util.getClientHeight);
       (function initResizeEvent() {
         //resize the panel height after event
         $(window).on("resize", function(){
-          let curClientWidth = comp.getClientHeight();
+          let curClientWidth = Util.getClientHeight();
 
           if($('.row1').css('display') == "none") {
             $('.design-panel').css('height',curClientWidth - 40);
@@ -36,6 +43,19 @@ define(function(require, exports, module) {
 
       })();
 
+      (function initLeftPanelEvent() {
+        new jQueryCollapse($("#leftPanel"), {
+          open: function() {
+            this.slideDown(150);
+            this.prev('.panel-title').find('.icon').attr('class','icon ico-accordion');
+          },
+          close: function() {
+            this.slideUp(150);
+            this.prev('.panel-title').find('.icon').attr('class','icon ico-accordioned');
+          }
+        });
+      })();
+
       var vm = new Vue({
         el: '#bar-collapse',
         data: {
@@ -44,7 +64,7 @@ define(function(require, exports, module) {
         },
         methods: {
           collapseHeaderEvent: function (event) {
-            let curClientWidth = comp.getClientHeight();
+            let curClientWidth = Util.getClientHeight();
 
             if($(".row1").css('display') == "none") {
               $(".row1").slideDown(150);
@@ -65,6 +85,7 @@ define(function(require, exports, module) {
           }
         }
       })
+
 
     };
 

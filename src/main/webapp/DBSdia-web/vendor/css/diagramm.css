@@ -207,6 +207,11 @@ input, textarea, div {
 	height: 8px;
 	background-position: -40px -47px;
 }
+.ico-accordioned{
+	width: 8px;
+	height: 8px;
+	background-position: -51px -46px;
+}
 .ico-dock-nav{
 	background-position: -40px 0px;
 }
@@ -685,6 +690,39 @@ input, textarea, div {
     position: absolute;
     background: #F6F6F6;
     border-right: 1px solid #A2A2A2;
+}
+.panel-title {
+    position: relative;
+    margin: 0px;
+    background-color: #F3F3F3;
+    height: 30px;
+    line-height: 30px;
+    font-size: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 0 2px 0 19px;
+    border-bottom: #cccccc solid 1px;
+    cursor: default;
+    -webkit-box-shadow: 0px 1px 1px rgba(0,0,0,.1);
+    -moz-box-shadow: 0px 1px 1px rgba(0,0,0,.1);
+    -ms-box-shadow: 0px 1px 1px rgba(0,0,0,.1);
+    box-shadow: 0px 1px 1px rgba(0,0,0,.1);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.33);
+}
+.panel-title a {
+  color:#333;
+}
+.panel-body {
+    margin: 0px auto;
+    width: 138px;
+    padding: 5px 0px;
+}
+.panel-title .ico-accordion,
+.panel-title .ico-accordioned {
+    position: absolute;
+    left: 5px;
+    top: 11px;
 }
 /*design left-panel end*/
 
