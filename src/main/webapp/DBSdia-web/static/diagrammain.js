@@ -56,6 +56,15 @@ define(function(require, exports, module) {
         });
       })();
 
+      function panelBoxDragEvent(elementClassName) {
+        let self = $(this);
+        if(self.hasClass("readonly")) { return; }
+
+        const shapeName = self.attr("shapeName");
+        let temp = [];
+
+      };
+
       var vm = new Vue({
         el: '#bar-collapse',
         data: {
