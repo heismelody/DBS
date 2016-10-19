@@ -724,6 +724,14 @@ input, textarea, div {
     left: 5px;
     top: 11px;
 }
+.panel-box {
+    display: inline-block;
+    border: 2px solid transparent;
+    position: relative;
+}
+.panel-item {
+    margin: 0px auto;
+}
 /*design left-panel end*/
 
 /*design right start*/

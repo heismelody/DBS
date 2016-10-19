@@ -1,14 +1,22 @@
 define(function(require, exports, module) {
     var util = require('Util.js');
     var vue = require('Vue');
-    var Util = util.Util;
     var json2 = require('json2');
     var jQuerycollapseStorage = require('jQuerycollapseStorage');
     var jQuerycollapse = require('jQuerycollapse');
 
+    var DiagramManager = require('diagramManager');
+    var DiagramCreator = require('diagramCreator');
+
+    var Util = util.Util;
+    var diagramManager = DiagramManager.diagramManager;
+    var diagramCreator = DiagramCreator.diagramCreator;
+
     var init = function() {
       _initDom();
       _initEvent();
+
+      diagramCreator.addPanelShape("panel-basic","rectangle");
     };
 
     function _initDom() {

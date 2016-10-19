@@ -1,4 +1,8 @@
 define(function(require, exports, module) {
+  var BasicDiagram = require('../diagram/diagrams/basicDiagram.js');
+
+  var basicDiagram = BasicDiagram.basicDiagram;
+
   var diagramManager = (function () {
     /**
      * --------------------------------------------------------------------------
@@ -124,10 +128,54 @@ define(function(require, exports, module) {
         },
     	};
 
+    var _GlobalPathRef = {};
+
     var diagramManager = {
       getDefaultDiagramTemplate : function getDefaultDiagramTemplate() {
         return defaultDiagramTemplate;
-      }
+      },
+      getDiagramPathByName : function getDiagramPathByName(shapeName) {
+
+        return defaultDiagramTemplate;
+      },
+
+      //This two functions uesd to add diagram template's [path] [ref] property.
+      //Ex:@arg ref: refference name
+      //        path: how to draw the diagram
+      //    diagramManager.addGlobalPathRef("rectangle",[{
+      //    	action: "move",
+      //    	x: "0",
+      //    	y: "0"
+      //    }, {
+      //    	action: "line",
+      //    	x: "w",
+      //    	y: "0"
+      //    }, {
+      //    	action: "line",
+      //    	x: "w",
+      //    	y: "h"
+      //    }, {
+      //    	action: "line",
+      //    	x: "0",
+      //    	y: "h"
+      //    }, {
+      //    	action: "close"
+      //    }]);
+      //    diagramManager.getGlobalPathRef("rectangle");
+      addGlobalPathRef : function addGlobalPathRef(ref,path) {
+        let refTemp = ref;
+        refTemp = refTemp.toLowerCase();
+        _GlobalPathRef[refTemp] = path;
+      },
+      getGlobalPathRef : function getGlobalPathRef(ref) {
+        let refTemp = ref;
+        refTemp = refTemp.toLowerCase();
+        if(_GlobalPathRef[refTemp] != undefined) {
+          return _GlobalPathRef[refTemp];
+        }
+      },
+
+
     };
 
     return diagramManager;
