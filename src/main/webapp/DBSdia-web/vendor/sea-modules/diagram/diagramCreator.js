@@ -1,7 +1,12 @@
 define(function(require, exports, module) {
   var DiagramDesigner = require('./diagramDesigner.js');
+  var BasicDiagram = require('./diagrams/basicDiagram.js');
+  var DiagramManager = require('./diagramManager.js');
 
+  var basicDiagram = BasicDiagram.basicDiagram;
   var diagramDesigner = DiagramDesigner.diagramDesigner;
+  var templateManager = DiagramManager.diagramManager.templateManager;
+  var objectManager = DiagramManager.diagramManager.objectManager;
 
   var diagramCreator = (function () {
     /**
@@ -21,6 +26,12 @@ define(function(require, exports, module) {
      */
 
     var diagramCreator = {
+      initTemplate : function createTemplate() {
+        for(var shapeName in basicDiagram) {
+          templateManager.addTemplate(basicDiagram[shapeName]);
+        }
+      },
+
       addPanelShape : function addPanelShape(element,shapeName) {
         let panelItemTemplate = '<div class="panel-box" shapename="' + shapeName + '"><canvas class="panel-item" width="30" height="30"></canvas></div>';
         let panelItem = $(panelItemTemplate).appendTo("#" + element);

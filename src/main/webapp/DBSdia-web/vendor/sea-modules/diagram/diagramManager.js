@@ -29,6 +29,7 @@ define(function(require, exports, module) {
         backgroundColor: "transparent",
     		orientation: "portrait"   //@see ORIENTATION
     };
+    //diagram Object is identified by id
     var defaultDiagramTemplate =  {
     		id: "",
     		name: "",
@@ -59,25 +60,6 @@ define(function(require, exports, module) {
     			zindex: 0,
     			angle: 0
     		},
-    		path: [{
-    				action: "move",
-    				x: "0",
-    				y: "0"
-    			}, {
-    				action: "line",
-    				x: "w",
-    				y: "0"
-    			}, {
-    				action: "line",
-    				x: "w",
-    				y: "h"
-    			}, {
-    				action: "line",
-    				x: "0",
-    				y: "h"
-    			}, {
-    				action: "close",
-    		}],
         shapeStyle: {
     			alpha: 1
     		},
@@ -110,6 +92,29 @@ define(function(require, exports, module) {
     			vAlign: "middle",
     			orientation: "vertical"
     		},
+        //  the path and anchors properties are not stored in the diagram object.
+        //  If use this properties,search in the _GlobalDiagramTemplates and get these two properties.
+        //  EX:
+
+        path: [{
+    				action: "move",
+    				x: "0",
+    				y: "0"
+    			}, {
+    				action: "line",
+    				x: "w",
+    				y: "0"
+    			}, {
+    				action: "line",
+    				x: "w",
+    				y: "h"
+    			}, {
+    				action: "line",
+    				x: "0",
+    				y: "h"
+    			}, {
+    				action: "close",
+    		}],
     		anchors: [{
     			x: "w/2",
     			y: "0"
@@ -128,15 +133,86 @@ define(function(require, exports, module) {
         },
     	};
 
+    var _GlobalDiagramOjects = {};
+    var _GlobalDiagramTemplates = {
+      basic : {
+      },
+    };
     var _GlobalPathRef = {};
 
     var diagramManager = {
-      getDefaultDiagramTemplate : function getDefaultDiagramTemplate() {
-        return defaultDiagramTemplate;
-      },
-      getDiagramPathByName : function getDiagramPathByName(shapeName) {
+      templateManager : {
+        getDefaultTemplate : function getDefaultTemplate() {
+          return defaultDiagramTemplate;
+        },
+        addTemplate : function addTemplate(template) {
+          let category = template["category"];
+          let shapeName = template["name"];
 
-        return defaultDiagramTemplate;
+          if(_GlobalDiagramTemplates[category] == undefined) {
+            this.addCategory(category);
+          }
+          if(_GlobalDiagramTemplates[category][shapeName] == undefined) {
+            _GlobalDiagramTemplates[category][shapeName] = template;
+          }
+        },
+        addCategory : function addCategory(category) {
+          _GlobalDiagramTemplates[category] = {};
+        },
+        getProperties : function getProperties(shapeName) {
+          let category = this.getCategoryByName(shapeName);
+          if(_GlobalDiagramTemplates[category][shapeName] == undefined) {
+            console.log("diagramManager.templateManager.getProperties() Error!");
+            return
+          }
+          else {
+            return _GlobalDiagramTemplates[category][shapeName]["properties"];
+          }
+        },
+        getCategoryByName : function getCategoryByName(shapeName) {
+          for(let category in _GlobalDiagramTemplates) {
+            if(_GlobalDiagramTemplates[category][shapeName] != undefined) {
+              return category;
+            }
+          }
+        },
+        getPathByName : function getPathByName(shapeName) {
+          let category = this.getCategoryByName(shapeName);
+          if(_GlobalDiagramTemplates[category][shapeName] == undefined) {
+            console.log("diagramManager.templateManager.getPathByName() Error!");
+            return
+          }
+          else {
+            return _GlobalDiagramTemplates[category][shapeName]["path"];
+          }
+        },
+        getActionsByName : function getActionsByName(shapeName) {
+          let category = this.getCategoryByName(shapeName);
+          return this.getPathByName(shapeName,category)[0]["actions"];
+        },
+        getAnchorsByName : function getAnchorsByName(shapeName) {
+          let category = this.getCategoryByName(shapeName);
+          if(_GlobalDiagramTemplates[category][shapeName] == undefined) {
+            console.log("diagramManager.templateManager.getAnchorsByName() Error!");
+            return
+          }
+          else {
+            return _GlobalDiagramTemplates[category][shapeName]["anchors"];
+          }
+        },
+      },
+
+      objectManager : {
+        getDiagramById : function getDiagramById(diagramId) {
+          return _GlobalDiagramOjects[diagramId];
+        },
+        addDiagram : function addDiagram(diagramObj) {
+          // ajaxHelper.addDiagram(diagramObj,function(diagramId) {
+          //   _GlobalDiagramOjects[diagramId] = diagramObj;
+          //   return diagramId;
+          // });
+        },
+
       },
 
       //This two functions uesd to add diagram template's [path] [ref] property.

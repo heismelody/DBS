@@ -1,4 +1,9 @@
 define(function(require, exports, module) {
+  var DiagramManager = require('./diagramManager.js');
+
+  var templateManager = DiagramManager.diagramManager.templateManager;
+  var objectManager = DiagramManager.diagramManager.objectManager;
+
   var diagramDesigner = (function () {
     /**
      * --------------------------------------------------------------------------
@@ -16,12 +21,8 @@ define(function(require, exports, module) {
      * --------------------------------------------------------------------------
      */
     var actions = {
-      move: function(a) {
-				this.moveTo(a.x, a.y);
-				this.prePoint = a;
-				if (this.beginPoint == null) {
-					this.beginPoint = a
-				}
+      move: function(action) {
+				this.moveTo(action.x, action.y);
 			},
 			line: function(d) {
 				if (typeof this.webkitLineDash != "undefined" && typeof this.lineDashOffset == "undefined" && this.lineWidth != 0) {
@@ -108,10 +109,25 @@ define(function(require, exports, module) {
     };
 
     var diagramDesigner = {
-      drawDiagram : function drawDiagram(element,shapeName) {
-        for(let eachpath in diagram["path"]) {
-          actions[eachpath["action"]];
+      drawDiagram : function drawDiagram(canvas,shapeName) {
+        let ctx = canvas.getContext("2d");
+
+        resolvePath(ctx,shapeName);
+      },
+      resolvePath : function resolvePath(ctx,shapeName) {
+        let curActions = templateManager.getActionsByName(shapeName);
+        let curProperties = templateManager.getProperties(shapeName);
+
+        for(let eachaction in curActions) {
+          actions[curActions[eachaction].action].call(ctx,curActions[eachaction]);
         }
+      },
+      drawTemplateDiagram : function drawTemplateDiagram() {
+
+      },
+
+      drawPanelItemDiagram : function drawPanelItemDiagram() {
+
       },
 
     };
