@@ -1,8 +1,10 @@
 define(function(require, exports, module) {
   var DiagramManager = require('./diagramManager.js');
+  var DiagramUtil = require('./Util.js');
 
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
+  var diagramUtil = DiagramUtil.diagramUtil;
 
   var diagramDesigner = (function () {
     /**
@@ -20,116 +22,72 @@ define(function(require, exports, module) {
      * Defination of the API;
      * --------------------------------------------------------------------------
      */
-    var actions = {
-      move: function(action) {
-				this.moveTo(action.x, action.y);
-			},
-			line: function(d) {
-				if (typeof this.webkitLineDash != "undefined" && typeof this.lineDashOffset == "undefined" && this.lineWidth != 0) {
-					var f = this.webkitLineDash;
-					var c = this.prePoint;
-					var h = Utils.measureDistance(c, d);
-					var k = 0;
-					var b = 1 / h;
-					var j = c;
-					var e = 0;
-					var g = true;
-					while (k < 1) {
-						k += b;
-						if (k > 1) {
-							k = 1
-						}
-						var i = {
-							x: (1 - k) * c.x + k * d.x,
-							y: (1 - k) * c.y + k * d.y
-						};
-						var a = Utils.measureDistance(j, i);
-						if (a >= f[e] || k >= 1) {
-							if (g) {
-								this.lineTo(i.x, i.y)
-							} else {
-								this.moveTo(i.x, i.y)
-							}
-							g = !g;
-							j = i;
-							e++;
-							if (e >= f.length) {
-								e = 0
-							}
-						}
-					}
-					this.moveTo(d.x, d.y)
-				} else {
-					this.lineTo(d.x, d.y)
-				}
-				this.prePoint = d;
-				if (this.beginPoint == null) {
-					this.beginPoint = d
-				}
-			},
-      close: function() {
-				if (typeof this.webkitLineDash != "undefined" && typeof this.lineDashOffset == "undefined" && this.lineWidth != 0) {
-					var f = this.webkitLineDash;
-					var c = this.prePoint;
-					var d = this.beginPoint;
-					var h = Utils.measureDistance(c, d);
-					var k = 0;
-					var b = 1 / h;
-					var j = c;
-					var e = 0;
-					var g = true;
-					while (k < 1) {
-						k += b;
-						if (k > 1) {
-							k = 1
-						}
-						var i = {
-							x: (1 - k) * c.x + k * d.x,
-							y: (1 - k) * c.y + k * d.y
-						};
-						var a = Utils.measureDistance(j, i);
-						if (a >= f[e] || k >= 1) {
-							if (g) {
-								this.lineTo(i.x, i.y)
-							} else {
-								this.moveTo(i.x, i.y)
-							}
-							g = !g;
-							j = i;
-							e++;
-							if (e >= f.length) {
-								e = 0
-							}
-						}
-					}
-				}
-				this.closePath()
-			},
-
-    };
-
     var diagramDesigner = {
-      drawDiagram : function drawDiagram(canvas,shapeName) {
-        let ctx = canvas.getContext("2d");
-
-        resolvePath(ctx,shapeName);
+      _tempVar : {
+        _x : 0,
+        _y : 0,
+        _w : 0,
+        _h : 0,
       },
-      resolvePath : function resolvePath(ctx,shapeName) {
-        let curActions = templateManager.getActionsByName(shapeName);
-        let curProperties = templateManager.getProperties(shapeName);
+      drawDiagram : function drawDiagram(canvas,shapeName,diagramId) {
+        let ctx = canvas.getContext("2d");
+        //draw template diagram
+        if(arguments.length == 2) {
+          let curProperties = templateManager.getProperties(shapeName);
+          this._tempVar._w = curProperties.w;
+          this._tempVar._h = curProperties.h;
 
-        for(let eachaction in curActions) {
-          actions[curActions[eachaction].action].call(ctx,curActions[eachaction]);
+          this.resolvePath(ctx,shapeName);
+        }
+        //draw diagram object
+        else if(arguments.length == 3){
+
+        }
+
+      },
+      resolvePath : function resolvePath(ctx,shapeName,diagramId) {
+        //draw template diagram
+        if(arguments.length == 2) {
+          let curActions = templateManager.getActionsByName(shapeName);
+
+          for(let eachaction in curActions) {
+            this.actions[curActions[eachaction].action].call(ctx,curActions[eachaction]);
+          }
+        }
+        //draw diagram object
+        else if(arguments.length == 3){
+
         }
       },
-      drawTemplateDiagram : function drawTemplateDiagram() {
 
-      },
+      actions : {
+        move: function(action) {
+          let w = diagramDesigner._tempVar._w;
+          let h = diagramDesigner._tempVar._h;
+          let curX = diagramUtil.evaluate(action.x,w,h);
+          let curY = diagramUtil.evaluate(action.y,w,h);
+          if(this.startX == undefined || this.startY == undefined) {
+            this.startX = curX;
+            this.startY = curY;
+          }
 
-      drawPanelItemDiagram : function drawPanelItemDiagram() {
+  				this.moveTo(curX,curY);
+  			},
+  			line: function(action) {
+          let w = diagramDesigner._tempVar._w;
+          let h = diagramDesigner._tempVar._h;
+          let curX = diagramUtil.evaluate(action.x,w,h);
+          let curY = diagramUtil.evaluate(action.y,w,h);
 
-      },
+  				this.lineTo(curX,curY);
+  			},
+        close: function() {
+          this.lineTo(this.startX,this.startY);
+          this.stroke();
+  				this.closePath();
+  			},
 
+      }
     };
 
     return diagramDesigner;

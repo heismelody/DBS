@@ -1,14 +1,10 @@
 define(function(require, exports, module) {
-  var diagramCreator = (function () {
+  var diagramUtil = (function () {
     /**
      * --------------------------------------------------------------------------
      * Defination of the const;
      * --------------------------------------------------------------------------
      */
-    var ORIENTATION = {          //Page size:
-      portrait : "portrait",    //height >= width
-      landscape : "landscape",  //others
-    };
 
     /**
      * --------------------------------------------------------------------------
@@ -16,15 +12,17 @@ define(function(require, exports, module) {
      * --------------------------------------------------------------------------
      */
 
-    var diagramCreator = {
+    var diagramUtil = {
       getDefaultDiagramTemplate : function getDefaultDiagramTemplate() {
         return defaultDiagramTemplate;
       },
+      //not efficient
+      evaluate : new Function("expression","w","h","return eval(expression)"),
 
     };
 
-    return diagramCreator;
+    return diagramUtil;
   })();
 
-  exports.diagramCreator = diagramCreator;
+  exports.diagramUtil = diagramUtil;
 });

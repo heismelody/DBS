@@ -22,7 +22,7 @@ define(function(require, exports, module) {
         name: "triangle",
         title: "Triangle",
         category: "basic",
-        props: {
+        properties: {
           w: 80,
           h: 70
         },

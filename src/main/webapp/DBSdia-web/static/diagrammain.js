@@ -7,28 +7,30 @@ define(function(require, exports, module) {
 
     var DiagramManager = require('diagramManager');
     var DiagramCreator = require('diagramCreator');
+    var DiagramDesigner = require('diagramDesigner');
 
     var Util = util.Util;
     var templateManager = DiagramManager.diagramManager.templateManager;
     var objectManager = DiagramManager.diagramManager.objectManager;
     var diagramCreator = DiagramCreator.diagramCreator;
+    var diagramDesigner = DiagramDesigner.diagramDesigner;
 
     var init = function() {
       _initDom();
       _initEvent();
 
       diagramCreator.initTemplate();
-      templateManager.getActionsByName("triangle");
-
-      let element = document.getElementById("testCanvas");
-      let ctx = element.getContext("2d");
-      ctx.clearRect(0,0,300,300);
-      ctx.fillStyle="#0000ff";
-      ctx.fillRect(0,0,300,300);
-      ctx.stroke();
-      ctx.restore();
+      let canvas = document.getElementById("testCanvas");
+      let shapeName = "triangle";
+      diagramDesigner.drawDiagram(canvas,shapeName);
+      // let ctx = element.getContext("2d");
+      // ctx.clearRect(0,0,300,300);
+      // ctx.fillStyle="#0000ff";
+      // ctx.fillRect(0,0,300,300);
+      // ctx.stroke();
+      // ctx.restore();
       document.getElementById("testCanvas").scrollIntoView(true);
-      diagramCreator.addPanelShape("panel-basic","rectangle");
+      // diagramCreator.addPanelShape("panel-basic","rectangle");
     };
 
     function _initDom() {

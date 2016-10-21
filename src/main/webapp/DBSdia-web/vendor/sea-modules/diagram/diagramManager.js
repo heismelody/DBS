@@ -128,6 +128,7 @@ define(function(require, exports, module) {
     			x: "w",
     			y: "h/2"
     		}],
+
         others: {
 
         },
@@ -149,10 +150,10 @@ define(function(require, exports, module) {
           let category = template["category"];
           let shapeName = template["name"];
 
-          if(_GlobalDiagramTemplates[category] == undefined) {
+          if(!_GlobalDiagramTemplates.hasOwnProperty("category")) {
             this.addCategory(category);
           }
-          if(_GlobalDiagramTemplates[category][shapeName] == undefined) {
+          if(!_GlobalDiagramTemplates[category].hasOwnProperty("shapeName")) {
             _GlobalDiagramTemplates[category][shapeName] = template;
           }
         },
@@ -161,29 +162,29 @@ define(function(require, exports, module) {
         },
         getProperties : function getProperties(shapeName) {
           let category = this.getCategoryByName(shapeName);
-          if(_GlobalDiagramTemplates[category][shapeName] == undefined) {
-            console.log("diagramManager.templateManager.getProperties() Error!");
-            return
+          if(this.isShapenameDefined(shapeName,category)) {
+            return _GlobalDiagramTemplates[category][shapeName]["properties"];
           }
           else {
-            return _GlobalDiagramTemplates[category][shapeName]["properties"];
+            console.log("diagramManager.templateManager.getProperties() Error!");
+            return
           }
         },
         getCategoryByName : function getCategoryByName(shapeName) {
           for(let category in _GlobalDiagramTemplates) {
-            if(_GlobalDiagramTemplates[category][shapeName] != undefined) {
+            if(_GlobalDiagramTemplates[category].hasOwnProperty(shapeName)) {
               return category;
             }
           }
         },
         getPathByName : function getPathByName(shapeName) {
           let category = this.getCategoryByName(shapeName);
-          if(_GlobalDiagramTemplates[category][shapeName] == undefined) {
-            console.log("diagramManager.templateManager.getPathByName() Error!");
-            return
+          if(this.isShapenameDefined(shapeName,category)) {
+            return _GlobalDiagramTemplates[category][shapeName]["path"];
           }
           else {
-            return _GlobalDiagramTemplates[category][shapeName]["path"];
+            console.log("diagramManager.templateManager.getPathByName() Error!");
+            return
           }
         },
         getActionsByName : function getActionsByName(shapeName) {
@@ -192,13 +193,16 @@ define(function(require, exports, module) {
         },
         getAnchorsByName : function getAnchorsByName(shapeName) {
           let category = this.getCategoryByName(shapeName);
-          if(_GlobalDiagramTemplates[category][shapeName] == undefined) {
+          if(this.isShapenameDefined(shapeName,category)) {
+            return _GlobalDiagramTemplates[category][shapeName]["anchors"];
+          }
+          else {
             console.log("diagramManager.templateManager.getAnchorsByName() Error!");
             return
           }
-          else {
-            return _GlobalDiagramTemplates[category][shapeName]["anchors"];
-          }
+        },
+        isShapenameDefined : function isShapenameDefined(shapeName,category) {
+          return (_GlobalDiagramTemplates.hasOwnProperty(category) && _GlobalDiagramTemplates[category].hasOwnProperty(shapeName));
         },
       },
 
@@ -212,7 +216,19 @@ define(function(require, exports, module) {
           //   return diagramId;
           // });
         },
-
+        getProperties : function getProperties(shapeName,diagramId) {
+          if(arguments.length == 2) {
+            if(_GlobalDiagramOjects.hasOwnProperty(diagramId)) {
+              return this.getDiagramById(diagramId)["properties"];
+            }
+            else {
+              return templateManager.getProperties(shapeName);
+            }
+          }
+          else {
+            console.log("diagramManager.getProperties() arguments null!");
+          }
+        },
       },
 
       //This two functions uesd to add diagram template's [path] [ref] property.
