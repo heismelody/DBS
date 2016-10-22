@@ -65,6 +65,60 @@ define(function(require, exports, module) {
           }]
         }]
       },
+      octagon : {
+      	name: "octagon",
+      	title: "Octagon",
+      	category: "basic",
+      	properties: {
+      		w: 70,
+      		h: 70
+      	},
+      	textBlock: [{
+      		position: {
+      			x: "10",
+      			y: "10",
+      			w: "w-20",
+      			h: "h-20"
+      		}
+      	}],
+      	path: [{
+      		actions: [{
+      			action: "move",
+      			x: "Math.min(w,h)*0.29",
+      			y: "0"
+      		}, {
+      			action: "line",
+      			x: "w-Math.min(w,h)*0.29",
+      			y: "0"
+      		}, {
+      			action: "line",
+      			x: "w",
+      			y: "h*0.29"
+      		}, {
+      			action: "line",
+      			x: "w",
+      			y: "h*0.71"
+      		}, {
+      			action: "line",
+      			x: "w-Math.min(w,h)*0.29",
+      			y: "h"
+      		}, {
+      			action: "line",
+      			x: "Math.min(w,h)*0.29",
+      			y: "h"
+      		}, {
+      			action: "line",
+      			x: "0",
+      			y: "h*0.71"
+      		}, {
+      			action: "line",
+      			x: "0",
+      			y: "h*0.29"
+      		}, {
+      			action: "close"
+      		}]
+      	}]
+      },
 
     };
 

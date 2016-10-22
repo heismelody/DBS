@@ -138,6 +138,8 @@ define(function(require, exports, module) {
     var _GlobalDiagramTemplates = {
       basic : {
       },
+      UML : {
+      },
     };
     var _GlobalPathRef = {};
 
@@ -146,11 +148,21 @@ define(function(require, exports, module) {
         getDefaultTemplate : function getDefaultTemplate() {
           return defaultDiagramTemplate;
         },
+        getAllCategory : function() {
+          let allCategory = [];
+          for(var category in _GlobalDiagramTemplates) {
+            allCategory.push(category);
+          }
+          return allCategory;
+        },
+        getTemplateByCategory : function(category) {
+          return _GlobalDiagramTemplates[category];
+        },
         addTemplate : function addTemplate(template) {
           let category = template["category"];
           let shapeName = template["name"];
 
-          if(!_GlobalDiagramTemplates.hasOwnProperty("category")) {
+          if(!_GlobalDiagramTemplates.hasOwnProperty(category)) {
             this.addCategory(category);
           }
           if(!_GlobalDiagramTemplates[category].hasOwnProperty("shapeName")) {
@@ -166,8 +178,7 @@ define(function(require, exports, module) {
             return _GlobalDiagramTemplates[category][shapeName]["properties"];
           }
           else {
-            console.log("diagramManager.templateManager.getProperties() Error!");
-            return
+            throw new Error("diagramManager.templateManager.getProperties() Error!");
           }
         },
         getCategoryByName : function getCategoryByName(shapeName) {
@@ -183,8 +194,7 @@ define(function(require, exports, module) {
             return _GlobalDiagramTemplates[category][shapeName]["path"];
           }
           else {
-            console.log("diagramManager.templateManager.getPathByName() Error!");
-            return
+            throw new Error("diagramManager.templateManager.getPathByName() Error!");
           }
         },
         getActionsByName : function getActionsByName(shapeName) {
@@ -197,8 +207,7 @@ define(function(require, exports, module) {
             return _GlobalDiagramTemplates[category][shapeName]["anchors"];
           }
           else {
-            console.log("diagramManager.templateManager.getAnchorsByName() Error!");
-            return
+            throw new Error("diagramManager.templateManager.getAnchorsByName() Error!");
           }
         },
         isShapenameDefined : function isShapenameDefined(shapeName,category) {

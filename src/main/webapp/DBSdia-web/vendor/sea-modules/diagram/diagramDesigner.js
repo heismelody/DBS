@@ -36,6 +36,8 @@ define(function(require, exports, module) {
           let curProperties = templateManager.getProperties(shapeName);
           this._tempVar._w = curProperties.w;
           this._tempVar._h = curProperties.h;
+          if(canvas.width < this._tempVar._w){this._tempVar._w = canvas.width;}
+          if(canvas.height < this._tempVar._h){this._tempVar._h = canvas.height;}
 
           this.resolvePath(ctx,shapeName);
         }
@@ -83,6 +85,10 @@ define(function(require, exports, module) {
   			},
         close: function() {
           this.lineTo(this.startX,this.startY);
+          delete this.startX;
+          delete this.startY;
+
+          this.fill();
           this.stroke();
   				this.closePath();
   			},

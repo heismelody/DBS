@@ -730,6 +730,7 @@ input, textarea, div {
     position: relative;
 }
 .panel-item {
+    position: relative;
     margin: 0px auto;
 }
 /*design left-panel end*/
