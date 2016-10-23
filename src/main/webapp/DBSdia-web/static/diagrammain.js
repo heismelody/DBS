@@ -8,12 +8,14 @@ define(function(require, exports, module) {
     var DiagramManager = require('diagramManager');
     var DiagramCreator = require('diagramCreator');
     var DiagramDesigner = require('diagramDesigner');
+    var EventHelper = require('eventHelper');
 
     var Util = util.Util;
     var templateManager = DiagramManager.diagramManager.templateManager;
     var objectManager = DiagramManager.diagramManager.objectManager;
     var diagramCreator = DiagramCreator.diagramCreator;
     var diagramDesigner = DiagramDesigner.diagramDesigner;
+    var eventHelper = EventHelper.eventHelper;
 
     var init = function() {
 
@@ -25,6 +27,7 @@ define(function(require, exports, module) {
       // ctx.restore();
       //document.getElementById("testCanvas").scrollIntoView(true);
       diagramCreator.init();
+      eventHelper.panelitemDraggable();
 
       _initDom();
       _initEvent();

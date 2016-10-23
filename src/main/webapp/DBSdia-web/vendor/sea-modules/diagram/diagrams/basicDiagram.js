@@ -119,6 +119,53 @@ define(function(require, exports, module) {
       		}]
       	}]
       },
+      note : {
+      	name: "note",
+      	title: "Note",
+      	category: "basic",
+      	properties: {
+      		w: 80,
+      		h: 100
+      	},
+      	anchors: [],
+      	textBlock: [{
+      		position: {
+      			x: 10,
+      			y: 10,
+      			w: "w-20",
+      			h: "h-20"
+      		}
+      	}],
+      	path: [{
+      		actions: [{
+      			action: "move",
+      			x: "0",
+      			y: "0"
+      		}, {
+      			action: "line",
+      			x: "w-16",
+      			y: "0"
+      		}, {
+      			action: "line",
+      			x: "w",
+      			y: "16"
+      		}, {
+      			action: "line",
+      			x: "w",
+      			y: "h"
+      		}, {
+      			action: "line",
+      			x: "0",
+      			y: "h"
+      		}, {
+      			action: "line",
+      			x: "0",
+      			y: "0"
+      		}, {
+      			action: "close"
+      		}]
+      	}],
+      },
 
     };
 

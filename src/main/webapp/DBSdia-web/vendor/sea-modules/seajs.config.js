@@ -13,6 +13,6 @@ seajs.config({
     "diagramManager":"diagram/diagramManager.js",
     "ajaxHelper":"diagram/ajaxHelper.js",
     "diagramDesigner":"diagram/diagramDesigner.js",
-    "eventHelper":"diagram/diagramManager.js",
+    "eventHelper":"diagram/eventHelper.js",
   }
 })

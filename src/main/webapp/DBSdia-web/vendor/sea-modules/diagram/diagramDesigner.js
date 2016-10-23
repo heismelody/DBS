@@ -64,15 +64,17 @@ define(function(require, exports, module) {
 
       actions : {
         move: function(action) {
+          this.beginPath();
           let w = diagramDesigner._tempVar._w;
           let h = diagramDesigner._tempVar._h;
           let curX = diagramUtil.evaluate(action.x,w,h);
           let curY = diagramUtil.evaluate(action.y,w,h);
-          if(this.startX == undefined || this.startY == undefined) {
+          if(this.startX == null || this.startY == null) {
             this.startX = curX;
             this.startY = curY;
           }
 
+          this.clearRect(0,0,w,h);
   				this.moveTo(curX,curY);
   			},
   			line: function(action) {
@@ -85,15 +87,17 @@ define(function(require, exports, module) {
   			},
         close: function() {
           this.lineTo(this.startX,this.startY);
-          delete this.startX;
-          delete this.startY;
+          this.startX = null;
+          this.startY = null;
 
-          this.fill();
           this.stroke();
-  				this.closePath();
+          this.closePath();
   			},
+      },
 
-      }
+      commands : {
+
+      },
     };
 
     return diagramDesigner;

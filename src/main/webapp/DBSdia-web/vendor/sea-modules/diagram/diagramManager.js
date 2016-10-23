@@ -134,6 +134,12 @@ define(function(require, exports, module) {
         },
     	};
 
+    //These two array store the commands stack for redo and undo.
+    var _GlobalundoStack = new Array();
+    var _GlobalredoStack = new Array();
+
+    //These two object store all diagram templates and objects.
+    //If want to get these objects,use diagramManager.functionName() to access.
     var _GlobalDiagramOjects = {};
     var _GlobalDiagramTemplates = {
       basic : {
@@ -216,14 +222,16 @@ define(function(require, exports, module) {
       },
 
       objectManager : {
+        generateDiagramId : function generateDiagramId() {
+          let id = "";
+
+          return id;
+        },
+        addNewDiagram : function addNewDiagram(shapeName,x,y) {
+
+        },
         getDiagramById : function getDiagramById(diagramId) {
           return _GlobalDiagramOjects[diagramId];
-        },
-        addDiagram : function addDiagram(diagramObj) {
-          // ajaxHelper.addDiagram(diagramObj,function(diagramId) {
-          //   _GlobalDiagramOjects[diagramId] = diagramObj;
-          //   return diagramId;
-          // });
         },
         getProperties : function getProperties(shapeName,diagramId) {
           if(arguments.length == 2) {
@@ -240,6 +248,8 @@ define(function(require, exports, module) {
         },
       },
 
+      pageManager : {
+      },
       //This two functions uesd to add diagram template's [path] [ref] property.
       //Ex:@arg ref: refference name
       //        path: how to draw the diagram

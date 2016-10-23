@@ -733,6 +733,14 @@ input, textarea, div {
     position: relative;
     margin: 0px auto;
 }
+#creating-diagram {
+    overflow: hidden;
+    position: absolute;
+    display: none;
+}
+#creating-canvas {
+  position: absolute;
+}
 /*design left-panel end*/
 
 /*design right start*/

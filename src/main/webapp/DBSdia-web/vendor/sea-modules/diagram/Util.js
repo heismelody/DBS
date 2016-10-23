@@ -13,9 +13,19 @@ define(function(require, exports, module) {
      */
 
     var diagramUtil = {
-      getDefaultDiagramTemplate : function getDefaultDiagramTemplate() {
-        return defaultDiagramTemplate;
-      },
+      getRelativePosOffset: function(pagex,pagey,ele) {
+    		var offset = ele.offset();
+    		if (offset == null) {
+    			offset = {
+    				left: 0,
+    				top: 0
+    			}
+    		}
+    		return {
+    			x: pagex - offset.left + ele.scrollLeft(),
+    			y: pagey - offset.top + ele.scrollTop()
+    		}
+    	},
       //not efficient
       evaluate : new Function("expression","w","h","return eval(expression)"),
 
