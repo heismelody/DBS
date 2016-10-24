@@ -73,7 +73,7 @@ define(function(require, exports, module) {
       		w: 70,
       		h: 70
       	},
-      	textBlock: [{
+      	textArea: [{
       		position: {
       			x: "10",
       			y: "10",

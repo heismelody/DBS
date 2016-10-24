@@ -94,7 +94,8 @@ define(function(require, exports, module) {
     		},
         //  the path and anchors properties are not stored in the diagram object.
         //  If use this properties,search in the _GlobalDiagramTemplates and get these two properties.
-        //  EX:
+        //  EX: let curPath = templateManager.getPathByName(shapeName)
+        //      let curActions = templateManager.getActionsByName(shapeName);
 
         path: [{
     				action: "move",
@@ -223,12 +224,22 @@ define(function(require, exports, module) {
 
       objectManager : {
         generateDiagramId : function generateDiagramId() {
-          let id = "";
-
-          return id;
+          //http://stackoverflow.com/questions/6248666/how-to-generate-short-uid-like-ax4j9z-in-js
+          function generateUIDNotMoreThan1million() {
+            return ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4)
+          }
+          return Date.now() + generateUIDNotMoreThan1million();
         },
         addNewDiagram : function addNewDiagram(shapeName,x,y) {
-
+          let newId =  this.generateDiagramId();
+          _GlobalDiagramOjects[newId] = {
+            "id" : newId,
+            "name" : shapeName,
+            "properties": {
+        			"x": x,
+        			"y": y,
+        		},
+          };
         },
         getDiagramById : function getDiagramById(diagramId) {
           return _GlobalDiagramOjects[diagramId];
@@ -286,6 +297,23 @@ define(function(require, exports, module) {
         }
       },
 
+      /**
+     * get diagram attribute by shapeName or id
+     * @param {Array} shapeNameNId - EX:[shapeName,(diagramId optional)].
+     * @param {Array} attrName - EX:["fontStyle","fontFamily"].
+     */
+      getAttr : function(shapeNameNId,attrName) {
+
+      },
+      /**
+     * set diagram attribute by shapeName or id
+     * @param {Array} shapeNameNId - EX:[shapeName,(diagramId optional)].
+     * @param {Array} attrName - EX:["fontStyle","fontFamily"].
+     * @param {Array} attrValuee - EX:["fontStyle","fontFamily"].
+     */
+      setAttr : function(diagramId,attrName,attrValue) {
+
+      },
 
     };
 

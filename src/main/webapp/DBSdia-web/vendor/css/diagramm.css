@@ -767,6 +767,11 @@ input, textarea, div {
     box-shadow: 3px 3px 6px #888;
     z-index: 0;
 }
+#creating-designer-diagram {
+  position: absolute;
+  display: none;
+  z-index: 11111;
+}
 /*design left end*/
 
 .design-layout {

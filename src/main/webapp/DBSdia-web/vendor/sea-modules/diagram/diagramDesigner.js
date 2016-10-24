@@ -34,11 +34,21 @@ define(function(require, exports, module) {
         //draw template diagram
         if(arguments.length == 2) {
           let curProperties = templateManager.getProperties(shapeName);
-          this._tempVar._w = curProperties.w;
-          this._tempVar._h = curProperties.h;
-          if(canvas.width < this._tempVar._w){this._tempVar._w = canvas.width;}
-          if(canvas.height < this._tempVar._h){this._tempVar._h = canvas.height;}
+          // if(canvas.width == null || canvas.height == null) {
+          //   canvas.width = curProperties.w;
+          //   canvas.height = curProperties.h;
+          // }
+          // else {
+          //   this._tempVar._w = canvas.width;
+          //   this._tempVar._h = canvas.height;
+          // }
+          // if(canvas.width < this._tempVar._w){this._tempVar._w = canvas.width;}
+          // if(canvas.height < this._tempVar._h){this._tempVar._h = canvas.height;}
+          // if(canvas.width > this._tempVar._w){this._tempVar._w = canvas.width;}
+          // if(canvas.height > this._tempVar._h){this._tempVar._h = canvas.height;}
 
+          this._tempVar._w = canvas.width;
+          this._tempVar._h = canvas.height;
           this.resolvePath(ctx,shapeName);
         }
         //draw diagram object
