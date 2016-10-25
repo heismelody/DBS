@@ -6,6 +6,7 @@ define(function(require, exports, module) {
   var diagramDesigner = DiagramDesigner.diagramDesigner;
   var diagramUtil = DiagramUtil.diagramUtil;
   var templateManager = DiagramManager.diagramManager.templateManager;
+  var objectManager = DiagramManager.diagramManager.objectManager;
 
   var eventHelper = (function () {
     /**
@@ -73,6 +74,12 @@ define(function(require, exports, module) {
             let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$("#creating-diagram"));
             $('#creating-canvas').css('left',pos.x - 15 + 'px');
             $('#creating-canvas').css('top',pos.y - 15  + 'px');
+            let curProperties = templateManager.getProperties(_shapeName);
+            let newW = curProperties.w + 20;
+            let newH = curProperties.h + 20;
+            let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="' + newW + '" height = "' + newH + '"></canvas>';
+            $('#creating-designer-diagram').css('width',newW).css('height',newH);
+            $('#creating-designer-diagram').append(creatingCanvasHtml);
 
             // tell our code to start moving the element with the mouse
             document.onmousemove = onMouseMove;
@@ -96,15 +103,13 @@ define(function(require, exports, module) {
             // this is the actual "drag code"
             if(e.clientX > 178) {
               //Mouse move in the designer
-              let curProperties = templateManager.getProperties(_shapeName);
-              $('#creating-designer-canvas').width(curProperties.w + 20);
-              $('#creating-designer-canvas').height(curProperties.h + 20);
-              diagramDesigner.drawDiagram($('#creating-designer-canvas')[0],_shapeName);
-              let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
-              $('#creating-designer-diagram').css('left',pos.x - 15 + 'px');
-              $('#creating-designer-diagram').css('top',pos.y - 15  + 'px');
               $('#creating-designer-diagram').show();
               $('#creating-designer-canvas').show();
+              diagramDesigner.drawDiagram($('#creating-designer-canvas')[0],_shapeName);
+              let curProperties = templateManager.getProperties(_shapeName);
+              let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+              $('#creating-designer-diagram').css('left',pos.x - curProperties.w/2 - 10 + 'px');
+              $('#creating-designer-diagram').css('top',pos.y - curProperties.h/2 - 10 + 'px');
             }
             else {
               //Mouse move in the left panel
@@ -122,8 +127,23 @@ define(function(require, exports, module) {
               document.onselectstart = null;
               _dragElement.ondragstart = null;
 
-              // this is how we know we're not dragging
+              //That is the actual mouse up code.
+              if(e.clientX > 178) {
+                let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$("#creating-diagram"));
+                let newId = objectManager.addNewDiagram(_shapeName,pos.x,pos.y);
+                var newObject = $('#creating-designer-diagram').detach();
+                $('.design-canvas').append(newObject);
+                $('#creating-designer-diagram').attr("id",newId).css('position','absolute');
+                $('#creating-designer-canvas').attr("id","").css('position','absolute');
+                $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
+              }
+              else {
+                $('#creating-designer-diagram').hide();
+                $('#creating-designer-canvas').remove();
+              }
               $('#creating-diagram').hide();
+
+              // this is how we know we're not dragging
               _dragElement = null;
           }
         }

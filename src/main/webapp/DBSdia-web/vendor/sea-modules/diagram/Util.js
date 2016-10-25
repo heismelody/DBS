@@ -11,6 +11,7 @@ define(function(require, exports, module) {
      * Defination of the API;
      * --------------------------------------------------------------------------
      */
+    var diagramPadding = 10;
 
     var diagramUtil = {
       getRelativePosOffset: function(pagex,pagey,ele) {
@@ -27,7 +28,40 @@ define(function(require, exports, module) {
     		}
     	},
       //not efficient
-      evaluate : new Function("expression","w","h","return eval(expression)"),
+      evaluate : function(expression,w,h) {
+        if(typeof expression == "string") {
+          return eval(expression);
+        }
+        else {
+          w = w - diagramPadding * 2;
+          h = h - diagramPadding * 2;
+          var result = {};
+          for(let exp in expression) {
+            if(exp == "x") {
+              let tempX = eval(expression.x);
+              if(tempX <= w/2) {
+                result["x"] = tempX + diagramPadding;
+              }
+              else {
+                result["x"] = tempX + diagramPadding;
+              }
+              continue;
+            }
+            else if(exp == "y") {
+              let tempY = eval(expression.y);
+              if(tempY <= h/2) {
+                result["y"] = tempY + diagramPadding;
+              }
+              else {
+                result["y"] = tempY + diagramPadding;
+              }
+              continue;
+            }
+          }
+
+          return result;
+        }
+      },
 
     };
 

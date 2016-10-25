@@ -122,7 +122,7 @@ define(function(require, exports, module) {
       note : {
       	name: "note",
       	title: "Note",
-      	category: "basic",
+      	category: "UML",
       	properties: {
       		w: 80,
       		h: 100

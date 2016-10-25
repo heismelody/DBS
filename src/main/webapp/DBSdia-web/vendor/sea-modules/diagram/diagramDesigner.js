@@ -31,22 +31,9 @@ define(function(require, exports, module) {
       },
       drawDiagram : function drawDiagram(canvas,shapeName,diagramId) {
         let ctx = canvas.getContext("2d");
+        ctx.shapeName = shapeName;
         //draw template diagram
         if(arguments.length == 2) {
-          let curProperties = templateManager.getProperties(shapeName);
-          // if(canvas.width == null || canvas.height == null) {
-          //   canvas.width = curProperties.w;
-          //   canvas.height = curProperties.h;
-          // }
-          // else {
-          //   this._tempVar._w = canvas.width;
-          //   this._tempVar._h = canvas.height;
-          // }
-          // if(canvas.width < this._tempVar._w){this._tempVar._w = canvas.width;}
-          // if(canvas.height < this._tempVar._h){this._tempVar._h = canvas.height;}
-          // if(canvas.width > this._tempVar._w){this._tempVar._w = canvas.width;}
-          // if(canvas.height > this._tempVar._h){this._tempVar._h = canvas.height;}
-
           this._tempVar._w = canvas.width;
           this._tempVar._h = canvas.height;
           this.resolvePath(ctx,shapeName);
@@ -77,23 +64,40 @@ define(function(require, exports, module) {
           this.beginPath();
           let w = diagramDesigner._tempVar._w;
           let h = diagramDesigner._tempVar._h;
-          let curX = diagramUtil.evaluate(action.x,w,h);
-          let curY = diagramUtil.evaluate(action.y,w,h);
+          let curXY = {};
+          let curProperties = templateManager.getProperties(this.shapeName);
+
+          if(w <= curProperties.w || h <= curProperties.h) {
+            curXY.x = diagramUtil.evaluate(action.x,w,h);
+            curXY.y = diagramUtil.evaluate(action.y,w,h);
+          }
+          else {
+            curXY = diagramUtil.evaluate(action,w,h);
+          }
+
           if(this.startX == null || this.startY == null) {
-            this.startX = curX;
-            this.startY = curY;
+            this.startX = curXY.x;
+            this.startY = curXY.y;
           }
 
           this.clearRect(0,0,w,h);
-  				this.moveTo(curX,curY);
+          this.moveTo(curXY.x,curXY.y);
   			},
   			line: function(action) {
           let w = diagramDesigner._tempVar._w;
           let h = diagramDesigner._tempVar._h;
-          let curX = diagramUtil.evaluate(action.x,w,h);
-          let curY = diagramUtil.evaluate(action.y,w,h);
+          let curXY = {};
+          let curProperties = templateManager.getProperties(this.shapeName);
 
-  				this.lineTo(curX,curY);
+          if(w <= curProperties.w || h <= curProperties.h) {
+            curXY.x = diagramUtil.evaluate(action.x,w,h);
+            curXY.y = diagramUtil.evaluate(action.y,w,h);
+          }
+          else {
+            curXY = diagramUtil.evaluate(action,w,h);
+          }
+
+  				this.lineTo(curXY.x,curXY.y);
   			},
         close: function() {
           this.lineTo(this.startX,this.startY);

@@ -232,14 +232,21 @@ define(function(require, exports, module) {
         },
         addNewDiagram : function addNewDiagram(shapeName,x,y) {
           let newId =  this.generateDiagramId();
+          let newCategory = diagramManager.templateManager.getCategoryByName(shapeName);
+          let newProperties = diagramManager.templateManager.getProperties(shapeName);
           _GlobalDiagramOjects[newId] = {
             "id" : newId,
             "name" : shapeName,
+            "category" : newCategory,
             "properties": {
         			"x": x,
         			"y": y,
+              "w": newProperties.w,
+              "h": newProperties.h,
         		},
           };
+
+          return newId;
         },
         getDiagramById : function getDiagramById(diagramId) {
           return _GlobalDiagramOjects[diagramId];
