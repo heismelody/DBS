@@ -27,7 +27,14 @@ define(function(require, exports, module) {
     			y: pagey - offset.top + ele.scrollTop()
     		}
     	},
-      //not efficient
+
+      getCanvasPos : function(relativeX,relativeY) {
+        let pos = {};
+        
+        return pos;
+      },
+
+      //not efficient because use eval();
       evaluate : function(expression,w,h) {
         if(typeof expression == "string") {
           return eval(expression);
@@ -39,22 +46,12 @@ define(function(require, exports, module) {
           for(let exp in expression) {
             if(exp == "x") {
               let tempX = eval(expression.x);
-              if(tempX <= w/2) {
-                result["x"] = tempX + diagramPadding;
-              }
-              else {
-                result["x"] = tempX + diagramPadding;
-              }
+              result["x"] = tempX + diagramPadding;
               continue;
             }
             else if(exp == "y") {
               let tempY = eval(expression.y);
-              if(tempY <= h/2) {
-                result["y"] = tempY + diagramPadding;
-              }
-              else {
-                result["y"] = tempY + diagramPadding;
-              }
+              result["y"] = tempY + diagramPadding;
               continue;
             }
           }

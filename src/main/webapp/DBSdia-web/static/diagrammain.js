@@ -27,7 +27,7 @@ define(function(require, exports, module) {
       // ctx.restore();
       //document.getElementById("testCanvas").scrollIntoView(true);
       diagramCreator.init();
-      eventHelper.panelitemDraggable();
+      eventHelper.initEvent();
 
       _initDom();
       _initEvent();

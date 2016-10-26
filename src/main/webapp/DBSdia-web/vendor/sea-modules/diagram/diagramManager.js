@@ -230,6 +230,9 @@ define(function(require, exports, module) {
           }
           return Date.now() + generateUIDNotMoreThan1million();
         },
+        /**
+       * @param {string} x,y - Relative position.The center of the canvas.
+       */
         addNewDiagram : function addNewDiagram(shapeName,x,y) {
           let newId =  this.generateDiagramId();
           let newCategory = diagramManager.templateManager.getCategoryByName(shapeName);

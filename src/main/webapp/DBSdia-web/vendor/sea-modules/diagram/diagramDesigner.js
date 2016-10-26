@@ -44,6 +44,9 @@ define(function(require, exports, module) {
         }
 
       },
+      drawDiagramAnchor : function() {
+
+      },
       resolvePath : function resolvePath(ctx,shapeName,diagramId) {
         //draw template diagram
         if(arguments.length == 2) {
@@ -57,6 +60,12 @@ define(function(require, exports, module) {
         else if(arguments.length == 3){
 
         }
+      },
+      addDiagramControlOverlay : function() {
+
+      },
+      addDiagramAnchorOverlay : function() {
+
       },
 
       actions : {
