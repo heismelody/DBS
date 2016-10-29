@@ -28,6 +28,7 @@ define(function(require, exports, module) {
       //document.getElementById("testCanvas").scrollIntoView(true);
       diagramCreator.init();
       eventHelper.initEvent();
+      
 
       _initDom();
       _initEvent();

@@ -39,7 +39,7 @@ define(function(require, exports, module) {
       initEvent : function() {
         document.onmousedown = this.documentMouseDownHandler;
         document.onclick = this.doucmentClickHandler;
-        document.onmouseover = this.doucmentMouseEnterHandler;
+        //document.onmouseover = this.doucmentMouseEnterHandler;
       },
 
       documentMouseDownHandler : function(e) {
@@ -73,7 +73,7 @@ define(function(require, exports, module) {
           // for Firefox, left click == 0
           var isDiagramObject = (target.className.indexOf('diagram-object') != -1);
           if(e.button == 1 && window.event != null || e.button == 0 && isDiagramObject) {
-            eventHelper.diagramObjMouseEnterHandler(e);
+            eventHelper.diagramObjClickHandler(e);
           }
       },
       doucmentMouseEnterHandler : function(e) {
@@ -88,7 +88,7 @@ define(function(require, exports, module) {
           // for Firefox, left click == 0
           var isDiagramObject = (target.className.indexOf('diagram-object') != -1);
           if(e.button == 1 && window.event != null || e.button == 0 && isDiagramObject) {
-            eventHelper.diagramObjClickHandler(e);
+            eventHelper.diagramObjMouseEnterHandler(e);
           }
       },
 
@@ -175,8 +175,13 @@ define(function(require, exports, module) {
               let newId = objectManager.addNewDiagram(_shapeName,pos.x,pos.y);
               var newObject = $('#creating-designer-diagram').detach();
               $('.design-canvas').append(newObject);
-              $('#creating-designer-diagram').attr("id",newId).attr("class","diagram-object-container").css('position','absolute');
-              $('#creating-designer-canvas').attr("id","").attr("class","diagram-object-canvas").css('position','absolute');
+              $('#creating-designer-diagram').attr("id",newId)
+                                             .attr("class","diagram-object-container")
+                                             .css('position','absolute');
+              $('#creating-designer-canvas').attr("id","")
+                                            .attr("class","diagram-object-canvas")
+                                            .css('position','absolute');
+              $("#" + newId).find("canvas").hover(eventHelper.diagramObjMouseEnterHandler,eventHelper.diagramObjMouseLeaveHandler);
               $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
             }
             else {
@@ -184,6 +189,7 @@ define(function(require, exports, module) {
               $('#creating-designer-canvas').remove();
             }
             $('#creating-diagram').hide();
+            target.style.zIndex = 0;
 
             // this is how we know we're not dragging
             _dragElement = null;
@@ -239,17 +245,31 @@ define(function(require, exports, module) {
             document.onmousemove = null;
             document.onselectstart = null;
             _dragElement.ondragstart = null;
+            target.style.zIndex = 0;
 
             // this is how we know we're not dragging
             _dragElement = null;
         }
       },
       diagramObjMouseEnterHandler : function(e) {
-        diagramDesigner.addDiagramAnchorOverlay();
+        let curId = $(e.target).parent().attr("id");
+
+        if($("#anchor-overlay-container").length == 0) {
+          diagramDesigner.addDiagramAnchorOverlay(curId);
+        }
+      },
+      diagramObjMouseLeaveHandler : function(e) {
+        $('#anchor-overlay-container').remove();
       },
       diagramObjClickHandler: function(e) {
-        diagramDesigner.addDiagramControlOverlay();
-        diagramDesigner.addDiagramAnchorOverlay();
+        let curId = $(target).parent().attr("id");
+
+        if($("#control-overlay-container").length != 0) {
+          $("#control-overlay-container").remove();
+          $("#anchor-overlay-container").remove();
+        }
+        diagramDesigner.addDiagramControlOverlay(curId);
+        diagramDesigner.addDiagramAnchorOverlay(curId);
       },
 
     };

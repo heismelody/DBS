@@ -211,7 +211,12 @@ define(function(require, exports, module) {
         getAnchorsByName : function getAnchorsByName(shapeName) {
           let category = this.getCategoryByName(shapeName);
           if(this.isShapenameDefined(shapeName,category)) {
-            return _GlobalDiagramTemplates[category][shapeName]["anchors"];
+            if(_GlobalDiagramTemplates[category][shapeName]["anchors"]) {
+              return _GlobalDiagramTemplates[category][shapeName]["anchors"];
+            }
+            else {
+              return defaultDiagramTemplate["anchors"];
+            }
           }
           else {
             throw new Error("diagramManager.templateManager.getAnchorsByName() Error!");
@@ -254,18 +259,24 @@ define(function(require, exports, module) {
         getDiagramById : function getDiagramById(diagramId) {
           return _GlobalDiagramOjects[diagramId];
         },
+        getShapeNameById : function(diagramId) {
+          return _GlobalDiagramOjects[diagramId]["name"];
+        },
         getProperties : function getProperties(shapeName,diagramId) {
           if(arguments.length == 2) {
             if(_GlobalDiagramOjects.hasOwnProperty(diagramId)) {
-              return this.getDiagramById(diagramId)["properties"];
+              return _GlobalDiagramOjects[diagramId]["properties"];
             }
             else {
-              return templateManager.getProperties(shapeName);
+              return diagramManager.templateManager.getProperties(shapeName);
             }
           }
           else {
             console.log("diagramManager.getProperties() arguments null!");
           }
+        },
+        getAnchorsByName : function(shapeName,id) {
+          return diagramManager.templateManager.getAnchorsByName(shapeName);
         },
       },
 

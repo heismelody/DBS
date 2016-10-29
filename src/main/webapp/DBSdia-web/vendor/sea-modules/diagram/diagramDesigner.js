@@ -17,6 +17,25 @@ define(function(require, exports, module) {
       landscape : "landscape",  //others
     };
 
+    //Defination of the diagram control and position in the canvas
+    var CONTROL_DIRECTION = {
+      "nw": {
+        x: "0",
+        y: "0",
+      },
+      "ne": {
+        x: "w",
+        y: "0",
+      },
+      "sw": {
+        x: "w",
+        y: "h"
+      },
+      "se": {
+        x: "0",
+        y: "h"
+      },
+    };
     /**
      * --------------------------------------------------------------------------
      * Defination of the API;
@@ -42,11 +61,94 @@ define(function(require, exports, module) {
         else if(arguments.length == 3){
 
         }
-
       },
-      drawDiagramAnchor : function() {
+      drawDiagramAnchors : function(canvas,shapeName) {
+        let curAnchors = objectManager.getAnchorsByName(shapeName);
+        let anchorsHtml = "<div id='anchor-overlay-container'></div>";
+        let ctx = canvas.getContext('2d');
+        this._tempVar._w = canvas.width;
+        this._tempVar._h = canvas.height;
+        $(".design-canvas").append(anchorsHtml);
+        ctx.shapeName = shapeName;
+        ctx.diagramId = $(canvas).parent().attr("id");
 
+        for(var i in curAnchors) {
+          this.drawDiagramAnchor.call(ctx,ctx,curAnchors[i]);
+        }
       },
+      drawDiagramAnchor : function(ctx,curAnchor) {
+        let anchorHtml = '<div class="anchor-overlay"></div>';
+        let curCanvas = $("#" + this.diagramId);
+        let curCanvasLeft = parseFloat(curCanvas.css("left"));
+        let curCanvasTop = parseFloat(curCanvas.css("top"));
+        let w = diagramDesigner._tempVar._w;
+        let h = diagramDesigner._tempVar._h;
+        let curXY = {};
+
+        curXY = diagramUtil.evaluate(curAnchor,w,h);
+        $("#anchor-overlay-container").css({
+          left: curCanvasLeft,
+          top: curCanvasTop,
+          width : "0px",
+          height : "0px"
+        });
+        $(anchorHtml).appendTo("#anchor-overlay-container").css({
+          left: curXY.x - 4 + "px",
+          top:  curXY.y - 4 + "px"
+        });
+      },
+
+      drawDiagramControls : function(canvas) {
+        let ctx = canvas.getContext('2d');
+        let curCanvasParent = $(canvas).parent();
+        let curCanvasLeft = parseFloat(curCanvasParent.css("left"));
+        let curCanvasTop = parseFloat(curCanvasParent.css("top"));
+        let curCanvasWidth = parseFloat(curCanvasParent.css("width"));
+        let curCanvasHeight = parseFloat(curCanvasParent.css("height"));
+        let controlsHtml = "<div id='control-overlay-container'></div>";
+        let boundaryHtml = "<canvas id='control-boundary' width=" + canvas.width + " height=" + canvas.height + ">";
+        this._tempVar._w = canvas.width;
+        this._tempVar._h = canvas.height;
+
+        $(controlsHtml).appendTo(".design-canvas").css({
+          left: curCanvasLeft,
+          top: curCanvasTop,
+          width : "0px",
+          height : "0px"
+        });
+        this.drawDiagramControl(ctx);
+
+        $(boundaryHtml).appendTo("#control-overlay-container");
+        let boundaryCtx = $("#control-boundary")[0].getContext('2d');
+        boundaryCtx.shapeName = canvas.shapeName;
+        this.drawDiagramCanvasBorder.call(boundaryCtx,boundaryCtx);
+      },
+      drawDiagramControl : function(ctx) {
+        let curControlHtml = '<div class="control-overlay"></div>';
+        for(var curDirection in CONTROL_DIRECTION) {
+          let w = diagramDesigner._tempVar._w;
+          let h = diagramDesigner._tempVar._h;
+
+          curXY = diagramUtil.evaluate(CONTROL_DIRECTION[curDirection],w,h);
+          $(curControlHtml).appendTo("#control-overlay-container").css({
+            left: curXY.x - 4 + "px",
+            top:  curXY.y - 4 + "px"
+          });
+        }
+      },
+      drawDiagramCanvasBorder : function(ctx) {
+        let w = ctx.canvas.width;
+        let h = ctx.canvas.height;
+
+        this.lineWidth = 1;
+        this.beginPath();
+        this.translate(-0.5,-0.5);
+        this.strokeStyle = "#C49999";
+        this.strokeRect(10,10,w-20,h-20);
+        this.stroke();
+        this.closePath();
+      },
+
       resolvePath : function resolvePath(ctx,shapeName,diagramId) {
         //draw template diagram
         if(arguments.length == 2) {
@@ -61,11 +163,16 @@ define(function(require, exports, module) {
 
         }
       },
-      addDiagramControlOverlay : function() {
+      addDiagramControlOverlay : function(diagramId) {
+        let curCanvas = $("#" + diagramId).find('canvas').get(0);
 
+        this.drawDiagramControls(curCanvas);
       },
-      addDiagramAnchorOverlay : function() {
+      addDiagramAnchorOverlay : function(diagramId) {
+        let curshapeName = objectManager.getShapeNameById(diagramId);
+        let curCanvas = $("#" + diagramId).find('canvas').get(0);
 
+        this.drawDiagramAnchors(curCanvas,curshapeName);
       },
 
       actions : {

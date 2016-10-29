@@ -762,17 +762,47 @@ input, textarea, div {
 }
 .design-canvas {
   position: relative;
-    background: #F2F2F2;
-    /*overflow: visible;*/
-    box-shadow: 3px 3px 6px #888;
-    z-index: 0;
+  background: #F2F2F2;
+  /*overflow: visible;*/
+  box-shadow: 3px 3px 6px #888;
+  z-index: 0;
 }
 #creating-designer-diagram {
   position: absolute;
   display: none;
   z-index: 11111;
 }
-/*design left end*/
+#anchor-overlay-container {
+  position: absolute;
+}
+.anchor-overlay {
+  position: absolute;
+  border-style: solid;
+  border-width: 1px;
+  background: white;
+  border-color: rgb(136, 51, 51);
+  border-radius: 4px;
+  width: 6px;
+  height: 6px;
+}
+#control-overlay-container {
+  position: absolute;
+}
+#control-overlay-container #control-boundary {
+    position: absolute;
+}
+.control-overlay {
+  border-color: rgb(136, 51, 51);
+  width: 6px;
+  height: 6px;
+  z-index: 10;
+  display: block;
+  position: absolute;
+  border-style: solid;
+  border-width: 1px;
+  background: white;
+}
+/*design right end*/
 
 .design-layout {
   height: 828px;
