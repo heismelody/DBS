@@ -27,14 +27,35 @@ define(function(require, exports, module) {
         x: "w",
         y: "0",
       },
-      "sw": {
+      "se": {
         x: "w",
         y: "h"
       },
-      "se": {
+      "sw": {
         x: "0",
         y: "h"
       },
+
+      // "c": {
+      //   x: "w/2",
+      //   y: "h/2"
+      // },
+      // "n": {
+      //   x: "w/2",
+      //   y: "0"
+      // },
+      // "s": {
+      //   x: "w/2",
+      //   y: "h"
+      // },
+      // "w": {
+      //   x: "0",
+      //   y: "h/2"
+      // },
+      // "e": {
+      //   x: "w",
+      //   y: "h/2"
+      // },
     };
     /**
      * --------------------------------------------------------------------------
@@ -63,14 +84,19 @@ define(function(require, exports, module) {
         }
       },
       drawDiagramAnchors : function(canvas,shapeName) {
+        let curDiagramId = $(canvas).parent().attr("id");
         let curAnchors = objectManager.getAnchorsByName(shapeName);
-        let anchorsHtml = "<div id='anchor-overlay-container'></div>";
+        let anchorsHtml = "<div class='anchor-overlay-container' targetid='" + curDiagramId + "'></div>";
         let ctx = canvas.getContext('2d');
         this._tempVar._w = canvas.width;
         this._tempVar._h = canvas.height;
+
+        if($(".anchor-overlay-container").length != 0) {
+          $(".anchor-overlay-container").remove();
+        }
         $(".design-canvas").append(anchorsHtml);
         ctx.shapeName = shapeName;
-        ctx.diagramId = $(canvas).parent().attr("id");
+        ctx.diagramId = curDiagramId;
 
         for(var i in curAnchors) {
           this.drawDiagramAnchor.call(ctx,ctx,curAnchors[i]);
@@ -86,13 +112,13 @@ define(function(require, exports, module) {
         let curXY = {};
 
         curXY = diagramUtil.evaluate(curAnchor,w,h);
-        $("#anchor-overlay-container").css({
+        $(".anchor-overlay-container").css({
           left: curCanvasLeft,
           top: curCanvasTop,
           width : "0px",
           height : "0px"
         });
-        $(anchorHtml).appendTo("#anchor-overlay-container").css({
+        $(anchorHtml).appendTo(".anchor-overlay-container").css({
           left: curXY.x - 4 + "px",
           top:  curXY.y - 4 + "px"
         });
@@ -105,11 +131,14 @@ define(function(require, exports, module) {
         let curCanvasTop = parseFloat(curCanvasParent.css("top"));
         let curCanvasWidth = parseFloat(curCanvasParent.css("width"));
         let curCanvasHeight = parseFloat(curCanvasParent.css("height"));
-        let controlsHtml = "<div id='control-overlay-container'></div>";
+        let controlsHtml = "<div id='control-overlay-container' targetid='" + curCanvasParent.attr("id") + "'></div>";
         let boundaryHtml = "<canvas id='control-boundary' width=" + canvas.width + " height=" + canvas.height + ">";
         this._tempVar._w = canvas.width;
         this._tempVar._h = canvas.height;
 
+        if($("#control-overlay-container").length != 0) {
+          $("#control-overlay-container").remove();
+        }
         $(controlsHtml).appendTo(".design-canvas").css({
           left: curCanvasLeft,
           top: curCanvasTop,
@@ -124,8 +153,8 @@ define(function(require, exports, module) {
         this.drawDiagramCanvasBorder.call(boundaryCtx,boundaryCtx);
       },
       drawDiagramControl : function(ctx) {
-        let curControlHtml = '<div class="control-overlay"></div>';
         for(var curDirection in CONTROL_DIRECTION) {
+          let curControlHtml = '<div class="control-overlay ' + curDirection + '"></div>';
           let w = diagramDesigner._tempVar._w;
           let h = diagramDesigner._tempVar._h;
 
@@ -183,7 +212,7 @@ define(function(require, exports, module) {
           let curXY = {};
           let curProperties = templateManager.getProperties(this.shapeName);
 
-          if(w <= curProperties.w || h <= curProperties.h) {
+          if(w <= 40 || h <= 40) {
             curXY.x = diagramUtil.evaluate(action.x,w,h);
             curXY.y = diagramUtil.evaluate(action.y,w,h);
           }
@@ -205,7 +234,7 @@ define(function(require, exports, module) {
           let curXY = {};
           let curProperties = templateManager.getProperties(this.shapeName);
 
-          if(w <= curProperties.w || h <= curProperties.h) {
+          if(w <= 40 || h <= 40) {
             curXY.x = diagramUtil.evaluate(action.x,w,h);
             curXY.y = diagramUtil.evaluate(action.y,w,h);
           }
@@ -226,6 +255,18 @@ define(function(require, exports, module) {
       },
 
       commands : {
+        createDiagram : {
+
+        },
+        deleteDiagram : {
+
+        },
+        moveDiagram : {
+
+        },
+        resizeDiagram : {
+
+        },
 
       },
     };

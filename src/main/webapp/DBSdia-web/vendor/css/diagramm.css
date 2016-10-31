@@ -772,7 +772,7 @@ input, textarea, div {
   display: none;
   z-index: 11111;
 }
-#anchor-overlay-container {
+.anchor-overlay-container {
   position: absolute;
 }
 .anchor-overlay {
@@ -790,6 +790,7 @@ input, textarea, div {
 }
 #control-overlay-container #control-boundary {
     position: absolute;
+    pointer-events: none;
 }
 .control-overlay {
   border-color: rgb(136, 51, 51);

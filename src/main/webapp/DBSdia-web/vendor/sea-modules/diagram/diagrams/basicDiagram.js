@@ -143,7 +143,7 @@ define(function(require, exports, module) {
       			y: "0"
       		}, {
       			action: "line",
-      			x: "w-16",
+      			x: "2*w/3",
       			y: "0"
       		}, {
       			action: "line",
@@ -151,7 +151,7 @@ define(function(require, exports, module) {
       			y: "16"
       		}, {
       			action: "line",
-      			x: "w",
+      			x: "w/3",
       			y: "h"
       		}, {
       			action: "line",

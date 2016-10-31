@@ -30,6 +30,16 @@ define(function(require, exports, module) {
      var _shapeName = "";
      var target;
 
+      //resize var
+     var curElement;//[nw ne sw se] or else.
+     var curId;
+     var curdiagramHeight;
+     var curdiagramWidth;
+     var hasN;  //-1 Not 0 Have
+     var hasS;
+     var hasW;
+     var hasE;
+
      function ExtractNumber(value) {
        var n = parseInt(value);
        return n == null || isNaN(n) ? 0 : n;
@@ -37,62 +47,37 @@ define(function(require, exports, module) {
 
     var eventHelper = {
       initEvent : function() {
-        document.onmousedown = this.documentMouseDownHandler;
-        document.onclick = this.doucmentClickHandler;
-        //document.onmouseover = this.doucmentMouseEnterHandler;
+
+        //panel item mouse down
+        $(".design-panel").on('mousedown','.panel-item',function(e) {
+          eventHelper.MouseDownHandler(e,eventHelper.panelitemMouseDownHandler);
+        });
+        //diagram mouse down
+        $(".design-layout").on('mousedown','.diagram-object-canvas',function(e) {
+          eventHelper.MouseDownHandler(e,eventHelper.diagramObjMouseDownHandler);
+        });
+        //diagram click
+        $(".design-layout").on('mousedown','.diagram-object-canvas', eventHelper.diagramObjClickHandler);
+
+        //control resize
+        $(".design-layout").on('mousedown','.control-overlay.nw',function(e) {
+          eventHelper.MouseDownHandler(e,eventHelper.resizeMousedownHandler);
+        });
+        $(".design-layout").on('mousedown','.control-overlay.ne',function(e) {
+          eventHelper.MouseDownHandler(e,eventHelper.resizeMousedownHandler);
+        });
+        $(".design-layout").on('mousedown','.control-overlay.sw',function(e) {
+          eventHelper.MouseDownHandler(e,eventHelper.resizeMousedownHandler);
+        });
+        $(".design-layout").on('mousedown','.control-overlay.se',function(e) {
+          eventHelper.MouseDownHandler(e,eventHelper.resizeMousedownHandler);
+        });
       },
 
-      documentMouseDownHandler : function(e) {
-          // IE is retarded and doesn't pass the event object
-          if (e == null)
-          e = window.event;
+      MouseDownHandler : function(e,actualHandler) {
+        // IE uses srcElement, others use target
+        target = e.target != null ? e.target : e.srcElement;
 
-          // IE uses srcElement, others use target
-          target = e.target != null ? e.target : e.srcElement;
-
-          // for IE, left click == 1
-          // for Firefox, left click == 0
-          var isPanelItem = (target.className.indexOf('panel-item') != -1);
-          var isDiagramObject = (target.className.indexOf('diagram-object-canvas') != -1);
-          if(e.button == 1 && window.event != null || e.button == 0 && isPanelItem) {
-            eventHelper.panelitemMouseDownHandler(e);
-          }
-          else if (e.button == 1 && window.event != null || e.button == 0 && isDiagramObject) {
-            eventHelper.diagramObjMouseDownHandler(e);
-          }
-      },
-      doucmentClickHandler : function(e) {
-          // IE is retarded and doesn't pass the event object
-          if (e == null)
-          e = window.event;
-
-          // IE uses srcElement, others use target
-          target = e.target != null ? e.target : e.srcElement;
-
-          // for IE, left click == 1
-          // for Firefox, left click == 0
-          var isDiagramObject = (target.className.indexOf('diagram-object') != -1);
-          if(e.button == 1 && window.event != null || e.button == 0 && isDiagramObject) {
-            eventHelper.diagramObjClickHandler(e);
-          }
-      },
-      doucmentMouseEnterHandler : function(e) {
-          // IE is retarded and doesn't pass the event object
-          if (e == null)
-          e = window.event;
-
-          // IE uses srcElement, others use target
-          target = e.target != null ? e.target : e.srcElement;
-
-          // for IE, left click == 1
-          // for Firefox, left click == 0
-          var isDiagramObject = (target.className.indexOf('diagram-object') != -1);
-          if(e.button == 1 && window.event != null || e.button == 0 && isDiagramObject) {
-            eventHelper.diagramObjMouseEnterHandler(e);
-          }
-      },
-
-      panelitemMouseDownHandler : function(e) {
         // grab the mouse position
         _startX = e.clientX;
         _startY = e.clientY;
@@ -103,8 +88,22 @@ define(function(require, exports, module) {
 
         // bring the clicked element to the front while it is being dragged
         _oldZIndex = target.style.zIndex;
-        target.style.zIndex = 10000;
 
+        actualHandler(e);
+
+        // cancel out any text selections
+        document.body.focus();
+
+        // prevent text selection in IE
+        document.onselectstart = function () { return false; };
+        // prevent IE from trying to drag an image
+        target.ondragstart = function() { return false; };
+
+        // prevent text selection (except IE)
+        return false;
+      },
+
+      panelitemMouseDownHandler : function(e) {
         // we need to access the element in onMouseMove
         _dragElement = $('#creating-canvas')[0];
 
@@ -126,22 +125,8 @@ define(function(require, exports, module) {
         // tell our code to start moving the element with the mouse
         document.onmousemove = eventHelper.panelitemMouseMoveHandler;
         document.onmouseup = eventHelper.panelitemMouseUpHandler;
-
-        // cancel out any text selections
-        document.body.focus();
-
-        // prevent text selection in IE
-        document.onselectstart = function () { return false; };
-        // prevent IE from trying to drag an image
-        target.ondragstart = function() { return false; };
-
-        // prevent text selection (except IE)
-        return false;
       },
       panelitemMouseMoveHandler : function(e) {
-        if (e == null)
-            var e = window.event;
-
         // this is the actual "drag code"
         if(e.clientX > 178) {
           //Mouse move in the designer
@@ -197,14 +182,6 @@ define(function(require, exports, module) {
       },
 
       diagramObjMouseDownHandler : function(e) {
-        // grab the mouse REALATIVE position
-        _startX = e.clientX;
-        _startY = e.clientY;
-
-        // bring the clicked element to the front while it is being dragged
-        _oldZIndex = target.style.zIndex;
-        target.style.zIndex = 10000;
-
         // we need to access the element in OnMouseMove
         _dragElement = $(target).parent()[0];
 
@@ -215,24 +192,15 @@ define(function(require, exports, module) {
         // tell our code to start moving the element with the mouse
         document.onmousemove = eventHelper.diagramObjMouseMoveHandler;
         document.onmouseup = eventHelper.diagramObjMouseUpHandler;
-
-        // cancel out any text selections
-        document.body.focus();
-
-        // prevent text selection in IE
-        document.onselectstart = function () { return false; };
-        // prevent IE from trying to drag an image
-        target.ondragstart = function() { return false; };
-
-        // prevent text selection (except IE)
-        return false;
       },
       diagramObjMouseMoveHandler : function(e) {
-        if (e == null)
-            var e = window.event;
-
         // this is the actual "drag code"
         $(_dragElement).css({
+          left: parseFloat(_offsetX) + e.clientX - _startX,
+          top: parseFloat(_offsetY) + e.clientY - _startY
+        });
+
+        $("#control-overlay-container,.anchor-overlay-container").css({
           left: parseFloat(_offsetX) + e.clientX - _startX,
           top: parseFloat(_offsetY) + e.clientY - _startY
         });
@@ -254,23 +222,111 @@ define(function(require, exports, module) {
       diagramObjMouseEnterHandler : function(e) {
         let curId = $(e.target).parent().attr("id");
 
-        if($("#anchor-overlay-container").length == 0) {
-          diagramDesigner.addDiagramAnchorOverlay(curId);
-        }
+        diagramDesigner.addDiagramAnchorOverlay(curId);
+        $('.anchor-overlay-container').addClass("anchor-hover");
       },
       diagramObjMouseLeaveHandler : function(e) {
-        $('#anchor-overlay-container').remove();
+        $('.anchor-hover').remove();
       },
       diagramObjClickHandler: function(e) {
         let curId = $(target).parent().attr("id");
 
-        if($("#control-overlay-container").length != 0) {
-          $("#control-overlay-container").remove();
-          $("#anchor-overlay-container").remove();
-        }
         diagramDesigner.addDiagramControlOverlay(curId);
         diagramDesigner.addDiagramAnchorOverlay(curId);
       },
+
+      resizeMousedownHandler : function(e) {
+        // we need to access the element in onMouseMove
+        _dragElement = $(target)[0];
+
+        //We have to change this to avoid slight offset.
+        _startX = $(e.target).offset()["left"] + 4;
+        _startY = $(e.target).offset()["top"] + 4;
+
+        curElement = $(target).attr("class").split(" ")[1];//[nw ne sw se] or else.
+        curId = $('#control-overlay-container').attr("targetid");
+        curdiagramHeight = parseFloat($("#" + curId).height());
+        curdiagramWidth = parseFloat($("#" + curId).width());
+        _shapeName = objectManager.getShapeNameById(curId);
+
+        hasN = curElement.indexOf("n");  //-1 Not Have
+        hasS = curElement.indexOf("s");
+        hasW = curElement.indexOf("w");
+        hasE = curElement.indexOf("e");
+        // tell our code to start moving the element with the mouse
+        document.onmousemove = eventHelper.resizeMouseMoveHandler;
+        document.onmouseup = eventHelper.resizeMouseUpHandler;
+      },
+      resizeMouseMoveHandler : function(e) {
+        let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+
+        if(hasN != -1) {
+          let curOffsetY = _startY - e.clientY + curdiagramHeight;
+          if(curOffsetY > 40) {
+            $("#" + curId).css({
+              height: curOffsetY,
+              top: pos.y - 10
+            });
+            $("#" + curId + " canvas").attr({
+              height: curOffsetY,
+            });
+          }
+        }
+        if(hasS != -1) {
+          let curOffsetY = e.clientY -_startY + curdiagramHeight;
+          if(curOffsetY > 40) {
+            $("#" + curId).css({
+              height: curOffsetY
+            });
+            $("#" + curId + " canvas").attr({
+              height: curOffsetY,
+            });
+          }
+        }
+        if(hasW != -1) {
+          let curOffsetX = _startX - e.clientX + curdiagramWidth;
+          if(curOffsetX > 40) {
+            $("#" + curId).css({
+              width: curOffsetX,
+              left: pos.x - 10
+            });
+            $("#" + curId + " canvas").attr({
+              width: curOffsetX
+            });
+          }
+        }
+        if(hasE != -1) {
+          let curOffsetX = e.clientX - _startX + curdiagramWidth;
+          if(curOffsetX > 40) {
+            $("#" + curId).css({
+              width: curOffsetX
+            });
+            $("#" + curId + " canvas").attr({
+              width: curOffsetX
+            });
+          }
+        }
+
+        diagramDesigner.drawDiagram($("#" + curId + " .diagram-object-canvas")[0],_shapeName);
+        diagramDesigner.addDiagramControlOverlay(curId);
+        diagramDesigner.addDiagramAnchorOverlay(curId);
+
+      },
+      resizeMouseUpHandler : function(e) {
+        if (_dragElement != null) {
+            _dragElement.style.zIndex = _oldZIndex;
+
+            // we're done with these events until the next OnMouseDown
+            document.onmousemove = null;
+            document.onselectstart = null;
+            _dragElement.ondragstart = null;
+            target.style.zIndex = 0;
+
+            // this is how we know we're not dragging
+            _dragElement = null;
+        }
+      },
+
 
     };
 
