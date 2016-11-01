@@ -135,10 +135,6 @@ define(function(require, exports, module) {
         },
     	};
 
-    //These two array store the commands stack for redo and undo.
-    var _GlobalundoStack = new Array();
-    var _GlobalredoStack = new Array();
-
     //These two object store all diagram templates and objects.
     //If want to get these objects,use diagramManager.functionName() to access.
     var _GlobalDiagramOjects = {};

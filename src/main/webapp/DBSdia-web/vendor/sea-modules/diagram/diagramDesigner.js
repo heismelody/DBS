@@ -253,22 +253,7 @@ define(function(require, exports, module) {
           this.closePath();
   			},
       },
-
-      commands : {
-        createDiagram : {
-
-        },
-        deleteDiagram : {
-
-        },
-        moveDiagram : {
-
-        },
-        resizeDiagram : {
-
-        },
-
-      },
+      
     };
 
     return diagramDesigner;

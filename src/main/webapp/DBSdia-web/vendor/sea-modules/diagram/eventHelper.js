@@ -47,6 +47,16 @@ define(function(require, exports, module) {
 
     var eventHelper = {
       initEvent : function() {
+        //menu bar click function
+        $("#bar-linkertype").on("click",function(e) {
+          $("#bar-linkertype").addClass("selected");
+        });
+
+        $(".design-layout").on("click",function(e) {
+          if($("#bar-linkertype").hasClass("selected")) {
+            let newId = objectManagerg.enerateDiagramId();
+          }
+        });
 
         //panel item mouse down
         $(".design-panel").on('mousedown','.panel-item',function(e) {
