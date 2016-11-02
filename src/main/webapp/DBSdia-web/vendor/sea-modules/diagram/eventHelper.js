@@ -2,11 +2,13 @@ define(function(require, exports, module) {
   var DiagramDesigner = require('./diagramDesigner.js');
   var DiagramUtil = require('./Util.js');
   var DiagramManager = require('./diagramManager.js');
+  var LineManager = require('./lineManager.js');
 
   var diagramDesigner = DiagramDesigner.diagramDesigner;
   var diagramUtil = DiagramUtil.diagramUtil;
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
+  var lineManager = LineManager.lineManager;
 
   var eventHelper = (function () {
     /**
@@ -40,6 +42,10 @@ define(function(require, exports, module) {
      var hasW;
      var hasE;
 
+     //draw line var
+     var start;         //store the position of start point
+     var startRelative;
+
      function ExtractNumber(value) {
        var n = parseInt(value);
        return n == null || isNaN(n) ? 0 : n;
@@ -49,14 +55,24 @@ define(function(require, exports, module) {
       initEvent : function() {
         //menu bar click function
         $("#bar-linkertype").on("click",function(e) {
-          $("#bar-linkertype").addClass("selected");
-        });
-
-        $(".design-layout").on("click",function(e) {
           if($("#bar-linkertype").hasClass("selected")) {
-            let newId = objectManagerg.enerateDiagramId();
+            $("#bar-linkertype").removeClass("selected");
+          }
+          else {
+            $("#bar-linkertype").addClass("selected");
           }
         });
+
+        $(".design-layout").on("mousedown",function(e) {
+          if($("#bar-linkertype").hasClass("selected")) {
+            eventHelper.MouseDownHandler(e,eventHelper.drawLineMousedownHandler);
+          }
+        });
+
+        //diagram right event
+        // $('selector').contextmenu(function() {
+        //     return false;
+        // });
 
         //panel item mouse down
         $(".design-panel").on('mousedown','.panel-item',function(e) {
@@ -125,12 +141,7 @@ define(function(require, exports, module) {
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$("#creating-diagram"));
         $('#creating-canvas').css('left',pos.x - 15 + 'px');
         $('#creating-canvas').css('top',pos.y - 15  + 'px');
-        let curProperties = templateManager.getProperties(_shapeName);
-        let newW = curProperties.w + 20;
-        let newH = curProperties.h + 20;
-        let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="' + newW + '" height = "' + newH + '"></canvas>';
-        $('#creating-designer-diagram').css('width',newW).css('height',newH);
-        $('#creating-designer-diagram').append(creatingCanvasHtml);
+        diagramDesigner.beforeCreatingDiagram(_shapeName);
 
         // tell our code to start moving the element with the mouse
         document.onmousemove = eventHelper.panelitemMouseMoveHandler;
@@ -140,13 +151,10 @@ define(function(require, exports, module) {
         // this is the actual "drag code"
         if(e.clientX > 178) {
           //Mouse move in the designer
+          let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
           $('#creating-designer-diagram').show();
           $('#creating-designer-canvas').show();
-          diagramDesigner.drawDiagram($('#creating-designer-canvas')[0],_shapeName);
-          let curProperties = templateManager.getProperties(_shapeName);
-          let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
-          $('#creating-designer-diagram').css('left',pos.x - curProperties.w/2 - 10 + 'px');
-          $('#creating-designer-diagram').css('top',pos.y - curProperties.h/2 - 10 + 'px');
+          diagramDesigner.creatingDiagram(pos.x,pos.y,_shapeName);
         }
         else {
           //Mouse move in the left panel
@@ -167,17 +175,8 @@ define(function(require, exports, module) {
             //That is the actual mouse up code.
             if(e.clientX > 178) {
               let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$("#creating-diagram"));
-              let newId = objectManager.addNewDiagram(_shapeName,pos.x,pos.y);
-              var newObject = $('#creating-designer-diagram').detach();
-              $('.design-canvas').append(newObject);
-              $('#creating-designer-diagram').attr("id",newId)
-                                             .attr("class","diagram-object-container")
-                                             .css('position','absolute');
-              $('#creating-designer-canvas').attr("id","")
-                                            .attr("class","diagram-object-canvas")
-                                            .css('position','absolute');
+              let newId = diagramDesigner.afterCreatingDiagram(pos.x,pos.y,_shapeName);
               $("#" + newId).find("canvas").hover(eventHelper.diagramObjMouseEnterHandler,eventHelper.diagramObjMouseLeaveHandler);
-              $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
             }
             else {
               $('#creating-designer-diagram').hide();
@@ -245,6 +244,7 @@ define(function(require, exports, module) {
         diagramDesigner.addDiagramAnchorOverlay(curId);
       },
 
+      //This mousedown/move/up function is the handler of resize diagram
       resizeMousedownHandler : function(e) {
         // we need to access the element in onMouseMove
         _dragElement = $(target)[0];
@@ -337,6 +337,93 @@ define(function(require, exports, module) {
         }
       },
 
+      //This mousedown/move/up function is the handler of draw line
+      drawLineMousedownHandler : function(e) {
+        // we need to access the element in onMouseMove
+        _dragElement = $(target)[0];
+
+        let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+        let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="0" height = "0"></canvas>';
+        _startX = pos.x;
+        _startY = pos.y;
+        _shapeName = "line";
+        start = {
+          x: _startX,
+          y: _startY,
+        };
+        startRelative = {
+          x: e.clientX,
+          y: e.clientY,
+        };
+
+        $('#creating-designer-diagram').append(creatingCanvasHtml);
+        $("#creating-designer-diagram").show();
+        $("#creating-designer-diagram").css({
+          left: pos.x,
+          top: pos.y,
+        });
+
+        // tell our code to start moving the element with the mouse
+        document.onmousemove = eventHelper.drawLineMouseMoveHandler;
+        document.onmouseup = eventHelper.drawLineMouseUpHandler;
+      },
+      drawLineMouseMoveHandler : function(e) {
+        let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+        let end = {
+          x: pos.x,
+          y: pos.y,
+        };
+        let curEndRelative;
+        let curStartRelative;
+
+        $("#creating-designer-canvas").attr({
+          width: Math.abs(end.x - start.x),
+          height: Math.abs(end.y - start.y),
+        });
+        $("#creating-designer-diagram").css({
+          left: Math.min(start.x,end.x),
+          top: Math.min(start.y,end.y),
+        });
+        curStartRelative = {
+          x: start.x - parseFloat($("#creating-designer-diagram").css("left")),
+          y: start.y - parseFloat($("#creating-designer-diagram").css("top")),
+        };
+        curEndRelative = {
+          x: end.x - parseFloat($("#creating-designer-diagram").css("left")),
+          y: end.y - parseFloat($("#creating-designer-diagram").css("top")),
+        };
+        lineManager.drawLine($("#creating-designer-canvas")[0],"line",curStartRelative,curEndRelative);
+      },
+      drawLineMouseUpHandler : function(e) {
+        if (_dragElement != null) {
+          // we're done with these events until the next OnMouseDown
+          document.onmousemove = null;
+          document.onselectstart = null;
+          _dragElement.ondragstart = null;
+          target.style.zIndex = 0;
+
+          let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+          let end = {
+            x: pos.x,
+            y: pos.y,
+          };
+          let newId = lineManager.addNewLine(start,end);
+          var newObject = $('#creating-designer-diagram').detach();
+          $('.design-canvas').append(newObject);
+          $('#creating-designer-diagram').attr("id",newId)
+                                         .attr("class","diagram-object-container")
+                                         .css('position','absolute');
+          $('#creating-designer-canvas').attr("id","")
+                                        .attr("class","diagram-object-canvas")
+                                        .css('position','absolute');
+          $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
+
+          _dragElement.style.zIndex = _oldZIndex;
+
+          // this is how we know we're not dragging
+          _dragElement = null;
+        }
+      },
 
     };
 

@@ -12,51 +12,7 @@ define(function(require, exports, module) {
      * Defination of the const;
      * --------------------------------------------------------------------------
      */
-    var ORIENTATION = {          //Page size:
-      portrait : "portrait",    //height >= width
-      landscape : "landscape",  //others
-    };
 
-    //Defination of the diagram control and position in the canvas
-    var CONTROL_DIRECTION = {
-      "nw": {
-        x: "0",
-        y: "0",
-      },
-      "ne": {
-        x: "w",
-        y: "0",
-      },
-      "se": {
-        x: "w",
-        y: "h"
-      },
-      "sw": {
-        x: "0",
-        y: "h"
-      },
-
-      // "c": {
-      //   x: "w/2",
-      //   y: "h/2"
-      // },
-      // "n": {
-      //   x: "w/2",
-      //   y: "0"
-      // },
-      // "s": {
-      //   x: "w/2",
-      //   y: "h"
-      // },
-      // "w": {
-      //   x: "0",
-      //   y: "h/2"
-      // },
-      // "e": {
-      //   x: "w",
-      //   y: "h/2"
-      // },
-    };
     /**
      * --------------------------------------------------------------------------
      * Defination of the API;
@@ -69,20 +25,65 @@ define(function(require, exports, module) {
         _w : 0,
         _h : 0,
       },
-      drawDiagram : function drawDiagram(canvas,shapeName,diagramId) {
-        let ctx = canvas.getContext("2d");
-        ctx.shapeName = shapeName;
-        //draw template diagram
-        if(arguments.length == 2) {
-          this._tempVar._w = canvas.width;
-          this._tempVar._h = canvas.height;
-          this.resolvePath(ctx,shapeName);
-        }
-        //draw diagram object
-        else if(arguments.length == 3){
 
-        }
+      beforeCreatingDiagram : function(shapeName){
+        let curProperties = templateManager.getProperties(shapeName);
+        let newW = curProperties.w + 20;
+        let newH = curProperties.h + 20;
+        let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="' + newW + '" height = "' + newH + '"></canvas>';
+        $('#creating-designer-diagram').css('width',newW).css('height',newH);
+        $('#creating-designer-diagram').append(creatingCanvasHtml);
       },
+      creatingDiagram : function(x,y,shapeName){
+        let curProperties = templateManager.getProperties(shapeName);
+        diagramDesigner.drawDiagram($('#creating-designer-canvas')[0],shapeName);
+        $('#creating-designer-diagram').css('left',x - curProperties.w/2 - 10 + 'px');
+        $('#creating-designer-diagram').css('top',y - curProperties.h/2 - 10 + 'px');
+      },
+      afterCreatingDiagram : function(x,y,shapeName){
+        let newId = objectManager.addNewDiagram(shapeName,x,y);
+        var newObject = $('#creating-designer-diagram').detach();
+        $('.design-canvas').append(newObject);
+        $('#creating-designer-diagram').attr("id",newId)
+                                       .attr("class","diagram-object-container")
+                                       .css('position','absolute');
+        $('#creating-designer-canvas').attr("id","")
+                                      .attr("class","diagram-object-canvas")
+                                      .css('position','absolute');
+        $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
+
+        return newId;
+      },
+
+      beforeCreatingLine : function(){
+        let curProperties = templateManager.getProperties(shapeName);
+        let newW = curProperties.w + 20;
+        let newH = curProperties.h + 20;
+        let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="' + newW + '" height = "' + newH + '"></canvas>';
+        $('#creating-designer-diagram').css('width',newW).css('height',newH);
+        $('#creating-designer-diagram').append(creatingCanvasHtml);
+      },
+      creatingLine : function(x,y){
+        let curProperties = templateManager.getProperties(shapeName);
+        diagramDesigner.drawDiagram($('#creating-designer-canvas')[0],shapeName);
+        $('#creating-designer-diagram').css('left',x - curProperties.w/2 - 10 + 'px');
+        $('#creating-designer-diagram').css('top',y - curProperties.h/2 - 10 + 'px');
+      },
+      afterCreatingLine : function(x,y){
+        let newId = objectManager.addNewDiagram(shapeName,x,y);
+        var newObject = $('#creating-designer-diagram').detach();
+        $('.design-canvas').append(newObject);
+        $('#creating-designer-diagram').attr("id",newId)
+                                       .attr("class","diagram-object-container")
+                                       .css('position','absolute');
+        $('#creating-designer-canvas').attr("id","")
+                                      .attr("class","diagram-object-canvas")
+                                      .css('position','absolute');
+        $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
+
+        return newId;
+      },
+
       drawDiagramAnchors : function(canvas,shapeName) {
         let curDiagramId = $(canvas).parent().attr("id");
         let curAnchors = objectManager.getAnchorsByName(shapeName);
@@ -153,12 +154,13 @@ define(function(require, exports, module) {
         this.drawDiagramCanvasBorder.call(boundaryCtx,boundaryCtx);
       },
       drawDiagramControl : function(ctx) {
-        for(var curDirection in CONTROL_DIRECTION) {
+        let controlDir = templateManager.getcontrolDir();
+        for(var curDirection in controlDir) {
           let curControlHtml = '<div class="control-overlay ' + curDirection + '"></div>';
           let w = diagramDesigner._tempVar._w;
           let h = diagramDesigner._tempVar._h;
 
-          curXY = diagramUtil.evaluate(CONTROL_DIRECTION[curDirection],w,h);
+          curXY = diagramUtil.evaluate(controlDir[curDirection],w,h);
           $(curControlHtml).appendTo("#control-overlay-container").css({
             left: curXY.x - 4 + "px",
             top:  curXY.y - 4 + "px"
@@ -178,6 +180,32 @@ define(function(require, exports, module) {
         this.closePath();
       },
 
+      addDiagramControlOverlay : function(diagramId) {
+        let curCanvas = $("#" + diagramId).find('canvas').get(0);
+
+        this.drawDiagramControls(curCanvas);
+      },
+      addDiagramAnchorOverlay : function(diagramId) {
+        let curshapeName = objectManager.getShapeNameById(diagramId);
+        let curCanvas = $("#" + diagramId).find('canvas').get(0);
+
+        this.drawDiagramAnchors(curCanvas,curshapeName);
+      },
+
+      drawDiagram : function drawDiagram(canvas,shapeName,diagramId) {
+        let ctx = canvas.getContext("2d");
+        ctx.shapeName = shapeName;
+        //draw template diagram
+        if(arguments.length == 2) {
+          this._tempVar._w = canvas.width;
+          this._tempVar._h = canvas.height;
+          this.resolvePath(ctx,shapeName);
+        }
+        //draw diagram object
+        else if(arguments.length == 3){
+
+        }
+      },
       resolvePath : function resolvePath(ctx,shapeName,diagramId) {
         //draw template diagram
         if(arguments.length == 2) {
@@ -192,18 +220,6 @@ define(function(require, exports, module) {
 
         }
       },
-      addDiagramControlOverlay : function(diagramId) {
-        let curCanvas = $("#" + diagramId).find('canvas').get(0);
-
-        this.drawDiagramControls(curCanvas);
-      },
-      addDiagramAnchorOverlay : function(diagramId) {
-        let curshapeName = objectManager.getShapeNameById(diagramId);
-        let curCanvas = $("#" + diagramId).find('canvas').get(0);
-
-        this.drawDiagramAnchors(curCanvas,curshapeName);
-      },
-
       actions : {
         move: function(action) {
           this.beginPath();
@@ -253,7 +269,7 @@ define(function(require, exports, module) {
           this.closePath();
   			},
       },
-      
+
     };
 
     return diagramDesigner;

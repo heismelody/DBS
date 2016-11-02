@@ -41,7 +41,45 @@ define(function(require, exports, module) {
     		link: "",
     		children: [],
     		parent: "",
-    		resizeDir: ["tl", "tr", "br", "bl"],
+    		controlDir: {
+          "nw": {
+            x: "0",
+            y: "0",
+          },
+          "ne": {
+            x: "w",
+            y: "0",
+          },
+          "se": {
+            x: "w",
+            y: "h"
+          },
+          "sw": {
+            x: "0",
+            y: "h"
+          },
+
+          // "c": {
+          //   x: "w/2",
+          //   y: "h/2"
+          // },
+          // "n": {
+          //   x: "w/2",
+          //   y: "0"
+          // },
+          // "s": {
+          //   x: "w/2",
+          //   y: "h"
+          // },
+          // "w": {
+          //   x: "0",
+          //   y: "h/2"
+          // },
+          // "e": {
+          //   x: "w",
+          //   y: "h/2"
+          // },
+        },
     		attribute: {
     			container: false,
     			visible: true,
@@ -92,8 +130,8 @@ define(function(require, exports, module) {
     			vAlign: "middle",
     			orientation: "vertical"
     		},
-        //  the path and anchors properties are not stored in the diagram object.
-        //  If use this properties,search in the _GlobalDiagramTemplates and get these two properties.
+        //  the path and anchors properties are not stored in the diagram object.Please use the following rules.
+        //  Search in the _GlobalDiagramTemplates and get these two properties.
         //  EX: let curPath = templateManager.getPathByName(shapeName)
         //      let curActions = templateManager.getActionsByName(shapeName);
 
@@ -217,6 +255,9 @@ define(function(require, exports, module) {
           else {
             throw new Error("diagramManager.templateManager.getAnchorsByName() Error!");
           }
+        },
+        getcontrolDir : function() {
+          return defaultDiagramTemplate["controlDir"];
         },
         isShapenameDefined : function isShapenameDefined(shapeName,category) {
           return (_GlobalDiagramTemplates.hasOwnProperty(category) && _GlobalDiagramTemplates[category].hasOwnProperty(shapeName));

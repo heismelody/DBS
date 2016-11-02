@@ -15,20 +15,17 @@ define(function(require, exports, module) {
      var defaultDiagramTemplate =  {
      		id: "",
      		name: "line",
-     		title: "",
-     		category: "",
+     		//title: "",
+     		//category: "",
      		group: "",
      		groupName: null,
      		locked: false,
-     		link: "",
-     		children: [],
-     		parent: "",
-     		resizeDir: ["tl", "tr", "br", "bl"],
+     		linkStart: "",
+        linkEnd: "",
      		attribute: {
      			container: false,
      			visible: true,
      			rotatable: true,
-     			linkable: true,
      			collapsable: false,
      			collapsed: false,
      			markerOffset: 5
@@ -39,19 +36,14 @@ define(function(require, exports, module) {
      			startY: 0,
      			endX : 120,
      			endY : 80,
+          width : 0,
+          height : 0,
      			zindex: 0,
-     		},
-         shapeStyle: {
-     			alpha: 1
      		},
      		lineStyle: {
      			lineWidth: 2,
      			lineColor: "50,50,50",
      			lineStyle: "solid"
-     		},
-     		fillStyle: {
-     			type: "solid",
-     			color: "255,255,255"
      		},
      		textArea: {
      			position: {
@@ -80,17 +72,77 @@ define(function(require, exports, module) {
     var _GlobalLineObject = {};
 
     var lineManager = {
-      drawLine : {
+      generateDiagramId : function generateDiagramId() {
+        //http://stackoverflow.com/questions/6248666/how-to-generate-short-uid-like-ax4j9z-in-js
+        function generateUIDNotMoreThan1million() {
+          return ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4)
+        }
+        return Date.now() + generateUIDNotMoreThan1million();
+      },
+      addNewLine : function(start,end) {
+        let newId =  this.generateDiagramId();
+        let width = Math.abs(start.x - end.x);
+        let height = Math.abs(start.y - end.y);
+
+        _GlobalLineObject[newId] = {
+          "id" : newId,
+          "name" : "line",
+          "properties": {
+       			"startX": start.x,
+       			"startY": start.y,
+       			"endX" : end.x,
+       			"endY" : end.y,
+            "width" : width,
+            "height" : height,
+       		},
+        };
+        return newId;
+      },
+      //when you draw the line, you should change coordinates to relative position of the canvas.
+      drawLine : function(canvas,linetype,start,end) {
+        let ctx = canvas.getContext("2d");
+
+        switch (linetype) {
+          case "basic":
+            this.drawBasicLine.call(ctx,end,start);
+            break;
+          case "step":
+            this.drawBasicLine.call(ctx);
+            break;
+          case "curve":
+            this.drawBasicLine.call(ctx);
+            break;
+          default:
+            this.drawBasicLine.call(ctx,end,start);
+        }
 
       },
+      drawLineById : function(canvas,id) {
+        let linetype = "";
+        let curProperties = {};
 
-      drawBasicLine : {
+        this.drawLine();
+      },
+
+      drawBasicLine : function(end,start) {
+        let w = this.canvas.width;
+        let h = this.canvas.height;
+        if(arguments.length == 2) {
+          this.startX = start.x;
+          this.startY = start.y;
+        }
+
+        this.beginPath();
+        this.clearRect(0,0,w,h);
+        this.moveTo(this.startX,this.startY);
+        this.lineTo(end.x,end.y);
+        this.stroke();
+        this.closePath();
+      },
+      drawStepLine : function() {
 
       },
-      drawLine : {
-
-      },
-      drawBezierCurve : {
+      drawBezierCurve : function() {
 
       },
 
