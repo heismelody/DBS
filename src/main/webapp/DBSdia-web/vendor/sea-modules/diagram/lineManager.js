@@ -98,6 +98,36 @@ define(function(require, exports, module) {
         };
         return newId;
       },
+      getStartPosition : function(lineId) {
+        let curProperties = _GlobalLineObject[lineId]["properties"];
+
+        return {
+          x: curProperties["startX"],
+          y: curProperties["startY"],
+        };
+      },
+      getEndPosition : function(lineId) {
+        let curProperties = _GlobalLineObject[lineId]["properties"];
+
+        return {
+          x: curProperties["endX"],
+          y: curProperties["endY"],
+        };
+      },
+      isPointOnLine : function(lineId,currPoint) {
+        let point1 = this.getStartPosition(lineId);
+        let point2 = this.getEndPosition(lineId);
+
+        if((currPoint.x >= Math.min(point1.x,point2.x) && currPoint.x <= Math.max(point1.x,point2.x))
+           && (currPoint.y >= Math.min(point1.y,point2.y) && currPoint.y <= Math.max(point1.y,point2.y)) ) {
+          return Math.abs((currPoint.y - point1.y)*(point2.x - point1.x) - (currPoint.x - point1.x)*(point2.y - point1.y)) <= 2000;
+        }
+        else {
+          return false;
+        }
+
+        //return $("#" + lineId).find("canvas")[0].getContext("2d").isPointInPath(currPoint.x,currPoint.y);
+      },
       //when you draw the line, you should change coordinates to relative position of the canvas.
       drawLine : function(canvas,linetype,start,end) {
         let ctx = canvas.getContext("2d");
@@ -143,6 +173,27 @@ define(function(require, exports, module) {
 
       },
       drawBezierCurve : function() {
+
+      },
+
+      addLineOverlay : function(lineId) {
+        let canvas = $("#" + lineId).find("canvas")[0];
+        let start = {
+          x: 0,
+          y: 0,
+        };
+        let end = {
+          x: 0,
+          y: 0,
+        };
+
+        this.addLineEndPoints(canvas,start,end);
+        this.addLineHightlight(canvas,start,end);
+      },
+      addLineEndPoints : function(canvas,start,end) {
+
+      },
+      addLineHightlight : function(canvas,start,end) {
 
       },
 

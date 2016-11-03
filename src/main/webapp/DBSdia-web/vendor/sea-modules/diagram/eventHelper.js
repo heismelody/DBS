@@ -44,7 +44,6 @@ define(function(require, exports, module) {
 
      //draw line var
      var start;         //store the position of start point
-     var startRelative;
 
      function ExtractNumber(value) {
        var n = parseInt(value);
@@ -69,7 +68,7 @@ define(function(require, exports, module) {
           }
         });
 
-        //diagram right event
+        //diagram right click event
         // $('selector').contextmenu(function() {
         //     return false;
         // });
@@ -78,12 +77,16 @@ define(function(require, exports, module) {
         $(".design-panel").on('mousedown','.panel-item',function(e) {
           eventHelper.MouseDownHandler(e,eventHelper.panelitemMouseDownHandler);
         });
-        //diagram mouse down
+        //diagram mouse down / click
         $(".design-layout").on('mousedown','.diagram-object-canvas',function(e) {
           eventHelper.MouseDownHandler(e,eventHelper.diagramObjMouseDownHandler);
         });
-        //diagram click
-        $(".design-layout").on('mousedown','.diagram-object-canvas', eventHelper.diagramObjClickHandler);
+        $(".design-layout").on('click','.diagram-object-canvas', eventHelper.diagramObjClickHandler);
+        //line mouse down / click
+        $(".design-layout").on('mousedown','.line-object-canvas',function(e) {
+          eventHelper.MouseDownHandler(e,eventHelper.lineObjMouseDownHandler);
+        });
+        $(".design-layout").on('click','.line-object-canvas', eventHelper.lineObjClickHandler);
 
         //control resize
         $(".design-layout").on('mousedown','.control-overlay.nw',function(e) {
@@ -351,10 +354,6 @@ define(function(require, exports, module) {
           x: _startX,
           y: _startY,
         };
-        startRelative = {
-          x: e.clientX,
-          y: e.clientY,
-        };
 
         $('#creating-designer-diagram').append(creatingCanvasHtml);
         $("#creating-designer-diagram").show();
@@ -377,12 +376,12 @@ define(function(require, exports, module) {
         let curStartRelative;
 
         $("#creating-designer-canvas").attr({
-          width: Math.abs(end.x - start.x),
-          height: Math.abs(end.y - start.y),
+          width: Math.abs(end.x - start.x) + 20,
+          height: Math.abs(end.y - start.y) + 20,
         });
         $("#creating-designer-diagram").css({
-          left: Math.min(start.x,end.x),
-          top: Math.min(start.y,end.y),
+          left: Math.min(start.x,end.x) - 10,
+          top: Math.min(start.y,end.y) - 10,
         });
         curStartRelative = {
           x: start.x - parseFloat($("#creating-designer-diagram").css("left")),
@@ -411,11 +410,15 @@ define(function(require, exports, module) {
           var newObject = $('#creating-designer-diagram').detach();
           $('.design-canvas').append(newObject);
           $('#creating-designer-diagram').attr("id",newId)
-                                         .attr("class","diagram-object-container")
+                                         .attr("class","line-object-container")
                                          .css('position','absolute');
           $('#creating-designer-canvas').attr("id","")
-                                        .attr("class","diagram-object-canvas")
+                                        .attr("class","line-object-canvas")
                                         .css('position','absolute');
+          if(parseInt($('#' + newId).find("canvas").attr("width")) < 10
+             || parseInt($('#' + newId).find("canvas").attr("height")) < 10 ) {
+            $('#' + newId).remove();
+          }
           $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
 
           _dragElement.style.zIndex = _oldZIndex;
@@ -423,6 +426,63 @@ define(function(require, exports, module) {
           // this is how we know we're not dragging
           _dragElement = null;
         }
+      },
+
+      lineObjMouseDownHandler : function(e) {
+        // we need to access the element in OnMouseMove
+        _dragElement = $(target).parent()[0];
+
+        // grab the clicked element's position
+        _offsetX = ExtractNumber(_dragElement.style.left);
+        _offsetY = ExtractNumber(_dragElement.style.top);
+
+        // tell our code to start moving the element with the mouse
+        document.onmousemove = eventHelper.diagramObjMouseMoveHandler;
+        document.onmouseup = eventHelper.diagramObjMouseUpHandler;
+      },
+      lineObjMouseMoveHandler : function(e) {
+        // // this is the actual "drag code"
+        // $(_dragElement).css({
+        //   left: parseFloat(_offsetX) + e.clientX - _startX,
+        //   top: parseFloat(_offsetY) + e.clientY - _startY
+        // });
+        //
+        // $("#control-overlay-container,.anchor-overlay-container").css({
+        //   left: parseFloat(_offsetX) + e.clientX - _startX,
+        //   top: parseFloat(_offsetY) + e.clientY - _startY
+        // });
+      },
+      lineObjMouseUpHandler : function(e) {
+        // if (_dragElement != null) {
+        //     _dragElement.style.zIndex = _oldZIndex;
+        //
+        //     // we're done with these events until the next OnMouseDown
+        //     document.onmousemove = null;
+        //     document.onselectstart = null;
+        //     _dragElement.ondragstart = null;
+        //     target.style.zIndex = 0;
+        //
+        //     // this is how we know we're not dragging
+        //     _dragElement = null;
+        // }
+      },
+      lineObjMouseEnterHandler : function(e) {
+        let curId = $(e.target).parent().attr("id");
+
+        diagramDesigner.addDiagramAnchorOverlay(curId);
+        $('.anchor-overlay-container').addClass("anchor-hover");
+      },
+      lineObjMouseLeaveHandler : function(e) {
+        $('.anchor-hover').remove();
+      },
+      lineObjClickHandler: function(e) {
+        let curId = $(target).parent().attr("id");
+        let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+
+        if(lineManager.isPointOnLine(curId,pos)) {
+          console.log("111");
+        }
+        //lineManager.addLineOverlay(curId);
       },
 
     };

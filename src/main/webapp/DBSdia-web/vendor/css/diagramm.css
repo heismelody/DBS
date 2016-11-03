@@ -815,6 +815,32 @@ input, textarea, div {
   border-width: 1px;
   background: white;
 }
+.line-overlay-point {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 1px solid #833;
+    background: white;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    -ms-border-radius: 4px;
+    -o-border-radius: 4px;
+    border-radius: 6px;
+    cursor: default;
+}
+.line-overlay-controlpoint {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border: 1px solid #833;
+    background: white;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    -ms-border-radius: 4px;
+    -o-border-radius: 4px;
+    border-radius: 4px;
+    cursor: default;
+}
 /*design right end*/
 
 .design-layout {

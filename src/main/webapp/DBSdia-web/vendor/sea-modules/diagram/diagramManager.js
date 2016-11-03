@@ -354,6 +354,9 @@ define(function(require, exports, module) {
           return _GlobalPathRef[refTemp];
         }
       },
+      getShapeByPosition : function(x,y) {
+
+      },
 
       /**
      * get diagram attribute by shapeName or id
