@@ -44,6 +44,8 @@ define(function(require, exports, module) {
 
      //draw line var
      var start;         //store the position of start point
+     var end;
+     var isStart;
 
      function ExtractNumber(value) {
        var n = parseInt(value);
@@ -52,6 +54,7 @@ define(function(require, exports, module) {
 
     var eventHelper = {
       initEvent : function() {
+
         //menu bar click function
         $("#bar-linkertype").on("click",function(e) {
           if($("#bar-linkertype").hasClass("selected")) {
@@ -101,8 +104,16 @@ define(function(require, exports, module) {
         $(".design-layout").on('mousedown','.control-overlay.se',function(e) {
           eventHelper.MouseDownHandler(e,eventHelper.resizeMousedownHandler);
         });
+
+
+        $(".design-layout").on('mousedown','.line-overlay-point',function(e) {
+          eventHelper.MouseDownHandler(e,eventHelper.lineOverlayMouseDownHandle);
+        });
       },
 
+      ClickHandle : function() {
+
+      },
       MouseDownHandler : function(e,actualHandler) {
         // IE uses srcElement, others use target
         target = e.target != null ? e.target : e.srcElement;
@@ -200,6 +211,11 @@ define(function(require, exports, module) {
         // grab the clicked element's position
         _offsetX = ExtractNumber(_dragElement.style.left);
         _offsetY = ExtractNumber(_dragElement.style.top);
+
+        let curId = $(target).parent().attr("id");
+
+        diagramDesigner.addDiagramControlOverlay(curId);
+        diagramDesigner.addDiagramAnchorOverlay(curId);
 
         // tell our code to start moving the element with the mouse
         document.onmousemove = eventHelper.diagramObjMouseMoveHandler;
@@ -415,9 +431,10 @@ define(function(require, exports, module) {
           $('#creating-designer-canvas').attr("id","")
                                         .attr("class","line-object-canvas")
                                         .css('position','absolute');
-          if(parseInt($('#' + newId).find("canvas").attr("width")) < 10
+          if($('#' + newId).find("canvas").length == 0
+             || parseInt($('#' + newId).find("canvas").attr("width")) < 10
              || parseInt($('#' + newId).find("canvas").attr("height")) < 10 ) {
-            $('#' + newId).remove();
+            lineManager.deleteLine(newId);
           }
           $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
 
@@ -437,8 +454,8 @@ define(function(require, exports, module) {
         _offsetY = ExtractNumber(_dragElement.style.top);
 
         // tell our code to start moving the element with the mouse
-        document.onmousemove = eventHelper.diagramObjMouseMoveHandler;
-        document.onmouseup = eventHelper.diagramObjMouseUpHandler;
+        //document.onmousemove = eventHelper.diagramObjMouseMoveHandler;
+        //document.onmouseup = eventHelper.diagramObjMouseUpHandler;
       },
       lineObjMouseMoveHandler : function(e) {
         // // this is the actual "drag code"
@@ -480,11 +497,90 @@ define(function(require, exports, module) {
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
 
         if(lineManager.isPointOnLine(curId,pos)) {
-          console.log("111");
+          lineManager.addLineOverlay(curId);
         }
-        //lineManager.addLineOverlay(curId);
       },
 
+      //Line object overlay event
+      lineOverlayMouseDownHandle : function(e) {
+        let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+        let lineId = $(target).parent().attr("targetid");
+        _dragElement = target;
+        isStart = $(target).attr("class").indexOf("start") != -1 ? true : false;
+
+        //current point is start of line
+        if(isStart) {
+          end = lineManager.getEndPosition(lineId);
+        }
+        //current point is end of line
+        else {
+          start = lineManager.getStartPosition(lineId);
+        }
+
+        // tell our code to start moving the element with the mouse
+        document.onmousemove = eventHelper.lineOverlayMouseMoveHandler;
+        document.onmouseup = eventHelper.lineOverlayMouseUpHandler;
+      },
+      lineOverlayMouseMoveHandler : function(e) {
+        let targetid = $(target).parent().attr("targetid");
+        let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+        let curEndRelative;
+        let curStartRelative;
+        if(isStart) {
+          start = {
+            x: pos.x,
+            y: pos.y,
+          };
+          $(target).css({
+            left: start.x - 6,
+            top: start.y - 6,
+          });
+        }
+        else {
+          end = {
+            x: pos.x,
+            y: pos.y,
+          };
+          $(target).css({
+            left: end.x - 6,
+            top: end.y - 6,
+          });
+        }
+
+        $("#" + targetid).find("canvas").attr({
+          width: Math.abs(end.x - start.x) + 20,
+          height: Math.abs(end.y - start.y) + 20,
+        });
+        $("#" + targetid).css({
+          left: Math.min(start.x,end.x) - 10,
+          top: Math.min(start.y,end.y) - 10,
+        });
+        curStartRelative = {
+          x: start.x - parseFloat($("#" + targetid).css("left")),
+          y: start.y - parseFloat($("#" + targetid).css("top")),
+        };
+        curEndRelative = {
+          x: end.x - parseFloat($("#" + targetid).css("left")),
+          y: end.y - parseFloat($("#" + targetid).css("top")),
+        };
+        lineManager.drawLine($("#" + targetid).find("canvas")[0],"line",curStartRelative,curEndRelative);
+      },
+      lineOverlayMouseUpHandler : function(e) {
+        if (_dragElement != null) {
+          // we're done with these events until the next OnMouseDown
+          document.onmousemove = null;
+          document.onselectstart = null;
+          _dragElement.ondragstart = null;
+          target.style.zIndex = 0;
+
+          _dragElement.style.zIndex = _oldZIndex;
+          let targetid = $(target).parent().attr("targetid");
+          let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+          lineManager.updateLinePosition(targetid,isStart,pos);
+          // this is how we know we're not dragging
+          _dragElement = null;
+        }
+      },
     };
 
     return eventHelper;

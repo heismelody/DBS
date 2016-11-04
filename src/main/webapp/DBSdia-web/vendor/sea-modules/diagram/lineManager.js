@@ -98,6 +98,20 @@ define(function(require, exports, module) {
         };
         return newId;
       },
+      deleteLine : function(lineId) {
+        $("#" + lineId).remove();
+        delete _GlobalLineObject[lineId];
+      },
+      updateLinePosition: function(lineId,isStart,pos) {
+        if(isStart) {
+          _GlobalLineObject[lineId]["properties"]["startX"] = pos.x;
+          _GlobalLineObject[lineId]["properties"]["startY"] = pos.y;
+        }
+        else {
+          _GlobalLineObject[lineId]["properties"]["endX"] = pos.x;
+          _GlobalLineObject[lineId]["properties"]["endY"] = pos.y;
+        }
+      },
       getStartPosition : function(lineId) {
         let curProperties = _GlobalLineObject[lineId]["properties"];
 
@@ -125,8 +139,6 @@ define(function(require, exports, module) {
         else {
           return false;
         }
-
-        //return $("#" + lineId).find("canvas")[0].getContext("2d").isPointInPath(currPoint.x,currPoint.y);
       },
       //when you draw the line, you should change coordinates to relative position of the canvas.
       drawLine : function(canvas,linetype,start,end) {
@@ -178,23 +190,36 @@ define(function(require, exports, module) {
 
       addLineOverlay : function(lineId) {
         let canvas = $("#" + lineId).find("canvas")[0];
-        let start = {
-          x: 0,
-          y: 0,
-        };
-        let end = {
-          x: 0,
-          y: 0,
-        };
+        let start = this.getStartPosition(lineId);
+        let end = this.getEndPosition(lineId);
 
+        if($("#line-overlay-container").length != 0) {
+          $("#line-overlay-container").remove();
+        }
         this.addLineEndPoints(canvas,start,end);
-        this.addLineHightlight(canvas,start,end);
+        this.addLineHightlight(canvas);
       },
       addLineEndPoints : function(canvas,start,end) {
+        let controlsHtml = "<div id='line-overlay-container' targetid='" + $(canvas).parent().attr("id") + "'></div>";
+        let startHtml = "<div class='line-overlay-point line-overlay-start'></div>";
+        let endHtml = "<div class='line-overlay-point line-overlay-end'></div>";
 
+        $(controlsHtml).appendTo(".design-canvas");
+        $(startHtml).appendTo("#line-overlay-container").css({
+          left: start.x - 6,
+          top: start.y - 6,
+        });
+        $(endHtml).appendTo("#line-overlay-container").css({
+          left: end.x - 6,
+          top: end.y - 6,
+        });
       },
-      addLineHightlight : function(canvas,start,end) {
+      addLineHightlight : function(canvas) {
+        let ctx = canvas.getContext("2d");
 
+        ctx.shadowBlur=10;
+        ctx.shadowColor="#B96A6A";
+        ctx.stroke();
       },
 
     };

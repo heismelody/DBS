@@ -1,7 +1,9 @@
 define(function(require, exports, module) {
   var BasicDiagram = require('../diagram/diagrams/basicDiagram.js');
+  var LineManager = require('./lineManager.js');
 
   var basicDiagram = BasicDiagram.basicDiagram;
+  var lineManager = LineManager.lineManager;
 
   var diagramManager = (function () {
     /**
@@ -273,25 +275,31 @@ define(function(require, exports, module) {
           return Date.now() + generateUIDNotMoreThan1million();
         },
         /**
-       * @param {string} x,y - Relative position.The center of the canvas.
+       * @param {string} x,y - Relative position.The center of the canvas.(NOT LINE)
+       * @param {string} x,y - Relative position.X={start.x,start.y};Y={end.x,end.y}.(LINE)
        */
         addNewDiagram : function addNewDiagram(shapeName,x,y) {
-          let newId =  this.generateDiagramId();
-          let newCategory = diagramManager.templateManager.getCategoryByName(shapeName);
-          let newProperties = diagramManager.templateManager.getProperties(shapeName);
-          _GlobalDiagramOjects[newId] = {
-            "id" : newId,
-            "name" : shapeName,
-            "category" : newCategory,
-            "properties": {
-        			"x": x,
-        			"y": y,
-              "w": newProperties.w,
-              "h": newProperties.h,
-        		},
-          };
+          if(shapeName == "line") {
+            lineManager.addNewLine(x,y);
+          }
+          else {
+            let newId =  this.generateDiagramId();
+            let newCategory = diagramManager.templateManager.getCategoryByName(shapeName);
+            let newProperties = diagramManager.templateManager.getProperties(shapeName);
+            _GlobalDiagramOjects[newId] = {
+              "id" : newId,
+              "name" : shapeName,
+              "category" : newCategory,
+              "properties": {
+          			"x": x,
+          			"y": y,
+                "w": newProperties.w,
+                "h": newProperties.h,
+          		},
+            };
 
-          return newId;
+            return newId;
+          }
         },
         getDiagramById : function getDiagramById(diagramId) {
           return _GlobalDiagramOjects[diagramId];
@@ -354,8 +362,15 @@ define(function(require, exports, module) {
           return _GlobalPathRef[refTemp];
         }
       },
-      getShapeByPosition : function(x,y) {
+      isPointInDiagram : function(diagramId,x,y) {
+        let curshapeName = this.objectManager.getShapeNameById(diagramId);
 
+        if(curshapeName == "line") {
+
+        }
+        else {
+
+        }
       },
 
       /**
