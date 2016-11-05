@@ -34,6 +34,24 @@ input, textarea, div {
     outline: none;
     font-size: inherit;
 }
+.menu.list {
+    padding: 4px 0px;
+}
+.menu {
+    position: absolute;
+    background: #FFF;
+    border-radius: 4px;
+    border: 1px solid rgb(180,180,180);
+    -webkit-box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.3);
+}
+.menu li {
+    padding: 0px 20px;
+    line-height: 26px;
+    cursor: default;
+    position: relative;
+}
 .icon {
   background: url(../images/diagram/sprite.png?9) no-repeat;
   height: 20px;
@@ -687,6 +705,18 @@ input, textarea, div {
 }
 .spinner-up {
     background-position: -44px -343px;
+}
+#bar-linkertype .linkertype-broken {
+  border-right: 1px solid #B9B9B9;
+}
+#line-type-list {
+    padding: 4px;
+}
+#line-type-list li {
+    width: 20px;
+    height: 20px;
+    padding: 3px;
+    border-radius: 2px;
 }
 /*header end*/
 

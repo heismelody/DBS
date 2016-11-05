@@ -15,8 +15,9 @@ define(function(require, exports, module) {
      var defaultDiagramTemplate =  {
      		id: "",
      		name: "line",
+        linetype : "basic",
      		//title: "",
-     		//category: "",
+     		//category: "line",
      		group: "",
      		groupName: null,
      		locked: false,
@@ -87,6 +88,7 @@ define(function(require, exports, module) {
         _GlobalLineObject[newId] = {
           "id" : newId,
           "name" : "line",
+          "linetype" : "basic",
           "properties": {
        			"startX": start.x,
        			"startY": start.y,
@@ -141,21 +143,59 @@ define(function(require, exports, module) {
         }
       },
       //when you draw the line, you should change coordinates to relative position of the canvas.
-      drawLine : function(canvas,linetype,start,end) {
+      drawCanvasAndLine : function(lineId,start,end) {
+        let curEndRelative;
+        let curStartRelative;
+
+        $("#" + lineId).find("canvas").attr({
+          width: Math.abs(end.x - start.x) + 20,
+          height: Math.abs(end.y - start.y) + 20,
+        });
+        $("#" + lineId).css({
+          left: Math.min(start.x,end.x) - 10,
+          top: Math.min(start.y,end.y) - 10,
+        });
+        curStartRelative = {
+          x: start.x - parseFloat($("#" + lineId).css("left")),
+          y: start.y - parseFloat($("#" + lineId).css("top")),
+        };
+        curEndRelative = {
+          x: end.x - parseFloat($("#" + lineId).css("left")),
+          y: end.y - parseFloat($("#" + lineId).css("top")),
+        };
+        argList = {
+          startControl : {
+
+          },
+          endControl : {
+
+          },
+        }
+        this.drawLine($("#" + lineId).find("canvas")[0],"curve",curStartRelative,curEndRelative,argList);
+      },
+      drawLine : function(canvas,linetype,start,end,argList) {
         let ctx = canvas.getContext("2d");
 
         switch (linetype) {
           case "basic":
-            this.drawBasicLine.call(ctx,end,start);
+            this.drawBasicLine.call(ctx,start,end);
             break;
           case "step":
-            this.drawBasicLine.call(ctx);
+            this.drawStepLine.call(ctx,start,end);
             break;
           case "curve":
-            this.drawBasicLine.call(ctx);
+            let startControl = {
+              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+              y: start.y,
+            };
+            let endControl = {
+              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+              y: end.y,
+            };
+            this.drawBezierCurve.call(ctx,start,startControl,end,endControl);
             break;
           default:
-            this.drawBasicLine.call(ctx,end,start);
+            this.drawBasicLine.call(ctx,start,end);
         }
 
       },
@@ -166,7 +206,18 @@ define(function(require, exports, module) {
         this.drawLine();
       },
 
-      drawBasicLine : function(end,start) {
+      drawBasicLine : function(start,end) {
+        let w = this.canvas.width;
+        let h = this.canvas.height;
+
+        this.beginPath();
+        this.clearRect(0,0,w,h);
+        this.moveTo(start.x,start.y);
+        this.lineTo(end.x,end.y);
+        this.stroke();
+        this.closePath();
+      },
+      drawStepLine : function(start,end) {
         let w = this.canvas.width;
         let h = this.canvas.height;
         if(arguments.length == 2) {
@@ -176,18 +227,22 @@ define(function(require, exports, module) {
 
         this.beginPath();
         this.clearRect(0,0,w,h);
-        this.moveTo(this.startX,this.startY);
-        this.lineTo(end.x,end.y);
+        // this.moveTo(this.startX,this.startY);
+        // this.lineTo(end.x,end.y);
         this.stroke();
         this.closePath();
       },
-      drawStepLine : function() {
+      drawBezierCurve : function(start,startControl,end,endControl) {
+        let w = this.canvas.width;
+        let h = this.canvas.height;
 
+        this.beginPath();
+        this.clearRect(0,0,w,h);
+        this.moveTo(start.x,start.y);
+        this.bezierCurveTo(startControl.x,startControl.y,endControl.x,endControl.y,end.x,end.y);
+        this.stroke();
+        this.closePath();
       },
-      drawBezierCurve : function() {
-
-      },
-
       addLineOverlay : function(lineId) {
         let canvas = $("#" + lineId).find("canvas")[0];
         let start = this.getStartPosition(lineId);

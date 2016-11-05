@@ -185,8 +185,12 @@ define(function(require, exports, module) {
       },
     };
     var _GlobalPathRef = {};
+    var _GlobalConfig = {};
 
     var diagramManager = {
+      configManager : {
+
+      },
       templateManager : {
         getDefaultTemplate : function getDefaultTemplate() {
           return defaultDiagramTemplate;
