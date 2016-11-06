@@ -9,6 +9,7 @@ define(function(require, exports, module) {
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
   var lineManager = LineManager.lineManager;
+  var selectedDiagramManager = DiagramManager.diagramManager.selectedDiagramManager;
 
   var eventHelper = (function () {
     /**
@@ -55,6 +56,11 @@ define(function(require, exports, module) {
     var eventHelper = {
       initEvent : function() {
         this.initToolBarEvent();
+        $(".design-layout").on('click',function(e) {
+          if(e.target.id == "designer-grids" || e.target.className == "canvas-container") {
+            selectedDiagramManager.removeSelected();
+          }
+        });
 
         $(".design-layout").on("mousedown",function(e) {
           if($("#bar-linkertype").hasClass("selected")) {

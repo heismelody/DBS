@@ -142,6 +142,15 @@ define(function(require, exports, module) {
           return false;
         }
       },
+      _isPointOnBasicLine : function() {
+
+      },
+      _isPointOnBezierCurve : function() {
+
+      },
+      _isPointOnStepLine : function() {
+
+      },
       //when you draw the line, you should change coordinates to relative position of the canvas.
       drawCanvasAndLine : function(lineId,start,end) {
         let curEndRelative;

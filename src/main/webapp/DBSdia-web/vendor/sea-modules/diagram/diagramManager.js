@@ -186,8 +186,20 @@ define(function(require, exports, module) {
     };
     var _GlobalPathRef = {};
     var _GlobalConfig = {};
+    var _GlobalSelectedDiagrams = [];
 
     var diagramManager = {
+      selectedDiagramManager : {
+        getSelected : function() {
+          return _GlobalSelectedDiagrams;
+        },
+        setSelected : function(diagramId) {
+          _GlobalSelectedDiagrams.push(diagramId);
+        },
+        removeSelected : function() {
+          _GlobalSelectedDiagrams = [];
+        },
+      },
       configManager : {
 
       },

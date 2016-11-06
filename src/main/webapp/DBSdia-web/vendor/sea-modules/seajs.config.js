@@ -14,5 +14,6 @@ seajs.config({
     "ajaxHelper":"diagram/ajaxHelper.js",
     "diagramDesigner":"diagram/diagramDesigner.js",
     "eventHelper":"diagram/eventHelper.js",
+    "uIManager":"diagram/uIManager.js",
   }
 })

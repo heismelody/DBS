@@ -9,6 +9,7 @@ define(function(require, exports, module) {
     var DiagramCreator = require('diagramCreator');
     var DiagramDesigner = require('diagramDesigner');
     var EventHelper = require('eventHelper');
+    var UIManager = require('uIManager');
 
     var Util = util.Util;
     var templateManager = DiagramManager.diagramManager.templateManager;
@@ -16,6 +17,7 @@ define(function(require, exports, module) {
     var diagramCreator = DiagramCreator.diagramCreator;
     var diagramDesigner = DiagramDesigner.diagramDesigner;
     var eventHelper = EventHelper.eventHelper;
+    var uIManager = UIManager.uIManager;
 
     var init = function() {
 
@@ -28,7 +30,8 @@ define(function(require, exports, module) {
       //document.getElementById("testCanvas").scrollIntoView(true);
       diagramCreator.init();
       eventHelper.initEvent();
-      
+      uIManager.toolbarDisable();
+
 
       _initDom();
       _initEvent();
@@ -93,6 +96,29 @@ define(function(require, exports, module) {
         data: {
           Uncollapsed:false,
           collapsed:true,
+          "bar-theme-disabled":true,
+          "bar-undo-disabled":true,
+          "bar-redo-disabled":true,
+          "bar-brush-disabled":true,
+          "bar-font-family-disabled":true,
+          "bar-font-size-disabled":true,
+          "bar-font-bold-disabled":true,
+          "bar-font-italic-disabled":true,
+          "bar-font-underline-disabled":true,
+          "bar-font-color-disabled":true,
+          "bar-font-align-disabled":true,
+          "bar-fill-disabled":true,
+          "bar-line-color-disabled":true,
+          "bar-line-width-disabled":true,
+          "bar-line-style-disabled":true,
+          "bar-linkertype-disabled":true,
+          "bar-beginarrow-disabled":true,
+          "bar-endarrow-disabled":true,
+          "bar-front-disabled":true,
+          "bar-back-disabled":true,
+          "bar-lock-disabled":true,
+          "bar-unlock-disabled":true,
+          "bar-link-disabled":true,
         },
         methods: {
           collapseHeaderEvent: function (event) {
