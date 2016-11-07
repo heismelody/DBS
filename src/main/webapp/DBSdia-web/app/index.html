@@ -44,26 +44,26 @@
           </div>
 
           <div class="row row2 toolbar">
-            <div id="bar-theme" class="toolbar-button" v-bind:class="{ 'disabled': bar-theme-disabled }" title="Change theme">
+            <div id="bar-theme" class="toolbar-button" v-bind:class="{ 'disabled': barthemeDisabled }" title="Change theme">
               <div class="icon theme"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-undo" class="toolbar-button" v-bind:class="{ 'disabled': bar-undo-disabled }" title="Undo (Ctrl+Z)">
+            <div id="bar-undo" class="toolbar-button" v-bind:class="{ 'disabled': barundoDisabled }" title="Undo (Ctrl+Z)">
               <div class="icon undo"></div>
             </div>
-            <div id="bar-redo" class="toolbar-button" v-bind:class="{ 'disabled': bar-redo-disabled }" title="Redo (Ctrl+Y)">
+            <div id="bar-redo" class="toolbar-button" v-bind:class="{ 'disabled': barredoDisabled }" title="Redo (Ctrl+Y)">
               <div class="icon redo"></div>
             </div>
-            <div id="bar-brush" class="toolbar-button" v-bind:class="{ 'disabled': bar-brush-disabled }" title="Brush (Ctrl+Shift+B)">
+            <div id="bar-brush" class="toolbar-button" v-bind:class="{ 'disabled': barbrushDisabled }" title="Brush (Ctrl+Shift+B)">
               <div class="icon brush"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-font-family" title="Font" class="toolbar-button" v-bind:class="{ 'disabled': bar-font-family-disabled }" style="width: 80px;">
+            <div id="bar-font-family" title="Font" class="toolbar-button" v-bind:class="{ 'disabled': barfontfamilyDisabled }" style="width: 80px;">
               <div class="text-content">Arial</div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div class="toolbar-small-devider"></div>
-            <div id="bar-font-size" title="Font size" class="spinner" v-bind:class="{ 'disabled': bar-font-size-disabled }" style="width: 50px;" min="12" max="100" old="13px">
+            <div id="bar-font-size" title="Font size" class="spinner" v-bind:class="{ 'disabled': barfontsizeDisabled }" style="width: 50px;" min="12" max="100" old="13px">
               <div class="spinner-input"><input disabled="disabled"></div>
               <div class="buttons">
                 <div class="spinner-up"></div>
@@ -71,72 +71,72 @@
               </div>
             </div>
             <div class="toolbar-small-devider"></div>
-            <div id="bar-font-bold" title="Bold (Ctrl+B)" class="toolbar-button" v-bind:class="{ 'disabled': bar-font-bold-disabled }">
+            <div id="bar-font-bold" title="Bold (Ctrl+B)" class="toolbar-button" v-bind:class="{ 'disabled': barfontboldDisabled }">
               <div class="icon bold"></div>
             </div>
-            <div id="bar-font-italic" title="Italic (Ctrl+I)" class="toolbar-button" v-bind:class="{ 'disabled': bar-font-italic-disabled }">
+            <div id="bar-font-italic" title="Italic (Ctrl+I)" class="toolbar-button" v-bind:class="{ 'disabled': barfontitalicDisabled }">
               <div class="icon italic"></div>
             </div>
-            <div id="bar-font-underline" title="Underline (Ctrl+U)" class="toolbar-button" v-bind:class="{ 'disabled': bar-font-underline-disabled }">
+            <div id="bar-font-underline" title="Underline (Ctrl+U)" class="toolbar-button" v-bind:class="{ 'disabled': barfontunderlineDisabled }">
               <div class="icon underline"></div>
             </div>
-            <div id="bar-font-color" title="Text color" class="toolbar-button drop-button" v-bind:class="{ 'disabled': bar-font-color-disabled }">
+            <div id="bar-font-color" title="Text color" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfontcolorDisabled }">
               <div class="icon fontcolor"></div>
               <div class="btn-color" style="background-color: rgb(50,50,50)"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-font-align" title="Align" class="toolbar-button drop-button" v-bind:class="{ 'disabled': bar-font-align-disabled }">
+            <div id="bar-font-align" title="Align" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfontalignDisabled }">
               <div class="icon alignleft"></div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-fill" title="Fill" class="toolbar-button drop-button" v-bind:class="{ 'disabled': bar-fill-disabled }">
+            <div id="bar-fill" title="Fill" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfillDisabled }">
               <div class="icon fillcolor"></div>
               <div class="btn-color" style="background-color: rgb(255,255,255)"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-line-color" title="Line color" class="toolbar-button drop-button" v-bind:class="{ 'disabled': bar-line-color-disabled }">
+            <div id="bar-line-color" title="Line color" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinecolorDisabled }">
               <div class="icon linecolor"></div>
               <div class="btn-color" style="background-color: rgb(50,50,50)"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-line-width" title="Line width" class="toolbar-button drop-button" v-bind:class="{ 'disabled': bar-line-width-disabled }">
+            <div id="bar-line-width" title="Line width" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinewidthDisabled }">
               <div class="icon linewidth"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-line-style" title="Line dash" class="toolbar-button drop-button" v-bind:class="{ 'disabled': bar-line-style-disabled }">
+            <div id="bar-line-style" title="Line dash" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinestyleDisabled }">
               <div class="icon linedash"></div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-linkertype" title="Line type" class="toolbar-button drop-button" v-bind:class="{ 'disabled': bar-linkertype-disabled }">
+            <div id="bar-linkertype" title="Line type" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinkertypeDisabled }" @click="linkerTypeClickHandler">
               <div class="icon linkertype-broken"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-beginarrow" title="Line beginning" class="toolbar-button drop-button" v-bind:class="{ 'disabled': bar-beginarrow-disabled }">
+            <div id="bar-beginarrow" title="Line beginning" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barbeginarrowDisabled }">
               <div class="icon ico-arrow larrow-none"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-endarrow" title="Line ending" class="toolbar-button drop-button" v-bind:class="{ 'disabled': bar-endarrow-disabled }">
+            <div id="bar-endarrow" title="Line ending" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barendarrowDisabled }">
               <div class="icon ico-arrow rarrow-none"></div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-front" title="Bring To Front (Ctrl+] )" class="toolbar-button" v-bind:class="{ 'disabled': bar-front-disabled }">
+            <div id="bar-front" title="Bring To Front (Ctrl+] )" class="toolbar-button" v-bind:class="{ 'disabled': barfrontDisabled }">
               <div class="icon ico-front"></div>
             </div>
-            <div id="bar-back" title="Send To Back (Ctrl+[ )" class="toolbar-button" v-bind:class="{ 'disabled': bar-back-disabled }">
+            <div id="bar-back" title="Send To Back (Ctrl+[ )" class="toolbar-button" v-bind:class="{ 'disabled': barbackDisabled }">
               <div class="icon ico-back"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-lock" title="Lock (Ctrl+L)" class="toolbar-button" v-bind:class="{ 'disabled': bar-lock-disabled }">
+            <div id="bar-lock" title="Lock (Ctrl+L)" class="toolbar-button" v-bind:class="{ 'disabled': barlockDisabled }">
               <div class="icon ico-lock"></div>
             </div>
-            <div id="bar-unlock" title="Unlock (Ctrl+Shift+L)" class="toolbar-button" v-bind:class="{ 'disabled': bar-unlock-disabled }">
+            <div id="bar-unlock" title="Unlock (Ctrl+Shift+L)" class="toolbar-button" v-bind:class="{ 'disabled': barunlockDisabled }">
               <div class="icon ico-unlock"></div>
             </div>
             <div class="toolbar-small-devider"></div>
-            <div id="bar-link" title="Insert Link" class="toolbar-button" v-bind:class="{ 'disabled': bar-link-disabled }">
+            <div id="bar-link" title="Insert Link" class="toolbar-button" v-bind:class="{ 'disabled': barlinkdisabled }">
               <div class="icon ico-link"></div>
             </div>
             <div class="toolbar-right">
@@ -179,11 +179,316 @@
 
       <div id="footer"></div>
       <div id="UIcontainer">
+        <ul id="font-list" class="menu list menu-icon" style="top: 102px; left: 155px; display: block;">
+          <li style="font-family: Arial"><div class="icon icon-selected"></div>Arial</li>
+          <li style="font-family: Verdana">Verdana</li>
+          <li style="font-family: Georgia">Georgia</li>
+          <li style="font-family: Times New Roman">Times New Roman</li>
+          <li style="font-family: Courier New">Courier New</li>
+          <li style="font-family: Impact">Impact</li>
+          <li style="font-family: Comic Sans MS">Comic Sans MS</li>
+          <li style="font-family: Tahoma">Tahoma</li>
+          <li style="font-family: Garamond">Garamond</li>
+          <li style="font-family: Lucida Console">Lucida Console</li>
+        </ul>
+
+        <ul id="font-align-list" class="menu list" style="top: 102px; left: 418px; display: block;">
+          <li cate="textAlign" al="left"><div class="icon alignleft"></div></li>
+          <li cate="textAlign" al="center"><div class="icon aligncenter"></div></li>
+          <li cate="textAlign" al="right"><div class="icon alignright"></div></li>
+          <li cate="vAlign" al="top"><div class="icon aligntop"></div></li>
+          <li cate="vAlign" al="middle"><div class="icon alignmiddle"></div></li>
+          <li cate="vAlign" al="bottom"><div class="icon alignbottom"></div></li>
+        </ul>
+
+        <ul id="line-width-list" class="menu list menu-icon" style="top: 102px; left: 537px;">
+          <li>0px</li>
+          <li>1px</li>
+          <li>2px</li>
+          <li>3px</li>
+          <li>4px</li>
+          <li>5px</li>
+          <li>6px</li>
+          <li>8px</li>
+          <li><div class="icon icon-selected"></div>10px</li>
+        </ul>
+
+        <ul id="line-style-list" class="menu list menu-icon" style="top: 102px; left: 574px;">
+          <li line="solid"><div class="icon icon-selected"></div><div class="icon linestyle linesolid"></div></li>
+          <li line="dashed"><div class="icon linestyle linedashed"></div></li>
+          <li line="dot"><div class="icon linestyle linedot"></div></li>
+          <li line="dashdot"><div class="icon linestyle linedashdot"></div></li>
+        </ul>
+
         <ul id="line-type-list" class="menu list" style="top: 102px; left: 619px; display: block;">
           <li tp="step"><div class="icon linkertype-broken"></div></li>
           <li tp="curve"><div class="icon linkertype-curve"></div></li>
           <li tp="basic"><div class="icon linkertype-normal"></div></li>
         </ul>
+
+        <ul id="beginarrow-list" class="menu list menu-icon" style="top: 102px; left: 656px;">
+          <li arrow="none"><div class="icon icon-arrow larrow-none"></div></li>
+          <li arrow="solidArrow"><div class="icon icon-selected"></div><div class="icon icon-arrow larrow-solidarrow"></div></li>
+          <li arrow="dashedArrow"><div class="icon icon-arrow larrow-dashedarrow"></div></li>
+          <li arrow="normal"><div class="icon icon-arrow larrow-normal"></div></li>
+          <li arrow="solidDiamond"><div class="icon icon-arrow larrow-soliddiamond"></div></li>
+          <li arrow="dashedDiamond"><div class="icon icon-arrow larrow-dasheddiamond"></div></li>
+          <li arrow="solidCircle"><div class="icon icon-arrow larrow-solidcircle"></div></li>
+          <li arrow="dashedCircle"><div class="icon icon-arrow larrow-dashedcircle"></div></li>
+          <li arrow="cross"><div class="icon icon-arrow larrow-cross"></div></li>
+        </ul>
+
+        <ul id="endarrow-list" class="menu list menu-icon" style="top: 102px; left: 701px;">
+          <li arrow="none"><div class="icon icon-selected"></div><div class="icon icon-arrow rarrow-none"></div></li>
+          <li arrow="solidArrow"><div class="icon icon-arrow rarrow-solidarrow"></div></li>
+          <li arrow="dashedArrow"><div class="icon icon-arrow rarrow-dashedarrow"></div></li>
+          <li arrow="normal"><div class="icon icon-arrow rarrow-normal"></div></li>
+          <li arrow="solidDiamond"><div class="icon icon-arrow rarrow-soliddiamond"></div></li>
+          <li arrow="dashedDiamond"><div class="icon icon-arrow rarrow-dasheddiamond"></div></li>
+          <li arrow="solidCircle"><div class="icon icon-arrow rarrow-solidcircle"></div></li>
+          <li arrow="dashedCircle"><div class="icon icon-arrow rarrow-dashedcircle"></div></li>
+          <li arrow="cross"><div class="icon icon-arrow rarrow-cross"></div></li>
+        </ul>
+
+        <div id="color-picker" class="menu color-picker" style="top: 102px; left: 381px; display: block;" init="true">
+          <div class="color-items" col="(0,0,0,0">
+            <div style="background-color:rgb(255,255,255);" col="255,255,255"></div>
+            <div style="background-color:rgb(229,229,229);" col="229,229,229"></div>
+            <div style="background-color:rgb(207,207,207);" col="207,207,207"></div>
+            <div style="background-color:rgb(184,184,184);" col="184,184,184"></div>
+            <div style="background-color:rgb(161,161,161);" col="161,161,161"></div>
+            <div style="background-color:rgb(138,138,138);" col="138,138,138"></div>
+            <div style="background-color:rgb(115,115,115);" col="115,115,115"></div>
+            <div style="background-color:rgb(92,92,92);" col="92,92,92"></div>
+            <div style="background-color:rgb(69,69,69);" col="69,69,69"></div>
+            <div style="background-color:rgb(50,50,50);" col="50,50,50" class="selected"></div>
+            <div style="background-color:rgb(23,23,23);" col="23,23,23"></div>
+            <div style="background-color:rgb(0,0,0);" col="0,0,0"></div>
+            <div class="clear" col="(0,0,0,0"></div>
+          </div>
+
+          <div class="color-items" col="(0,0,0,0">
+          	<div style="background-color:rgb(255,204,204);" col="255,204,204">
+          	</div>
+          	<div style="background-color:rgb(255,230,204);" col="255,230,204">
+          	</div>
+          	<div style="background-color:rgb(255,255,204);" col="255,255,204">
+          	</div>
+          	<div style="background-color:rgb(230,255,204);" col="230,255,204">
+          	</div>
+          	<div style="background-color:rgb(204,255,204);" col="204,255,204">
+          	</div>
+          	<div style="background-color:rgb(204,255,230);" col="204,255,230">
+          	</div>
+          	<div style="background-color:rgb(204,255,255);" col="204,255,255">
+          	</div>
+          	<div style="background-color:rgb(204,229,255);" col="204,229,255">
+          	</div>
+          	<div style="background-color:rgb(204,204,255);" col="204,204,255">
+          	</div>
+          	<div style="background-color:rgb(229,204,255);" col="229,204,255">
+          	</div>
+          	<div style="background-color:rgb(255,204,255);" col="255,204,255">
+          	</div>
+          	<div style="background-color:rgb(255,204,230);" col="255,204,230">
+          	</div>
+          	<div style="background-color:rgb(255,153,153);" col="255,153,153">
+          	</div>
+          	<div style="background-color:rgb(255,204,153);" col="255,204,153">
+          	</div>
+          	<div style="background-color:rgb(255,255,153);" col="255,255,153">
+          	</div>
+          	<div style="background-color:rgb(204,255,153);" col="204,255,153">
+          	</div>
+          	<div style="background-color:rgb(153,255,153);" col="153,255,153">
+          	</div>
+          	<div style="background-color:rgb(153,255,204);" col="153,255,204">
+          	</div>
+          	<div style="background-color:rgb(153,255,255);" col="153,255,255">
+          	</div>
+          	<div style="background-color:rgb(153,204,255);" col="153,204,255">
+          	</div>
+          	<div style="background-color:rgb(153,153,255);" col="153,153,255">
+          	</div>
+          	<div style="background-color:rgb(204,153,255);" col="204,153,255">
+          	</div>
+          	<div style="background-color:rgb(255,153,255);" col="255,153,255">
+          	</div>
+          	<div style="background-color:rgb(255,153,204);" col="255,153,204">
+          	</div>
+          	<div style="background-color:rgb(255,102,102);" col="255,102,102">
+          	</div>
+          	<div style="background-color:rgb(255,179,102);" col="255,179,102">
+          	</div>
+          	<div style="background-color:rgb(255,255,102);" col="255,255,102">
+          	</div>
+          	<div style="background-color:rgb(179,255,102);" col="179,255,102">
+          	</div>
+          	<div style="background-color:rgb(102,255,102);" col="102,255,102">
+          	</div>
+          	<div style="background-color:rgb(102,255,179);" col="102,255,179">
+          	</div>
+          	<div style="background-color:rgb(102,255,255);" col="102,255,255">
+          	</div>
+          	<div style="background-color:rgb(102,178,255);" col="102,178,255">
+          	</div>
+          	<div style="background-color:rgb(102,102,255);" col="102,102,255">
+          	</div>
+          	<div style="background-color:rgb(178,102,255);" col="178,102,255">
+          	</div>
+          	<div style="background-color:rgb(255,102,255);" col="255,102,255">
+          	</div>
+          	<div style="background-color:rgb(255,102,179);" col="255,102,179">
+          	</div>
+          	<div style="background-color:rgb(255,51,51);" col="255,51,51">
+          	</div>
+          	<div style="background-color:rgb(255,153,51);" col="255,153,51">
+          	</div>
+          	<div style="background-color:rgb(255,255,51);" col="255,255,51">
+          	</div>
+          	<div style="background-color:rgb(153,255,51);" col="153,255,51">
+          	</div>
+          	<div style="background-color:rgb(51,255,51);" col="51,255,51">
+          	</div>
+          	<div style="background-color:rgb(51,255,153);" col="51,255,153">
+          	</div>
+          	<div style="background-color:rgb(51,255,255);" col="51,255,255">
+          	</div>
+          	<div style="background-color:rgb(51,153,255);" col="51,153,255">
+          	</div>
+          	<div style="background-color:rgb(51,51,255);" col="51,51,255">
+          	</div>
+          	<div style="background-color:rgb(153,51,255);" col="153,51,255">
+          	</div>
+          	<div style="background-color:rgb(255,51,255);" col="255,51,255">
+          	</div>
+          	<div style="background-color:rgb(255,51,153);" col="255,51,153">
+          	</div>
+          	<div style="background-color:rgb(255,0,0);" col="255,0,0">
+          	</div>
+          	<div style="background-color:rgb(255,128,0);" col="255,128,0">
+          	</div>
+          	<div style="background-color:rgb(255,255,0);" col="255,255,0">
+          	</div>
+          	<div style="background-color:rgb(128,255,0);" col="128,255,0">
+          	</div>
+          	<div style="background-color:rgb(0,255,0);" col="0,255,0">
+          	</div>
+          	<div style="background-color:rgb(0,255,128);" col="0,255,128">
+          	</div>
+          	<div style="background-color:rgb(0,255,255);" col="0,255,255">
+          	</div>
+          	<div style="background-color:rgb(0,127,255);" col="0,127,255">
+          	</div>
+          	<div style="background-color:rgb(0,0,255);" col="0,0,255">
+          	</div>
+          	<div style="background-color:rgb(127,0,255);" col="127,0,255">
+          	</div>
+          	<div style="background-color:rgb(255,0,255);" col="255,0,255">
+          	</div>
+          	<div style="background-color:rgb(255,0,128);" col="255,0,128">
+          	</div>
+          	<div style="background-color:rgb(204,0,0);" col="204,0,0">
+          	</div>
+          	<div style="background-color:rgb(204,102,0);" col="204,102,0">
+          	</div>
+          	<div style="background-color:rgb(204,204,0);" col="204,204,0">
+          	</div>
+          	<div style="background-color:rgb(102,204,0);" col="102,204,0">
+          	</div>
+          	<div style="background-color:rgb(0,204,0);" col="0,204,0">
+          	</div>
+          	<div style="background-color:rgb(0,204,102);" col="0,204,102">
+          	</div>
+          	<div style="background-color:rgb(0,204,204);" col="0,204,204">
+          	</div>
+          	<div style="background-color:rgb(0,102,204);" col="0,102,204">
+          	</div>
+          	<div style="background-color:rgb(0,0,204);" col="0,0,204">
+          	</div>
+          	<div style="background-color:rgb(102,0,204);" col="102,0,204">
+          	</div>
+          	<div style="background-color:rgb(204,0,204);" col="204,0,204">
+          	</div>
+          	<div style="background-color:rgb(204,0,102);" col="204,0,102">
+          	</div>
+          	<div style="background-color:rgb(153,0,0);" col="153,0,0">
+          	</div>
+          	<div style="background-color:rgb(153,76,0);" col="153,76,0">
+          	</div>
+          	<div style="background-color:rgb(153,153,0);" col="153,153,0">
+          	</div>
+          	<div style="background-color:rgb(77,153,0);" col="77,153,0">
+          	</div>
+          	<div style="background-color:rgb(0,153,0);" col="0,153,0">
+          	</div>
+          	<div style="background-color:rgb(0,153,77);" col="0,153,77">
+          	</div>
+          	<div style="background-color:rgb(0,153,153);" col="0,153,153">
+          	</div>
+          	<div style="background-color:rgb(0,76,153);" col="0,76,153">
+          	</div>
+          	<div style="background-color:rgb(0,0,153);" col="0,0,153">
+          	</div>
+          	<div style="background-color:rgb(76,0,153);" col="76,0,153">
+          	</div>
+          	<div style="background-color:rgb(153,0,153);" col="153,0,153">
+          	</div>
+          	<div style="background-color:rgb(153,0,77);" col="153,0,77">
+          	</div>
+          	<div style="background-color:rgb(102,0,0);" col="102,0,0">
+          	</div>
+          	<div style="background-color:rgb(102,51,0);" col="102,51,0">
+          	</div>
+          	<div style="background-color:rgb(102,102,0);" col="102,102,0">
+          	</div>
+          	<div style="background-color:rgb(51,102,0);" col="51,102,0">
+          	</div>
+          	<div style="background-color:rgb(0,102,0);" col="0,102,0">
+          	</div>
+          	<div style="background-color:rgb(0,102,51);" col="0,102,51">
+          	</div>
+          	<div style="background-color:rgb(0,102,102);" col="0,102,102">
+          	</div>
+          	<div style="background-color:rgb(0,51,102);" col="0,51,102">
+          	</div>
+          	<div style="background-color:rgb(0,0,102);" col="0,0,102">
+          	</div>
+          	<div style="background-color:rgb(51,0,102);" col="51,0,102">
+          	</div>
+          	<div style="background-color:rgb(102,0,102);" col="102,0,102">
+          	</div>
+          	<div style="background-color:rgb(102,0,51);" col="102,0,51">
+          	</div>
+          	<div style="background-color:rgb(51,0,0);" col="51,0,0">
+          	</div>
+          	<div style="background-color:rgb(51,26,0);" col="51,26,0">
+          	</div>
+          	<div style="background-color:rgb(51,51,0);" col="51,51,0">
+          	</div>
+          	<div style="background-color:rgb(26,51,0);" col="26,51,0" class="">
+          	</div>
+          	<div style="background-color:rgb(0,51,0);" col="0,51,0">
+          	</div>
+          	<div style="background-color:rgb(0,51,26);" col="0,51,26">
+          	</div>
+          	<div style="background-color:rgb(0,51,51);" col="0,51,51">
+          	</div>
+          	<div style="background-color:rgb(0,25,51);" col="0,25,51">
+          	</div>
+          	<div style="background-color:rgb(0,0,51);" col="0,0,51">
+          	</div>
+          	<div style="background-color:rgb(25,0,51);" col="25,0,51">
+          	</div>
+          	<div style="background-color:rgb(51,0,51);" col="51,0,51">
+          	</div>
+          	<div style="background-color:rgb(51,0,26);" col="51,0,26">
+          	</div>
+          	<div class="clear" col="(0,0,0,0">
+          	</div>
+          </div>
+        </div>
+
       </div>
     </div>
 

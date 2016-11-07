@@ -55,7 +55,6 @@ define(function(require, exports, module) {
 
     var eventHelper = {
       initEvent : function() {
-        this.initToolBarEvent();
         $(".design-layout").on('click',function(e) {
           if(e.target.id == "designer-grids" || e.target.className == "canvas-container") {
             selectedDiagramManager.removeSelected();
@@ -104,18 +103,6 @@ define(function(require, exports, module) {
 
         $(".design-layout").on('mousedown','.line-overlay-point',function(e) {
           eventHelper.MouseDownHandler(e,eventHelper.lineOverlayMouseDownHandle);
-        });
-      },
-      initToolBarEvent : function() {
-
-        //menu bar click function
-        $("#bar-linkertype").on("click",function(e) {
-          if($("#bar-linkertype").hasClass("selected")) {
-            $("#bar-linkertype").removeClass("selected");
-          }
-          else {
-            $("#bar-linkertype").addClass("selected");
-          }
         });
       },
 

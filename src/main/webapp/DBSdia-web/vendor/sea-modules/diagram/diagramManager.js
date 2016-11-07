@@ -197,7 +197,9 @@ define(function(require, exports, module) {
           _GlobalSelectedDiagrams.push(diagramId);
         },
         removeSelected : function() {
-          _GlobalSelectedDiagrams = [];
+          for(var i in _GlobalSelectedDiagrams) {
+            _GlobalSelectedDiagrams.pop();
+          }
         },
       },
       configManager : {
@@ -321,7 +323,7 @@ define(function(require, exports, module) {
           return _GlobalDiagramOjects[diagramId];
         },
         getShapeNameById : function(diagramId) {
-          return _GlobalDiagramOjects[diagramId]["name"];
+          return _GlobalDiagramOjects.hasOwnProperty(diagramId) ? _GlobalDiagramOjects[diagramId]["name"] : null;
         },
         getProperties : function getProperties(shapeName,diagramId) {
           if(arguments.length == 2) {
@@ -338,6 +340,10 @@ define(function(require, exports, module) {
         },
         getAnchorsByName : function(shapeName,id) {
           return diagramManager.templateManager.getAnchorsByName(shapeName);
+        },
+        //Remove later
+        isLine : function(id) {
+          return this.getShapeNameById(id) ? true : false;
         },
       },
 
