@@ -156,7 +156,7 @@ input, textarea, div {
 .icon.transparent:hover{
 	border:1px solid #aaa;
 }
-.ico-arrow{
+.icon-arrow{
 	width: 26px;
 	height: 10px;
 }
@@ -752,9 +752,19 @@ input, textarea, div {
 #beginarrow-list li, #endarrow-list li {
     padding: 8px 30px;
 }
-.icon-arrow {
+.ico-arrow {
     width: 26px;
     height: 10px;
+}
+.drop-button .ico-arrow {
+    margin-top: 7px;
+    margin-left: 4px;
+}
+.drop-button .ico {
+    margin-right: 0px;
+}
+.toolbar-button .ico {
+    margin: 2px;
 }
 /*header end*/
 
@@ -786,6 +796,11 @@ input, textarea, div {
     height: 0px;
     width: 100%;
     clear: both;
+}
+.color-items :hover {
+    position: relative;
+    border: #FFFFFF solid 2px;
+    margin: -1px -2px -2px -1px;
 }
 /* color picker end*/
 

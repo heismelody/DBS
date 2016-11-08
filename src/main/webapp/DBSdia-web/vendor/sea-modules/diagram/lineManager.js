@@ -1,4 +1,5 @@
 define(function(require, exports, module) {
+  var bezier = require('Bezier');
   var lineManager = (function () {
     /**
      * --------------------------------------------------------------------------
@@ -71,6 +72,7 @@ define(function(require, exports, module) {
        },
      	};
     var _GlobalLineObject = {};
+    var _bezierObj = {};
 
     var lineManager = {
       generateDiagramId : function generateDiagramId() {
@@ -88,7 +90,7 @@ define(function(require, exports, module) {
         _GlobalLineObject[newId] = {
           "id" : newId,
           "name" : "line",
-          "linetype" : "basic",
+          "linetype" : "curve",
           "properties": {
        			"startX": start.x,
        			"startY": start.y,
@@ -98,11 +100,30 @@ define(function(require, exports, module) {
             "height" : height,
        		},
         };
+
+        let argList = {
+          startControl : {
+            x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+            y: start.y,
+          },
+          endControl : {
+            x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+            y: end.y,
+          }
+        }
+        _bezierObj = new Bezier(start.x,start.y,
+                               argList.startControl.x,argList.startControl.y,
+                               argList.endControl.x,argList.endControl.y,
+                               end.x,end.y);
+
         return newId;
       },
       deleteLine : function(lineId) {
         $("#" + lineId).remove();
         delete _GlobalLineObject[lineId];
+      },
+      getLineTypeById : function(lineId) {
+        return _GlobalLineObject[lineId]["linetype"];
       },
       updateLinePosition: function(lineId,isStart,pos) {
         if(isStart) {
@@ -131,6 +152,21 @@ define(function(require, exports, module) {
         };
       },
       isPointOnLine : function(lineId,currPoint) {
+        let curLineType = this.getLineTypeById(lineId);
+
+        switch (curLineType) {
+          case "basic":
+            return this._isPointOnBezierCurve(currPoint,lineId);
+            break;
+          case "curve":
+          console.log("111" + this._isPointOnBasicLine(currPoint,lineId))
+            return this._isPointOnBasicLine(currPoint,lineId);
+            break;
+          default:
+
+        }
+      },
+      _isPointOnBasicLine : function(currPoint,lineId) {
         let point1 = this.getStartPosition(lineId);
         let point2 = this.getEndPosition(lineId);
 
@@ -142,45 +178,84 @@ define(function(require, exports, module) {
           return false;
         }
       },
-      _isPointOnBasicLine : function() {
-
+      _isPointOnBezierCurve : function(point,lineId) {
+        let curProject = _bezierObj.project(point);
+        return curProject.d <= 15 ? true : false;
       },
-      _isPointOnBezierCurve : function() {
-
-      },
-      _isPointOnStepLine : function() {
+      _isPointOnStepLine : function(point,lineId) {
 
       },
       //when you draw the line, you should change coordinates to relative position of the canvas.
-      drawCanvasAndLine : function(lineId,start,end) {
+      drawCanvasAndLine : function(lineId,start,end,argList) {
         let curEndRelative;
         let curStartRelative;
+        let curLineType = this.getLineTypeById(lineId);
 
-        $("#" + lineId).find("canvas").attr({
-          width: Math.abs(end.x - start.x) + 20,
-          height: Math.abs(end.y - start.y) + 20,
-        });
-        $("#" + lineId).css({
-          left: Math.min(start.x,end.x) - 10,
-          top: Math.min(start.y,end.y) - 10,
-        });
-        curStartRelative = {
-          x: start.x - parseFloat($("#" + lineId).css("left")),
-          y: start.y - parseFloat($("#" + lineId).css("top")),
-        };
-        curEndRelative = {
-          x: end.x - parseFloat($("#" + lineId).css("left")),
-          y: end.y - parseFloat($("#" + lineId).css("top")),
-        };
-        argList = {
-          startControl : {
+        if(curLineType == "curve") {
+          if(argList == undefined) {
+            argList = {
+              startControl : {
+                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                y: start.y,
+              },
+              endControl : {
+                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                y: end.y,
+              }
+            }
+          }
+          _bezierObj = new Bezier(start.x,start.y,
+                                 argList.startControl.x,argList.startControl.y,
+                                 argList.endControl.x,argList.endControl.y,
+                                 end.x,end.y);
 
-          },
-          endControl : {
-
-          },
+          $("#" + lineId).find("canvas").attr({
+            width: _bezierObj.bbox().x.size + 20,
+            height: _bezierObj.bbox().y.size + 20,
+          });
+          $("#" + lineId).css({
+            left: _bezierObj.bbox().x.min - 10,
+            top: _bezierObj.bbox().y.min - 10,
+          });
+          curStartRelative = {
+            x: start.x - parseFloat($("#" + lineId).css("left")),
+            y: start.y - parseFloat($("#" + lineId).css("top")),
+          };
+          curEndRelative = {
+            x: end.x - parseFloat($("#" + lineId).css("left")),
+            y: end.y - parseFloat($("#" + lineId).css("top")),
+          };
+          let RelativeStartControl = {
+            x: argList.startControl.x - parseFloat($("#" + lineId).css("left")),
+            y: argList.startControl.y - parseFloat($("#" + lineId).css("top")),
+          };
+          let RelativeEndControl = {
+            x: argList.endControl.x - parseFloat($("#" + lineId).css("left")),
+            y: argList.endControl.y - parseFloat($("#" + lineId).css("top")),
+          };
+          argList.startControl = RelativeStartControl;
+          argList.endControl = RelativeEndControl;
+          this.drawLine($("#" + lineId).find("canvas")[0],curLineType,curStartRelative,curEndRelative,argList);
         }
-        this.drawLine($("#" + lineId).find("canvas")[0],"curve",curStartRelative,curEndRelative,argList);
+        else {
+          $("#" + lineId).find("canvas").attr({
+            width: Math.abs(end.x - start.x) + 20,
+            height: Math.abs(end.y - start.y) + 20,
+          });
+          $("#" + lineId).css({
+            left: Math.min(start.x,end.x) - 10,
+            top: Math.min(start.y,end.y) - 10,
+          });
+          curStartRelative = {
+            x: start.x - parseFloat($("#" + lineId).css("left")),
+            y: start.y - parseFloat($("#" + lineId).css("top")),
+          };
+          curEndRelative = {
+            x: end.x - parseFloat($("#" + lineId).css("left")),
+            y: end.y - parseFloat($("#" + lineId).css("top")),
+          };
+          this.drawLine($("#" + lineId).find("canvas")[0],curLineType,curStartRelative,curEndRelative,argList);
+        }
       },
       drawLine : function(canvas,linetype,start,end,argList) {
         let ctx = canvas.getContext("2d");
@@ -193,15 +268,7 @@ define(function(require, exports, module) {
             this.drawStepLine.call(ctx,start,end);
             break;
           case "curve":
-            let startControl = {
-              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-              y: start.y,
-            };
-            let endControl = {
-              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-              y: end.y,
-            };
-            this.drawBezierCurve.call(ctx,start,startControl,end,endControl);
+            this.drawBezierCurve.call(ctx,start,argList.startControl,end,argList.endControl);
             break;
           default:
             this.drawBasicLine.call(ctx,start,end);

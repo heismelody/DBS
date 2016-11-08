@@ -8,6 +8,7 @@ seajs.config({
     "jQuerycollapseCookie":"jQuertCollapse/src/jquery.collapse_cookie_storage.js",
     "jQuerycollapseStorage":"jQuertCollapse/src/jquery.collapse_storage.js",
     "jQuerycollapse":"jQuertCollapse/src/jquery.collapse.js",
+    "Bezier":"BezierJs/bezier.js",
 
     "diagramCreator":"diagram/diagramCreator.js",
     "diagramManager":"diagram/diagramManager.js",

@@ -44,26 +44,26 @@
           </div>
 
           <div class="row row2 toolbar">
-            <div id="bar-theme" class="toolbar-button" v-bind:class="{ 'disabled': barthemeDisabled }" title="Change theme">
+            <div id="bar-theme" class="toolbar-button" v-bind:class="{ 'disabled': barthemeDisabled }" @click.select="toolbarButtonClickHandler" title="Change theme">
               <div class="icon theme"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-undo" class="toolbar-button" v-bind:class="{ 'disabled': barundoDisabled }" title="Undo (Ctrl+Z)">
+            <div id="bar-undo" class="toolbar-button" v-bind:class="{ 'disabled': barundoDisabled }" @click.select="toolbarButtonClickHandler" title="Undo (Ctrl+Z)">
               <div class="icon undo"></div>
             </div>
-            <div id="bar-redo" class="toolbar-button" v-bind:class="{ 'disabled': barredoDisabled }" title="Redo (Ctrl+Y)">
+            <div id="bar-redo" class="toolbar-button" v-bind:class="{ 'disabled': barredoDisabled }" @click.select="toolbarButtonClickHandler" title="Redo (Ctrl+Y)">
               <div class="icon redo"></div>
             </div>
-            <div id="bar-brush" class="toolbar-button" v-bind:class="{ 'disabled': barbrushDisabled }" title="Brush (Ctrl+Shift+B)">
+            <div id="bar-brush" class="toolbar-button" v-bind:class="{ 'disabled': barbrushDisabled }" @click.select="toolbarButtonClickHandler" title="Brush (Ctrl+Shift+B)">
               <div class="icon brush"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-font-family" title="Font" class="toolbar-button" v-bind:class="{ 'disabled': barfontfamilyDisabled }" style="width: 80px;">
+            <div id="bar-font-family" title="Font" class="toolbar-button" v-bind:class="{ 'disabled': barfontfamilyDisabled }" @click.select="toolbarButtonClickHandler" style="width: 80px;">
               <div class="text-content">Arial</div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div class="toolbar-small-devider"></div>
-            <div id="bar-font-size" title="Font size" class="spinner" v-bind:class="{ 'disabled': barfontsizeDisabled }" style="width: 50px;" min="12" max="100" old="13px">
+            <div id="bar-font-size" title="Font size" class="spinner" v-bind:class="{ 'disabled': barfontsizeDisabled }" @click.select="toolbarButtonClickHandler" style="width: 50px;" min="12" max="100" old="13px">
               <div class="spinner-input"><input disabled="disabled"></div>
               <div class="buttons">
                 <div class="spinner-up"></div>
@@ -71,72 +71,72 @@
               </div>
             </div>
             <div class="toolbar-small-devider"></div>
-            <div id="bar-font-bold" title="Bold (Ctrl+B)" class="toolbar-button" v-bind:class="{ 'disabled': barfontboldDisabled }">
+            <div id="bar-font-bold" title="Bold (Ctrl+B)" class="toolbar-button" v-bind:class="{ 'disabled': barfontboldDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon bold"></div>
             </div>
-            <div id="bar-font-italic" title="Italic (Ctrl+I)" class="toolbar-button" v-bind:class="{ 'disabled': barfontitalicDisabled }">
+            <div id="bar-font-italic" title="Italic (Ctrl+I)" class="toolbar-button" v-bind:class="{ 'disabled': barfontitalicDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon italic"></div>
             </div>
-            <div id="bar-font-underline" title="Underline (Ctrl+U)" class="toolbar-button" v-bind:class="{ 'disabled': barfontunderlineDisabled }">
+            <div id="bar-font-underline" title="Underline (Ctrl+U)" class="toolbar-button" v-bind:class="{ 'disabled': barfontunderlineDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon underline"></div>
             </div>
-            <div id="bar-font-color" title="Text color" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfontcolorDisabled }">
+            <div id="bar-font-color" title="Text color" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfontcolorDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon fontcolor"></div>
               <div class="btn-color" style="background-color: rgb(50,50,50)"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-font-align" title="Align" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfontalignDisabled }">
+            <div id="bar-font-align" title="Align" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfontalignDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon alignleft"></div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-fill" title="Fill" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfillDisabled }">
+            <div id="bar-fill" title="Fill" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfillDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon fillcolor"></div>
               <div class="btn-color" style="background-color: rgb(255,255,255)"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-line-color" title="Line color" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinecolorDisabled }">
+            <div id="bar-line-color" title="Line color" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinecolorDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon linecolor"></div>
               <div class="btn-color" style="background-color: rgb(50,50,50)"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-line-width" title="Line width" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinewidthDisabled }">
+            <div id="bar-line-width" title="Line width" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinewidthDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon linewidth"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-line-style" title="Line dash" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinestyleDisabled }">
+            <div id="bar-line-style" title="Line dash" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinestyleDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon linedash"></div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-linkertype" title="Line type" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinkertypeDisabled }" @click="linkerTypeClickHandler">
-              <div class="icon linkertype-broken"></div>
+            <div id="bar-linkertype" title="Line type" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinkertypeDisabled }" @click.select="toolbarButtonClickHandler">
+              <div class="icon linkertype-normal"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-beginarrow" title="Line beginning" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barbeginarrowDisabled }">
+            <div id="bar-beginarrow" title="Line beginning" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barbeginarrowDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon ico-arrow larrow-none"></div>
               <div class="icon ico-dropdown"></div>
             </div>
-            <div id="bar-endarrow" title="Line ending" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barendarrowDisabled }">
+            <div id="bar-endarrow" title="Line ending" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barendarrowDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon ico-arrow rarrow-none"></div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-front" title="Bring To Front (Ctrl+] )" class="toolbar-button" v-bind:class="{ 'disabled': barfrontDisabled }">
+            <div id="bar-front" title="Bring To Front (Ctrl+] )" class="toolbar-button" v-bind:class="{ 'disabled': barfrontDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon ico-front"></div>
             </div>
-            <div id="bar-back" title="Send To Back (Ctrl+[ )" class="toolbar-button" v-bind:class="{ 'disabled': barbackDisabled }">
+            <div id="bar-back" title="Send To Back (Ctrl+[ )" class="toolbar-button" v-bind:class="{ 'disabled': barbackDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon ico-back"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-lock" title="Lock (Ctrl+L)" class="toolbar-button" v-bind:class="{ 'disabled': barlockDisabled }">
+            <div id="bar-lock" title="Lock (Ctrl+L)" class="toolbar-button" v-bind:class="{ 'disabled': barlockDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon ico-lock"></div>
             </div>
-            <div id="bar-unlock" title="Unlock (Ctrl+Shift+L)" class="toolbar-button" v-bind:class="{ 'disabled': barunlockDisabled }">
+            <div id="bar-unlock" title="Unlock (Ctrl+Shift+L)" class="toolbar-button" v-bind:class="{ 'disabled': barunlockDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon ico-unlock"></div>
             </div>
             <div class="toolbar-small-devider"></div>
-            <div id="bar-link" title="Insert Link" class="toolbar-button" v-bind:class="{ 'disabled': barlinkdisabled }">
+            <div id="bar-link" title="Insert Link" class="toolbar-button" v-bind:class="{ 'disabled': barlinkdisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon ico-link"></div>
             </div>
             <div class="toolbar-right">
@@ -179,7 +179,7 @@
 
       <div id="footer"></div>
       <div id="UIcontainer">
-        <ul id="font-list" class="menu list menu-icon" style="top: 102px; left: 155px; display: block;">
+        <ul id="font-list" class="menu list menu-icon" style="top: 78px; left: 155px; display: none;">
           <li style="font-family: Arial"><div class="icon icon-selected"></div>Arial</li>
           <li style="font-family: Verdana">Verdana</li>
           <li style="font-family: Georgia">Georgia</li>
@@ -192,7 +192,7 @@
           <li style="font-family: Lucida Console">Lucida Console</li>
         </ul>
 
-        <ul id="font-align-list" class="menu list" style="top: 102px; left: 418px; display: block;">
+        <ul id="font-align-list" class="menu list" style="top: 78px; left: 418px; display: none;">
           <li cate="textAlign" al="left"><div class="icon alignleft"></div></li>
           <li cate="textAlign" al="center"><div class="icon aligncenter"></div></li>
           <li cate="textAlign" al="right"><div class="icon alignright"></div></li>
@@ -201,7 +201,7 @@
           <li cate="vAlign" al="bottom"><div class="icon alignbottom"></div></li>
         </ul>
 
-        <ul id="line-width-list" class="menu list menu-icon" style="top: 102px; left: 537px;">
+        <ul id="line-width-list" class="menu list menu-icon" style="top: 78px; left: 544px; display: none;">
           <li>0px</li>
           <li>1px</li>
           <li>2px</li>
@@ -213,20 +213,20 @@
           <li><div class="icon icon-selected"></div>10px</li>
         </ul>
 
-        <ul id="line-style-list" class="menu list menu-icon" style="top: 102px; left: 574px;">
+        <ul id="line-style-list" class="menu list menu-icon" style="top: 78px; left: 583px; display: none;">
           <li line="solid"><div class="icon icon-selected"></div><div class="icon linestyle linesolid"></div></li>
           <li line="dashed"><div class="icon linestyle linedashed"></div></li>
           <li line="dot"><div class="icon linestyle linedot"></div></li>
           <li line="dashdot"><div class="icon linestyle linedashdot"></div></li>
         </ul>
 
-        <ul id="line-type-list" class="menu list" style="top: 102px; left: 619px; display: block;">
+        <ul id="line-type-list" class="menu list" style="top: 78px; left: 630px; display: none;">
           <li tp="step"><div class="icon linkertype-broken"></div></li>
           <li tp="curve"><div class="icon linkertype-curve"></div></li>
           <li tp="basic"><div class="icon linkertype-normal"></div></li>
         </ul>
 
-        <ul id="beginarrow-list" class="menu list menu-icon" style="top: 102px; left: 656px;">
+        <ul id="beginarrow-list" class="menu list menu-icon" style="top: 78px; left: 670px; display: none;">
           <li arrow="none"><div class="icon icon-arrow larrow-none"></div></li>
           <li arrow="solidArrow"><div class="icon icon-selected"></div><div class="icon icon-arrow larrow-solidarrow"></div></li>
           <li arrow="dashedArrow"><div class="icon icon-arrow larrow-dashedarrow"></div></li>
@@ -238,7 +238,7 @@
           <li arrow="cross"><div class="icon icon-arrow larrow-cross"></div></li>
         </ul>
 
-        <ul id="endarrow-list" class="menu list menu-icon" style="top: 102px; left: 701px;">
+        <ul id="endarrow-list" class="menu list menu-icon" style="top: 78px; left: 715px; display: none;">
           <li arrow="none"><div class="icon icon-selected"></div><div class="icon icon-arrow rarrow-none"></div></li>
           <li arrow="solidArrow"><div class="icon icon-arrow rarrow-solidarrow"></div></li>
           <li arrow="dashedArrow"><div class="icon icon-arrow rarrow-dashedarrow"></div></li>
@@ -250,7 +250,7 @@
           <li arrow="cross"><div class="icon icon-arrow rarrow-cross"></div></li>
         </ul>
 
-        <div id="color-picker" class="menu color-picker" style="top: 102px; left: 381px; display: block;" init="true">
+        <div id="color-picker" class="menu color-picker" style="top: 78px; left: 381px; display: none;" init="true">
           <div class="color-items" col="(0,0,0,0">
             <div style="background-color:rgb(255,255,255);" col="255,255,255"></div>
             <div style="background-color:rgb(229,229,229);" col="229,229,229"></div>

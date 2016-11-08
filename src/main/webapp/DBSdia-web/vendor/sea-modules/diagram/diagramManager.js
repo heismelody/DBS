@@ -186,20 +186,28 @@ define(function(require, exports, module) {
     };
     var _GlobalPathRef = {};
     var _GlobalConfig = {};
-    var _GlobalSelectedDiagrams = [];
+    var _GlobalSelectedDiagrams = ["2","23"];
+    var _GlobalSelectedFirstEntity = [];
 
     var diagramManager = {
       selectedDiagramManager : {
         getSelected : function() {
           return _GlobalSelectedDiagrams;
         },
+        getSelectedFirstEntity : function() {
+          return _GlobalSelectedFirstEntity;
+        },
         setSelected : function(diagramId) {
-          _GlobalSelectedDiagrams.push(diagramId);
+          for(var i in diagramId) {
+            _GlobalSelectedDiagrams.push(diagramId[i]);
+          }
+          _GlobalSelectedFirstEntity.push(diagramId[0]);
         },
         removeSelected : function() {
-          for(var i in _GlobalSelectedDiagrams) {
+          for(let i in _GlobalSelectedDiagrams) {
             _GlobalSelectedDiagrams.pop();
           }
+          _GlobalSelectedFirstEntity.pop();
         },
       },
       configManager : {
@@ -211,7 +219,7 @@ define(function(require, exports, module) {
         },
         getAllCategory : function() {
           let allCategory = [];
-          for(var category in _GlobalDiagramTemplates) {
+          for(let category in _GlobalDiagramTemplates) {
             allCategory.push(category);
           }
           return allCategory;

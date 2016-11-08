@@ -27,6 +27,18 @@ define(function(require, exports, module) {
      * Defination of the API;
      * --------------------------------------------------------------------------
      */
+     var targetMenu = {
+       "bar-font-family" : "font-list",
+       "bar-font-color" : "color-picker",
+       "bar-font-align" : "font-align-list",
+       "bar-fill" : "color-picker",
+       "bar-line-color": "color-picker",
+       "bar-line-width": "line-width-list",
+       "bar-line-style": "line-style-list",
+       "bar-linkertype": "line-type-list",
+       "bar-beginarrow": "beginarrow-list",
+       "bar-endarrow": "endarrow-list",
+     };
     var uIManager = {
 
       toolbarDisable : function() {
@@ -34,9 +46,12 @@ define(function(require, exports, module) {
           el: '.toolbar',
           data: {
             selectedObj : selectedDiagramManager.getSelected(),
+            selectedFirstObj : selectedDiagramManager.getSelectedFirstEntity(),
 
             Uncollapsed:false,
             collapsed:true,
+
+            targetMenuList:targetMenu,
 
             barthemeDisabled:false,
             barundoDisabled:true,
@@ -64,6 +79,18 @@ define(function(require, exports, module) {
             barlinkdisabled:true,
           },
           watch : {
+            Uncollapsed: function (val) {
+              for(let src in this.targetMenuList) {
+                $("#" + this.targetMenuList[src]).css("top","32px");
+              }
+            },
+            collapsed: function (val) {
+              if(val == true) {
+                for(let src in this.targetMenuList) {
+                  $("#" + this.targetMenuList[src]).css("top","78px");
+                }
+              }
+            },
             selectedObj: function (val) {
               //dont have current selected diagram
               if(val.length == 0) {
@@ -195,16 +222,42 @@ define(function(require, exports, module) {
                 $('.design-layout').css('height',curClientWidth - 40);
               }
             },
-            linkerTypeClickHandler : function(e) {
-              if($("#bar-linkertype").hasClass("selected")) {
-                $("#bar-linkertype").removeClass("selected");
+            toolbarButtonClickHandler : function(e) {
+              let isButton = e.target.className.indexOf("toolbar-button") != -1 ? true : false;
+              let isTextContent = e.target.className.indexOf("text-content") != -1 ? true : false;
+              let isIcon = e.target.className.indexOf("icon") != -1  ? true : false;
+              let curButton;
+
+              //set the current click element
+              if(isButton) {
+                curButton = e.target;
               }
-              else {
-                $("#bar-linkertype").addClass("selected");
+              else if(isIcon || isTextContent) {
+                curButton = $(e.target).parent()[0];
+              }
+
+              if(!$(curButton).hasClass("disabled")) {
+                if($(curButton).hasClass("selected")) {
+                  $(curButton).removeClass("selected");
+                  let curId = $(curButton).attr("id");
+                  if(this.targetMenuList.hasOwnProperty(curId)) {
+                    $("#" + this.targetMenuList[curId]).hide();
+                  }
+                }
+                else {
+                  $(curButton).addClass("selected");
+                  let curId = $(curButton).attr("id");
+                  if(this.targetMenuList.hasOwnProperty(curId)) {
+                    $("#" + this.targetMenuList[curId]).show();
+                  }
+                }
               }
             },
+            aaa : function() {
+              console.log("1")
+            }
 
-            
+
           }
         })
       },
