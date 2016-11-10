@@ -38,6 +38,10 @@ define(function(require, exports, module) {
      			startY: 0,
      			endX : 120,
      			endY : 80,
+          startControlX: 100,
+          startControlY: 100,
+          endControlX: 100,
+          endControlY: 100,
           width : 0,
           height : 0,
      			zindex: 0,
@@ -151,16 +155,55 @@ define(function(require, exports, module) {
           y: curProperties["endY"],
         };
       },
+      getStartCotrolPosition : function(lineId) {
+        let curProperties = _GlobalLineObject[lineId]["properties"];
+        let start = {
+          x: curProperties.startX,
+          y: curProperties.startY,
+        };
+        let end = {
+          x: curProperties.endX,
+          y: curProperties.endY,
+        };
+
+        if(curProperties.hasOwnProperty("startControlX")) {
+          return {
+            startControl : {
+              x: startControlX,
+              y: startControlY,
+            },
+            endControl : {
+              x: endControlX,
+              y: endControlY,
+            },
+          }
+        }
+        else {
+          return {
+            startControl : {
+              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+              y: start.y,
+            },
+            endControl : {
+              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+              y: end.y,
+            },
+          }
+        }
+
+      },
+      getEndControlPosition : function(lineId) {
+
+      },
       isPointOnLine : function(lineId,currPoint) {
         let curLineType = this.getLineTypeById(lineId);
 
         switch (curLineType) {
           case "basic":
-            return this._isPointOnBezierCurve(currPoint,lineId);
+            return this._isPointOnBasicLine(currPoint,lineId);
             break;
           case "curve":
-          console.log("111" + this._isPointOnBasicLine(currPoint,lineId))
-            return this._isPointOnBasicLine(currPoint,lineId);
+            return this._isPointOnBezierCurve(currPoint,lineId);
             break;
           default:
 
@@ -180,7 +223,8 @@ define(function(require, exports, module) {
       },
       _isPointOnBezierCurve : function(point,lineId) {
         let curProject = _bezierObj.project(point);
-        return curProject.d <= 15 ? true : false;
+        console.log(curProject)
+        return curProject.d <= 5 ? true : false;
       },
       _isPointOnStepLine : function(point,lineId) {
 
@@ -192,17 +236,31 @@ define(function(require, exports, module) {
         let curLineType = this.getLineTypeById(lineId);
 
         if(curLineType == "curve") {
-          if(argList == undefined) {
-            argList = {
-              startControl : {
-                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                y: start.y,
-              },
-              endControl : {
+          if(argList != undefined) {
+            if(!argList.hasOwnProperty("startControl")){
+              argList["startControl"] = {
+                  x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                  y: start.y,
+              };
+            }
+            else if(!argList.hasOwnProperty("endControl")){
+              argList["endControl"] = {
                 x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
                 y: end.y,
-              }
+              };
             }
+          }
+          else {
+              argList = {
+                "startControl" : {
+                    x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                    y: start.y,
+                },
+                "endControl" : {
+                  x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                  y: end.y,
+                }
+              };
           }
           _bezierObj = new Bezier(start.x,start.y,
                                  argList.startControl.x,argList.startControl.y,
@@ -319,15 +377,46 @@ define(function(require, exports, module) {
         this.stroke();
         this.closePath();
       },
+      //http://stackoverflow.com/questions/4270485/drawing-lines-on-html-page
+      drawLineWithoutCanvas : function(start,end,className,appendedElement) {
+        let lineHtml = "<div class=" + className + "></div>";
+        let a = start.x - end.x,
+            b = start.y - end.y,
+            length = Math.sqrt(a * a + b * b);
+        let sx = (start.x + end.x) / 2,
+            sy = (start.y + end.y) / 2;
+        let x = sx - length / 2,
+            y = sy;
+        let angle = Math.PI - Math.atan2(-b, a);
+
+        $(lineHtml).appendTo($(appendedElement))
+                   .attr("style", 'border: 1px solid #833; '
+                                + 'width: ' + length + 'px; '
+                                + 'height: 0px; '
+                                + '-moz-transform: rotate(' + angle + 'rad); '
+                                + '-webkit-transform: rotate(' + angle + 'rad); '
+                                + '-o-transform: rotate(' + angle + 'rad); '
+                                + '-ms-transform: rotate(' + angle + 'rad); '
+                                + 'position: absolute; '
+                                + 'top: ' + y + 'px; '
+                                + 'left: ' + x + 'px; '
+                                + 'opacity: 0.5; '
+                                + 'z-index: -1; ');
+        return $(lineHtml);
+      },
       addLineOverlay : function(lineId) {
         let canvas = $("#" + lineId).find("canvas")[0];
         let start = this.getStartPosition(lineId);
         let end = this.getEndPosition(lineId);
+        let curLineType = this.getLineTypeById(lineId);
 
         if($("#line-overlay-container").length != 0) {
           $("#line-overlay-container").remove();
         }
         this.addLineEndPoints(canvas,start,end);
+        if(curLineType == "curve") {
+          this.addCurveControlPoint(canvas);
+        }
         this.addLineHightlight(canvas);
       },
       addLineEndPoints : function(canvas,start,end) {
@@ -343,6 +432,30 @@ define(function(require, exports, module) {
         $(endHtml).appendTo("#line-overlay-container").css({
           left: end.x - 6,
           top: end.y - 6,
+        });
+      },
+      addCurveControlPoint : function(canvas) {
+        let lineId = $(canvas).parent().attr("id");
+        let start = this.getStartPosition(lineId);
+        let end = this.getEndPosition(lineId);
+        let startHtml = "<div class='line-overlay-controlpoint line-overlay-controlstart'></div>";
+        let endHtml = "<div class='line-overlay-controlpoint line-overlay-controlend'></div>";
+        let controlPoint = this.getStartCotrolPosition(lineId);
+
+        if($("#line-overlay-container").length == 0) {
+          let controlsHtml = "<div id='line-overlay-container' targetid='" + lineId + "'></div>";
+          $(controlsHtml).appendTo(".design-canvas");
+        }
+
+        this.drawLineWithoutCanvas(start,controlPoint.startControl,"line-overlay-controlline",$("#line-overlay-container")[0]);
+        this.drawLineWithoutCanvas(end,controlPoint.endControl,"line-overlay-controlline",$("#line-overlay-container")[0]);
+        $(startHtml).appendTo("#line-overlay-container").css({
+          left: controlPoint.startControl.x - 4,
+          top: controlPoint.startControl.y - 4,
+        });
+        $(endHtml).appendTo("#line-overlay-container").css({
+          left: controlPoint.endControl.x - 4,
+          top: controlPoint.endControl.y - 4,
         });
       },
       addLineHightlight : function(canvas) {

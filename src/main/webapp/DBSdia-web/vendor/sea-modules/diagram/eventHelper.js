@@ -104,6 +104,10 @@ define(function(require, exports, module) {
         $(".design-layout").on('mousedown','.line-overlay-point',function(e) {
           eventHelper.MouseDownHandler(e,eventHelper.lineOverlayMouseDownHandle);
         });
+
+        $(".design-layout").on('mousedown','.line-overlay-controlpoint',function(e) {
+          eventHelper.MouseDownHandler(e,eventHelper.lineControlOverlayMouseDownHandle);
+        });
       },
 
       ClickHandle : function() {
@@ -555,6 +559,68 @@ define(function(require, exports, module) {
           let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
           lineManager.drawCanvasAndLine(targetid,start,end);
           lineManager.updateLinePosition(targetid,isStart,pos);
+
+          // this is how we know we're not dragging
+          _dragElement = null;
+        }
+      },
+
+      lineControlOverlayMouseDownHandle : function(e) {
+        let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+        let lineId = $(target).parent().attr("targetid");
+        _dragElement = target;
+        isStart = $(target).attr("class").indexOf("start") != -1 ? true : false;
+
+        start = lineManager.getStartPosition(lineId);
+        end = lineManager.getEndPosition(lineId);
+
+        // tell our code to start moving the element with the mouse
+        document.onmousemove = eventHelper.lineControlOverlayMouseMoveHandler;
+        document.onmouseup = eventHelper.lineControlOverlayMouseUpHandler;
+      },
+      lineControlOverlayMouseMoveHandler : function(e) {
+        let targetid = $(target).parent().attr("targetid");
+        let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+        let argList = {};
+
+        if(isStart) {
+          argList["startControl"] = {
+              x: pos.x,
+              y: pos.y,
+          };
+          $(target).css({
+            left: pos.x - 4,
+            top: pos.y - 4,
+          });
+        }
+        else {
+          argList["endControl"] = {
+              x: pos.x,
+              y: pos.y,
+          };
+          $(target).css({
+            left: pos.x - 4,
+            top: pos.y - 4,
+          });
+        }
+
+        lineManager.drawCanvasAndLine(targetid,start,end,argList);
+        //lineManager.addCurveControlPoint($("#" + targetid).find("canvas")[0]);
+      },
+      lineControlOverlayMouseUpHandler : function(e) {
+        if (_dragElement != null && _dragElement.className.indexOf("line-overlay-controlpoint") != -1) {
+          // we're done with these events until the next OnMouseDown
+          document.onmousemove = null;
+          document.onselectstart = null;
+          _dragElement.ondragstart = null;
+          target.style.zIndex = 0;
+
+          _dragElement.style.zIndex = _oldZIndex;
+
+          //real handler
+          let targetid = $(target).parent().attr("targetid");
+          let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+          lineManager.drawCanvasAndLine(targetid,start,end);
 
           // this is how we know we're not dragging
           _dragElement = null;
