@@ -1,5 +1,6 @@
 define(function(require, exports, module) {
   var bezier = require('Bezier');
+
   var lineManager = (function () {
     /**
      * --------------------------------------------------------------------------

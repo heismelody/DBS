@@ -621,6 +621,7 @@ define(function(require, exports, module) {
           let targetid = $(target).parent().attr("targetid");
           let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
           lineManager.drawCanvasAndLine(targetid,start,end);
+          //lineManager.updateLineControlPosition();
 
           // this is how we know we're not dragging
           _dragElement = null;

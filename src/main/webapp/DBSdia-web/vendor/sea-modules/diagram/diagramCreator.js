@@ -30,6 +30,9 @@ define(function(require, exports, module) {
         for(var shapeName in basicDiagram) {
           templateManager.addTemplate(basicDiagram[shapeName]);
         }
+        let test = DiagramManager.diagramManager.getAttrByShapeName("triangle",{properties:["x"]});
+
+        console.log(test)
       },
       initPanelBoxes : function initPanelBoxes() {
         let allCategory = templateManager.getAllCategory();

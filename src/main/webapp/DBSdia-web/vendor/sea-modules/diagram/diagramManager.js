@@ -214,19 +214,6 @@ define(function(require, exports, module) {
 
       },
       templateManager : {
-        getDefaultTemplate : function getDefaultTemplate() {
-          return defaultDiagramTemplate;
-        },
-        getAllCategory : function() {
-          let allCategory = [];
-          for(let category in _GlobalDiagramTemplates) {
-            allCategory.push(category);
-          }
-          return allCategory;
-        },
-        getTemplateByCategory : function(category) {
-          return _GlobalDiagramTemplates[category];
-        },
         addTemplate : function addTemplate(template) {
           let category = template["category"];
           let shapeName = template["name"];
@@ -241,14 +228,18 @@ define(function(require, exports, module) {
         addCategory : function addCategory(category) {
           _GlobalDiagramTemplates[category] = {};
         },
-        getProperties : function getProperties(shapeName) {
-          let category = this.getCategoryByName(shapeName);
-          if(this.isShapenameDefined(shapeName,category)) {
-            return _GlobalDiagramTemplates[category][shapeName]["properties"];
+        getDefaultTemplate : function getDefaultTemplate() {
+          return defaultDiagramTemplate;
+        },
+        getAllCategory : function() {
+          let allCategory = [];
+          for(let category in _GlobalDiagramTemplates) {
+            allCategory.push(category);
           }
-          else {
-            throw new Error("diagramManager.templateManager.getProperties() Error!");
-          }
+          return allCategory;
+        },
+        getTemplateByCategory : function(category) {
+          return _GlobalDiagramTemplates[category];
         },
         getCategoryByName : function getCategoryByName(shapeName) {
           for(let category in _GlobalDiagramTemplates) {
@@ -257,32 +248,18 @@ define(function(require, exports, module) {
             }
           }
         },
+        getProperties : function getProperties(shapeName) {
+          return diagramManager.getAttrByShapeName(shapeName,{properties:[]})
+        },
         getPathByName : function getPathByName(shapeName) {
-          let category = this.getCategoryByName(shapeName);
-          if(this.isShapenameDefined(shapeName,category)) {
-            return _GlobalDiagramTemplates[category][shapeName]["path"];
-          }
-          else {
-            throw new Error("diagramManager.templateManager.getPathByName() Error!");
-          }
+          return diagramManager.getAttrByShapeName(shapeName,{path:[]})
         },
         getActionsByName : function getActionsByName(shapeName) {
           let category = this.getCategoryByName(shapeName);
           return this.getPathByName(shapeName,category)[0]["actions"];
         },
         getAnchorsByName : function getAnchorsByName(shapeName) {
-          let category = this.getCategoryByName(shapeName);
-          if(this.isShapenameDefined(shapeName,category)) {
-            if(_GlobalDiagramTemplates[category][shapeName]["anchors"]) {
-              return _GlobalDiagramTemplates[category][shapeName]["anchors"];
-            }
-            else {
-              return defaultDiagramTemplate["anchors"];
-            }
-          }
-          else {
-            throw new Error("diagramManager.templateManager.getAnchorsByName() Error!");
-          }
+          return diagramManager.getAttrByShapeName(shapeName,{anchors:[]})
         },
         getcontrolDir : function() {
           return defaultDiagramTemplate["controlDir"];
@@ -305,27 +282,22 @@ define(function(require, exports, module) {
        * @param {string} x,y - Relative position.X={start.x,start.y};Y={end.x,end.y}.(LINE)
        */
         addNewDiagram : function addNewDiagram(shapeName,x,y) {
-          if(shapeName == "line") {
-            lineManager.addNewLine(x,y);
-          }
-          else {
-            let newId =  this.generateDiagramId();
-            let newCategory = diagramManager.templateManager.getCategoryByName(shapeName);
-            let newProperties = diagramManager.templateManager.getProperties(shapeName);
-            _GlobalDiagramOjects[newId] = {
-              "id" : newId,
-              "name" : shapeName,
-              "category" : newCategory,
-              "properties": {
-          			"x": x,
-          			"y": y,
-                "w": newProperties.w,
-                "h": newProperties.h,
-          		},
-            };
+          let newId =  this.generateDiagramId();
+          let newCategory = diagramManager.templateManager.getCategoryByName(shapeName);
+          let newProperties = diagramManager.templateManager.getProperties(shapeName);
+          _GlobalDiagramOjects[newId] = {
+            "id" : newId,
+            "name" : shapeName,
+            "category" : newCategory,
+            "properties": {
+              "x": x,
+              "y": y,
+              "w": newProperties.w,
+              "h": newProperties.h,
+            },
+          };
 
-            return newId;
-          }
+          return newId;
         },
         getDiagramById : function getDiagramById(diagramId) {
           return _GlobalDiagramOjects[diagramId];
@@ -334,17 +306,7 @@ define(function(require, exports, module) {
           return _GlobalDiagramOjects.hasOwnProperty(diagramId) ? _GlobalDiagramOjects[diagramId]["name"] : null;
         },
         getProperties : function getProperties(shapeName,diagramId) {
-          if(arguments.length == 2) {
-            if(_GlobalDiagramOjects.hasOwnProperty(diagramId)) {
-              return _GlobalDiagramOjects[diagramId]["properties"];
-            }
-            else {
-              return diagramManager.templateManager.getProperties(shapeName);
-            }
-          }
-          else {
-            console.log("diagramManager.getProperties() arguments null!");
-          }
+          return diagramManager.getAttrById(diagramId,{properties:[]});
         },
         getAnchorsByName : function(shapeName,id) {
           return diagramManager.templateManager.getAnchorsByName(shapeName);
@@ -405,10 +367,72 @@ define(function(require, exports, module) {
 
       /**
      * get diagram attribute by shapeName or id
-     * @param {Array} shapeNameNId - EX:[shapeName,(diagramId optional)].
-     * @param {Array} attrName - EX:["fontStyle","fontFamily"].
+     * @param {Array} shapeName - the shapeName for query.
+     * @param {Array} attrName - obj
+     * EX:{properties:["x"]}   @return diagramObj["properties"]["x"]            { x:10 }
+     *    {properties:[]}       @return diagramObj["properties"]                 { x:10 , y:10 , width:10 , height:10 }
+     *    {properties:["x","y"]} @return diagramObj["properties"]["x"] & ["y"]    { x:10 , y:10 }
      */
-      getAttr : function(shapeNameNId,attrName) {
+      getAttrByShapeName : function(shapeName,args) {
+        let category = this.templateManager.getCategoryByName(shapeName);
+        if(_GlobalDiagramTemplates[category].hasOwnProperty(shapeName)) {
+          let result = {};
+
+          for(let attrName in args) {
+            let attrObj = _GlobalDiagramTemplates[category][shapeName][attrName];
+
+            if(args[attrName].length == 0) {
+              result = defaultDiagramTemplate[attrName];
+              for(var key in attrObj) {
+                result[key] = attrObj[key];
+              }
+
+              return result;
+            }
+            else {
+              for(let i in args[attrName]) {
+                let curKey = args[attrName][i];
+
+                (attrObj[curKey] == undefined) ?
+                      result[curKey] = defaultDiagramTemplate[attrName][curKey]
+                    : result[curKey] = attrObj[curKey];
+              }
+
+              return result;
+            }
+          }
+        }
+        else {
+          throw new Error("Shape name undefined!");
+        }
+      },
+      getAttrById : function(id,args) {
+        let result;
+
+        if(_GlobalDiagramOjects.hasOwnProperty(id)) {
+          let attrObj = _GlobalDiagramOjects[id][args];
+          let shapeName = this.objectManager.getShapeNameById(id);
+
+          for(let arg in args) {
+            if(args[arg].length == 0) {
+              return attrObj;
+            }
+            else {
+              for(let i in args[arg]) {
+                let curKey = args[arg][i];
+
+                (attrObj[curKey] == undefined) ?
+                      result[curKey] = this.getAttrByShapeName(shapeName,args)
+                    : result[curKey] = attrObj[curKey];
+              }
+
+              return result;
+            }
+          }
+        }
+        else {
+          throw new Error("Diagram undefined!");
+        }
 
       },
       /**
