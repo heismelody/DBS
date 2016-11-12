@@ -210,6 +210,9 @@ define(function(require, exports, module) {
           _GlobalSelectedFirstEntity.pop();
         },
       },
+      pageManager : {
+
+      },
       configManager : {
 
       },
@@ -282,22 +285,53 @@ define(function(require, exports, module) {
        * @param {string} x,y - Relative position.X={start.x,start.y};Y={end.x,end.y}.(LINE)
        */
         addNewDiagram : function addNewDiagram(shapeName,x,y) {
-          let newId =  this.generateDiagramId();
-          let newCategory = diagramManager.templateManager.getCategoryByName(shapeName);
-          let newProperties = diagramManager.templateManager.getProperties(shapeName);
-          _GlobalDiagramOjects[newId] = {
-            "id" : newId,
-            "name" : shapeName,
-            "category" : newCategory,
-            "properties": {
-              "x": x,
-              "y": y,
-              "w": newProperties.w,
-              "h": newProperties.h,
-            },
-          };
+          if(shapeName == "line") {
+            let newLineObj = lineManager.addNewLine(x,y);
+            let newId = newLineObj["id"];
 
-          return newId;
+            _GlobalDiagramOjects[newId] = newLineObj;
+            // _GlobalLineObject[newId] = {
+            //   "id" : newId,
+            //   "name" : "line",
+            //   "linetype" : "curve",
+            //   "properties": {
+            // 			"startX": start.x,
+            // 			"startY": start.y,
+            // 			"endX" : end.x,
+            // 			"endY" : end.y,
+            //     "width" : width,
+            //     "height" : height,
+            // 		},
+            // };
+
+            return newId;
+          }
+          else {
+            let newId =  this.generateDiagramId();
+            let newCategory = diagramManager.templateManager.getCategoryByName(shapeName);
+            let newProperties = diagramManager.templateManager.getProperties(shapeName);
+            _GlobalDiagramOjects[newId] = {
+              "id" : newId,
+              "name" : shapeName,
+              "category" : newCategory,
+              "properties": {
+                "x": x,
+                "y": y,
+                "w": newProperties.w,
+                "h": newProperties.h,
+              },
+            };
+
+            return newId;
+          }
+        },
+        deleteDiagram : function (id) {
+          let curshapeName = this.getShapeNameById(id);
+
+          if(curshapeName == "line") {
+            lineManager.deleteLine(id);
+            delete _GlobalDiagramOjects[id];
+          }
         },
         getDiagramById : function getDiagramById(diagramId) {
           return _GlobalDiagramOjects[diagramId];
@@ -311,14 +345,19 @@ define(function(require, exports, module) {
         getAnchorsByName : function(shapeName,id) {
           return diagramManager.templateManager.getAnchorsByName(shapeName);
         },
+        updateDiagramPos : function (id,pos,argList) {
+          let shapeName = this.getShapeNameById(id);
+
+          if(shapeName == "line") {
+            lineManager.updateLinePosition(id,argList,pos);
+          }
+        },
         //Remove later
         isLine : function(id) {
           return this.getShapeNameById(id) ? true : false;
         },
       },
 
-      pageManager : {
-      },
       //This two functions uesd to add diagram template's [path] [ref] property.
       //Ex:@arg ref: refference name
       //        path: how to draw the diagram
@@ -356,9 +395,9 @@ define(function(require, exports, module) {
       },
       isPointInDiagram : function(diagramId,x,y) {
         let curshapeName = this.objectManager.getShapeNameById(diagramId);
-
+        console.log(curshapeName)
         if(curshapeName == "line") {
-
+          return lineManager.isPointOnLine(diagramId,{"x":x,"y":y});
         }
         else {
 
@@ -407,13 +446,13 @@ define(function(require, exports, module) {
         }
       },
       getAttrById : function(id,args) {
-        let result;
+        let result = {};
 
         if(_GlobalDiagramOjects.hasOwnProperty(id)) {
-          let attrObj = _GlobalDiagramOjects[id][args];
           let shapeName = this.objectManager.getShapeNameById(id);
 
           for(let arg in args) {
+            let attrObj = _GlobalDiagramOjects[id][arg];
             if(args[arg].length == 0) {
               return attrObj;
             }

@@ -3,14 +3,12 @@ define(function(require, exports, module) {
   var DiagramDesigner = require('./diagramDesigner.js');
   var DiagramUtil = require('./Util.js');
   var DiagramManager = require('./diagramManager.js');
-  var LineManager = require('./lineManager.js');
   var DiagramUtil = require('./Util.js');
 
   var diagramDesigner = DiagramDesigner.diagramDesigner;
   var diagramUtil = DiagramUtil.diagramUtil;
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
-  var lineManager = LineManager.lineManager;
   var selectedDiagramManager = DiagramManager.diagramManager.selectedDiagramManager;
 
   var diagramUtil = DiagramUtil.diagramUtil;

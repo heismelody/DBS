@@ -6,6 +6,7 @@ define(function(require, exports, module) {
 
   var diagramDesigner = DiagramDesigner.diagramDesigner;
   var diagramUtil = DiagramUtil.diagramUtil;
+  var diagramManager = DiagramManager.diagramManager;
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
   var lineManager = LineManager.lineManager;
@@ -385,8 +386,7 @@ define(function(require, exports, module) {
           x: pos.x,
           y: pos.y,
         };
-        let curEndRelative;
-        let curStartRelative;
+        let curPosRelative = {};
 
         $("#creating-designer-canvas").attr({
           width: Math.abs(end.x - start.x) + 20,
@@ -396,15 +396,17 @@ define(function(require, exports, module) {
           left: Math.min(start.x,end.x) - 10,
           top: Math.min(start.y,end.y) - 10,
         });
-        curStartRelative = {
-          x: start.x - parseFloat($("#creating-designer-diagram").css("left")),
-          y: start.y - parseFloat($("#creating-designer-diagram").css("top")),
+        curPosRelative = {
+          start : {
+            x: start.x - parseFloat($("#creating-designer-diagram").css("left")),
+            y: start.y - parseFloat($("#creating-designer-diagram").css("top")),
+          },
+          end : {
+            x: end.x - parseFloat($("#creating-designer-diagram").css("left")),
+            y: end.y - parseFloat($("#creating-designer-diagram").css("top")),
+          },
         };
-        curEndRelative = {
-          x: end.x - parseFloat($("#creating-designer-diagram").css("left")),
-          y: end.y - parseFloat($("#creating-designer-diagram").css("top")),
-        };
-        lineManager.drawLine($("#creating-designer-canvas")[0],"line",curStartRelative,curEndRelative);
+        diagramDesigner.drawDiagram($("#creating-designer-canvas")[0],"line",curPosRelative);
       },
       drawLineMouseUpHandler : function(e) {
         if (_dragElement != null) {
@@ -419,7 +421,7 @@ define(function(require, exports, module) {
             x: pos.x,
             y: pos.y,
           };
-          let newId = lineManager.addNewLine(start,end);
+          let newId = objectManager.addNewDiagram("line",start,end);
           var newObject = $('#creating-designer-diagram').detach();
           $('.design-canvas').append(newObject);
           $('#creating-designer-diagram').attr("id",newId)
@@ -431,7 +433,7 @@ define(function(require, exports, module) {
           if($('#' + newId).find("canvas").length == 0
              || parseInt($('#' + newId).find("canvas").attr("width")) < 10
              || parseInt($('#' + newId).find("canvas").attr("height")) < 10 ) {
-            lineManager.deleteLine(newId);
+            objectManager.deleteDiagram(newId);
           }
           $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
 
@@ -493,8 +495,8 @@ define(function(require, exports, module) {
         let curId = $(target).parent().attr("id");
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
 
-        if(lineManager.isPointOnLine(curId,pos)) {
-          lineManager.addLineOverlay(curId);
+        if(diagramManager.isPointInDiagram(curId,pos.x,pos.y)) {
+          diagramDesigner.addDiagramControlOverlay(curId);
         }
       },
 
@@ -507,11 +509,19 @@ define(function(require, exports, module) {
 
         //current point is start of line
         if(isStart) {
-          end = lineManager.getEndPosition(lineId);
+          end = diagramManager.getAttrById(lineId,{properties:["endX","endY"]})
+          end = {
+            x : end.endX,
+            y : end.endY,
+          };
         }
         //current point is end of line
         else {
-          start = lineManager.getStartPosition(lineId);
+          start = diagramManager.getAttrById(lineId,{properties:["startX","startY"]})
+          start = {
+            x : start.startX,
+            y : start.startY,
+          };
         }
 
         // tell our code to start moving the element with the mouse
@@ -542,7 +552,7 @@ define(function(require, exports, module) {
           });
         }
 
-        lineManager.drawCanvasAndLine(targetid,start,end);
+        diagramDesigner.drawCanvasAndDiagram(targetid,{"start":start,"end":end});
       },
       lineOverlayMouseUpHandler : function(e) {
         if (_dragElement != null && _dragElement.className.indexOf("line-overlay-point") != -1) {
@@ -557,8 +567,8 @@ define(function(require, exports, module) {
           //real handler
           let targetid = $(target).parent().attr("targetid");
           let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
-          lineManager.drawCanvasAndLine(targetid,start,end);
-          lineManager.updateLinePosition(targetid,isStart,pos);
+          diagramDesigner.drawCanvasAndDiagram(targetid,{"start":start,"end":end});
+          objectManager.updateDiagramPos(targetid,pos,isStart);
 
           // this is how we know we're not dragging
           _dragElement = null;
@@ -571,8 +581,16 @@ define(function(require, exports, module) {
         _dragElement = target;
         isStart = $(target).attr("class").indexOf("start") != -1 ? true : false;
 
-        start = lineManager.getStartPosition(lineId);
-        end = lineManager.getEndPosition(lineId);
+        start = diagramManager.getAttrById(lineId,{properties:["startX","startY"]})
+        start = {
+          x : start.startX,
+          y : start.startY,
+        };
+        end = diagramManager.getAttrById(lineId,{properties:["endX","endY"]})
+        end = {
+          x : end.endX,
+          y : end.endY,
+        };
 
         // tell our code to start moving the element with the mouse
         document.onmousemove = eventHelper.lineControlOverlayMouseMoveHandler;
@@ -604,7 +622,9 @@ define(function(require, exports, module) {
           });
         }
 
-        lineManager.drawCanvasAndLine(targetid,start,end,argList);
+        argList["start"] = start
+        argList["end"] = end;
+        diagramDesigner.drawCanvasAndLine(targetid,argList);
         //lineManager.addCurveControlPoint($("#" + targetid).find("canvas")[0]);
       },
       lineControlOverlayMouseUpHandler : function(e) {
@@ -620,7 +640,7 @@ define(function(require, exports, module) {
           //real handler
           let targetid = $(target).parent().attr("targetid");
           let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
-          lineManager.drawCanvasAndLine(targetid,start,end);
+          diagramDesigner.drawCanvasAndDiagram(targetid,{"start":start,"end":end});
           //lineManager.updateLineControlPosition();
 
           // this is how we know we're not dragging

@@ -121,7 +121,7 @@ define(function(require, exports, module) {
                                argList.endControl.x,argList.endControl.y,
                                end.x,end.y);
 
-        return newId;
+        return _GlobalLineObject[newId];
       },
       deleteLine : function(lineId) {
         $("#" + lineId).remove();
@@ -237,32 +237,31 @@ define(function(require, exports, module) {
         let curLineType = this.getLineTypeById(lineId);
 
         if(curLineType == "curve") {
-          if(argList != undefined) {
-            if(!argList.hasOwnProperty("startControl")){
-              argList["startControl"] = {
+          if(!argList.hasOwnProperty("startControl") && !argList.hasOwnProperty("endControl")) {
+            argList = {
+              "startControl" : {
                   x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
                   y: start.y,
-              };
-            }
-            else if(!argList.hasOwnProperty("endControl")){
-              argList["endControl"] = {
+              },
+              "endControl" : {
                 x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
                 y: end.y,
-              };
-            }
+              }
+            };
           }
-          else {
-              argList = {
-                "startControl" : {
-                    x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                    y: start.y,
-                },
-                "endControl" : {
-                  x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                  y: end.y,
-                }
-              };
+          else if(!argList.hasOwnProperty("startControl")){
+            argList["startControl"] = {
+                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                y: start.y,
+            };
           }
+          else if(!argList.hasOwnProperty("endControl")){
+            argList["endControl"] = {
+              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+              y: end.y,
+            };
+          }
+
           _bezierObj = new Bezier(start.x,start.y,
                                  argList.startControl.x,argList.startControl.y,
                                  argList.endControl.x,argList.endControl.y,

@@ -1,7 +1,9 @@
 define(function(require, exports, module) {
   var DiagramManager = require('./diagramManager.js');
   var DiagramUtil = require('./Util.js');
+  var LineManager = require('./lineManager.js');
 
+  var lineManager = LineManager.lineManager;
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
   var diagramUtil = DiagramUtil.diagramUtil;
@@ -181,9 +183,15 @@ define(function(require, exports, module) {
       },
 
       addDiagramControlOverlay : function(diagramId) {
-        let curCanvas = $("#" + diagramId).find('canvas').get(0);
+        let curshapeName = objectManager.getShapeNameById(diagramId);
+        if(curshapeName == "line") {
+          lineManager.addLineOverlay(diagramId);
+        }
+        else {
+          let curCanvas = $("#" + diagramId).find('canvas').get(0);
 
-        this.drawDiagramControls(curCanvas);
+          this.drawDiagramControls(curCanvas);
+        }
       },
       addDiagramAnchorOverlay : function(diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
@@ -192,19 +200,33 @@ define(function(require, exports, module) {
         this.drawDiagramAnchors(curCanvas,curshapeName);
       },
 
-      drawDiagram : function drawDiagram(canvas,shapeName,diagramId) {
+      drawDiagram : function drawDiagram(canvas,shapeName,argList) {
         let ctx = canvas.getContext("2d");
         ctx.shapeName = shapeName;
-        //draw template diagram
-        if(arguments.length == 2) {
+        if(shapeName == "line") {
+          let curStartRelative = argList["start"];
+          let curEndRelative = argList["end"];
+
+          lineManager.drawLine(canvas,"basic",curStartRelative,curEndRelative);
+        }
+        else {
           this._tempVar._w = canvas.width;
           this._tempVar._h = canvas.height;
           this.resolvePath(ctx,shapeName);
         }
-        //draw diagram object
-        else if(arguments.length == 3){
+      },
+      drawCanvasAndDiagram : function (id,argList) {
+        let shapeName = objectManager.getShapeNameById(id);
 
+        if(shapeName == "line") {
+          let start = argList["start"],
+              end = argList["end"];
+
+          lineManager.drawCanvasAndLine(id,start,end,argList);
         }
+      },
+      drawDiagramById : function () {
+
       },
       resolvePath : function resolvePath(ctx,shapeName,diagramId) {
         //draw template diagram
