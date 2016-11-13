@@ -3,6 +3,7 @@ define(function(require, exports, module) {
   var DiagramUtil = require('./Util.js');
   var DiagramManager = require('./diagramManager.js');
   var LineManager = require('./lineManager.js');
+  var SelectedManager = require('./selectedManager.js');
 
   var diagramDesigner = DiagramDesigner.diagramDesigner;
   var diagramUtil = DiagramUtil.diagramUtil;
@@ -10,7 +11,7 @@ define(function(require, exports, module) {
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
   var lineManager = LineManager.lineManager;
-  var selectedDiagramManager = DiagramManager.diagramManager.selectedDiagramManager;
+  var selectedManager = SelectedManager.selectedManager;
 
   var eventHelper = (function () {
     /**
@@ -50,7 +51,7 @@ define(function(require, exports, module) {
      var isStart;
 
      function ExtractNumber(value) {
-       var n = parseInt(value);
+       let n = parseInt(value);
        return n == null || isNaN(n) ? 0 : n;
      }
 
@@ -58,7 +59,7 @@ define(function(require, exports, module) {
       initEvent : function() {
         $(".design-layout").on('click',function(e) {
           if(e.target.id == "designer-grids" || e.target.className == "canvas-container") {
-            selectedDiagramManager.removeSelected();
+            selectedManager.removeSelected();
           }
         });
 
@@ -111,9 +112,6 @@ define(function(require, exports, module) {
         });
       },
 
-      ClickHandle : function() {
-
-      },
       MouseDownHandler : function(e,actualHandler) {
         // IE uses srcElement, others use target
         target = e.target != null ? e.target : e.srcElement;
@@ -214,8 +212,8 @@ define(function(require, exports, module) {
 
         let curId = $(target).parent().attr("id");
 
-        diagramDesigner.addDiagramControlOverlay(curId);
-        diagramDesigner.addDiagramAnchorOverlay(curId);
+        selectedManager.removeSelected();
+        selectedManager.setSelected(curId);
 
         // tell our code to start moving the element with the mouse
         document.onmousemove = eventHelper.diagramObjMouseMoveHandler;
@@ -259,8 +257,11 @@ define(function(require, exports, module) {
       diagramObjClickHandler: function(e) {
         let curId = $(target).parent().attr("id");
 
-        diagramDesigner.addDiagramControlOverlay(curId);
-        diagramDesigner.addDiagramAnchorOverlay(curId);
+        selectedManager.removeSelected();
+        selectedManager.setSelected(curId);
+        //
+        // diagramDesigner.addDiagramControlOverlay(curId);
+        // diagramDesigner.addDiagramAnchorOverlay(curId);
       },
 
       //This mousedown/move/up function is the handler of resize diagram
@@ -422,7 +423,7 @@ define(function(require, exports, module) {
             y: pos.y,
           };
           let newId = objectManager.addNewDiagram("line",start,end);
-          var newObject = $('#creating-designer-diagram').detach();
+          let newObject = $('#creating-designer-diagram').detach();
           $('.design-canvas').append(newObject);
           $('#creating-designer-diagram').attr("id",newId)
                                          .attr("class","line-object-container")
@@ -624,8 +625,10 @@ define(function(require, exports, module) {
 
         argList["start"] = start
         argList["end"] = end;
-        diagramDesigner.drawCanvasAndLine(targetid,argList);
-        //lineManager.addCurveControlPoint($("#" + targetid).find("canvas")[0]);
+        diagramDesigner.drawCanvasAndDiagram(targetid,argList);
+        lineManager.updateCurveControlPosition(targetid,isStart,pos);
+        lineManager.removeCurveOverlay(isStart);
+        lineManager.addCurveControlLine(targetid,{"isStart":isStart});
       },
       lineControlOverlayMouseUpHandler : function(e) {
         if (_dragElement != null && _dragElement.className.indexOf("line-overlay-controlpoint") != -1) {
@@ -640,8 +643,7 @@ define(function(require, exports, module) {
           //real handler
           let targetid = $(target).parent().attr("targetid");
           let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
-          diagramDesigner.drawCanvasAndDiagram(targetid,{"start":start,"end":end});
-          //lineManager.updateLineControlPosition();
+          lineManager.updateCurveControlPosition(targetid,isStart,pos);
 
           // this is how we know we're not dragging
           _dragElement = null;

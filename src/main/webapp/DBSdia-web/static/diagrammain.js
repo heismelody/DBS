@@ -32,7 +32,6 @@ define(function(require, exports, module) {
       eventHelper.initEvent();
       uIManager.toolbarDisable();
 
-
       _initDom();
       _initEvent();
     };
@@ -90,7 +89,7 @@ define(function(require, exports, module) {
         let temp = [];
 
       };
-      
+
     };
 
     exports.init = init;

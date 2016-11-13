@@ -17,8 +17,7 @@ define(function(require, exports, module) {
      */
 
     var diagramCreator = {
-      getDefaultDiagramTemplate : function getDefaultDiagramTemplate() {
-        return defaultDiagramTemplate;
+
       },
 
     };

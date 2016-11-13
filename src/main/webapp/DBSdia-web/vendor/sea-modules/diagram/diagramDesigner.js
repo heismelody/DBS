@@ -193,6 +193,15 @@ define(function(require, exports, module) {
           this.drawDiagramControls(curCanvas);
         }
       },
+      removeControlOverlay : function (diagramId) {
+        let curshapeName = objectManager.getShapeNameById(diagramId);
+        if(curshapeName == "line") {
+
+        }
+        else {
+          $("#control-overlay-container").remove();
+        }
+      },
       addDiagramAnchorOverlay : function(diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         let curCanvas = $("#" + diagramId).find('canvas').get(0);

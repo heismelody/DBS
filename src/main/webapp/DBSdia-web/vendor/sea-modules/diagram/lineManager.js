@@ -14,7 +14,7 @@ define(function(require, exports, module) {
      * --------------------------------------------------------------------------
      */
      //diagram Object is identified by id
-     var defaultDiagramTemplate =  {
+     var defaultLineTemplate =  {
      		id: "",
      		name: "line",
         linetype : "basic",
@@ -88,14 +88,70 @@ define(function(require, exports, module) {
         return Date.now() + generateUIDNotMoreThan1million();
       },
       addNewLine : function(start,end) {
+        let linetype = "curve";
         let newId =  this.generateDiagramId();
         let width = Math.abs(start.x - end.x);
         let height = Math.abs(start.y - end.y);
 
+        switch (linetype) {
+          case "curve":
+            let control = {
+              startControl : {
+                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                y: start.y,
+              },
+              endControl : {
+                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                y: end.y,
+              }
+            }
+            _bezierObj = new Bezier(start.x,start.y,
+                                   control.startControl.x,control.startControl.y,
+                                   control.endControl.x,control.endControl.y,
+                                   end.x,end.y);
+            _GlobalLineObject[newId] = {
+              "id" : newId,
+              "name" : "line",
+              "linetype" : linetype,
+              "properties": {
+                "startX": start.x,
+                "startY": start.y,
+                "endX" : end.x,
+                "endY" : end.y,
+                "startControlX": control.startControl.x,
+                "startControlY": control.startControl.y,
+                "endControlX": control.endControl.x,
+                "endControlY": control.endControl.y,
+                "width" : width,
+                "height" : height,
+              },
+            };
+            break;
+          case "basic":
+            _GlobalLineObject[newId] = {
+              "id" : newId,
+              "name" : "line",
+              "linetype" : linetype,
+              "properties": {
+                "startX": start.x,
+                "startY": start.y,
+                "endX" : end.x,
+                "endY" : end.y,
+                "width" : width,
+                "height" : height,
+              },
+            };
+            break;
+          case "step":
+
+            break;
+          default:
+
+        }
         _GlobalLineObject[newId] = {
           "id" : newId,
           "name" : "line",
-          "linetype" : "curve",
+          "linetype" : linetype,
           "properties": {
        			"startX": start.x,
        			"startY": start.y,
@@ -105,21 +161,6 @@ define(function(require, exports, module) {
             "height" : height,
        		},
         };
-
-        let argList = {
-          startControl : {
-            x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-            y: start.y,
-          },
-          endControl : {
-            x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-            y: end.y,
-          }
-        }
-        _bezierObj = new Bezier(start.x,start.y,
-                               argList.startControl.x,argList.startControl.y,
-                               argList.endControl.x,argList.endControl.y,
-                               end.x,end.y);
 
         return _GlobalLineObject[newId];
       },
@@ -140,6 +181,16 @@ define(function(require, exports, module) {
           _GlobalLineObject[lineId]["properties"]["endY"] = pos.y;
         }
       },
+      updateCurveControlPosition : function (lineId,isStart,pos) {
+        if(isStart) {
+          _GlobalLineObject[lineId]["properties"]["startControlX"] = pos.x;
+          _GlobalLineObject[lineId]["properties"]["startControlY"] = pos.y;
+        }
+        else {
+          _GlobalLineObject[lineId]["properties"]["endControlX"] = pos.x;
+          _GlobalLineObject[lineId]["properties"]["endControlY"] = pos.y;
+        }
+      },
       getStartPosition : function(lineId) {
         let curProperties = _GlobalLineObject[lineId]["properties"];
 
@@ -156,7 +207,7 @@ define(function(require, exports, module) {
           y: curProperties["endY"],
         };
       },
-      getStartCotrolPosition : function(lineId) {
+      getCotrolPosition : function(lineId) {
         let curProperties = _GlobalLineObject[lineId]["properties"];
         let start = {
           x: curProperties.startX,
@@ -170,12 +221,12 @@ define(function(require, exports, module) {
         if(curProperties.hasOwnProperty("startControlX")) {
           return {
             startControl : {
-              x: startControlX,
-              y: startControlY,
+              x: curProperties.startControlX,
+              y: curProperties.startControlY,
             },
             endControl : {
-              x: endControlX,
-              y: endControlY,
+              x: curProperties.endControlX,
+              y: curProperties.endControlY,
             },
           }
         }
@@ -191,9 +242,6 @@ define(function(require, exports, module) {
             },
           }
         }
-
-      },
-      getEndControlPosition : function(lineId) {
 
       },
       isPointOnLine : function(lineId,currPoint) {
@@ -224,7 +272,6 @@ define(function(require, exports, module) {
       },
       _isPointOnBezierCurve : function(point,lineId) {
         let curProject = _bezierObj.project(point);
-        console.log(curProject)
         return curProject.d <= 5 ? true : false;
       },
       _isPointOnStepLine : function(point,lineId) {
@@ -413,9 +460,12 @@ define(function(require, exports, module) {
         if($("#line-overlay-container").length != 0) {
           $("#line-overlay-container").remove();
         }
-        this.addLineEndPoints(canvas,start,end);
         if(curLineType == "curve") {
+          this.addLineEndPoints(canvas,start,end);
           this.addCurveControlPoint(canvas);
+        }
+        else {
+          this.addLineEndPoints(canvas,start,end);
         }
         this.addLineHightlight(canvas);
       },
@@ -440,15 +490,15 @@ define(function(require, exports, module) {
         let end = this.getEndPosition(lineId);
         let startHtml = "<div class='line-overlay-controlpoint line-overlay-controlstart'></div>";
         let endHtml = "<div class='line-overlay-controlpoint line-overlay-controlend'></div>";
-        let controlPoint = this.getStartCotrolPosition(lineId);
+        let controlPoint = this.getCotrolPosition(lineId);
 
         if($("#line-overlay-container").length == 0) {
           let controlsHtml = "<div id='line-overlay-container' targetid='" + lineId + "'></div>";
           $(controlsHtml).appendTo(".design-canvas");
         }
 
-        this.drawLineWithoutCanvas(start,controlPoint.startControl,"line-overlay-controlline",$("#line-overlay-container")[0]);
-        this.drawLineWithoutCanvas(end,controlPoint.endControl,"line-overlay-controlline",$("#line-overlay-container")[0]);
+        this.drawLineWithoutCanvas(start,controlPoint.startControl,"line-overlay-start-controlline",$("#line-overlay-container")[0]);
+        this.drawLineWithoutCanvas(end,controlPoint.endControl,"line-overlay-end-controlline",$("#line-overlay-container")[0]);
         $(startHtml).appendTo("#line-overlay-container").css({
           left: controlPoint.startControl.x - 4,
           top: controlPoint.startControl.y - 4,
@@ -457,6 +507,32 @@ define(function(require, exports, module) {
           left: controlPoint.endControl.x - 4,
           top: controlPoint.endControl.y - 4,
         });
+      },
+      addCurveControlLine : function (lineId,argList) {
+        let isStart = (argList && argList.hasOwnProperty("isStart")) ? argList.isStart : undefined;
+        let start = this.getStartPosition(lineId);
+        let end = this.getEndPosition(lineId);
+        let controlPoint = this.getCotrolPosition(lineId);
+
+        if(isStart == undefined) {
+          this.drawLineWithoutCanvas(start,controlPoint.startControl,"line-overlay-start-controlline",$("#line-overlay-container")[0]);
+          this.drawLineWithoutCanvas(end,controlPoint.endControl,"line-overlay-end-controlline",$("#line-overlay-container")[0]);
+        }
+        else if(isStart) {
+          this.drawLineWithoutCanvas(start,controlPoint.startControl,"line-overlay-start-controlline",$("#line-overlay-container")[0]);
+        }
+        else {
+          this.drawLineWithoutCanvas(end,controlPoint.endControl,"line-overlay-end-controlline",$("#line-overlay-container")[0]);
+        }
+
+      },
+      removeCurveOverlay : function (isStart) {
+        if(isStart) {
+          ($(".line-overlay-start-controlline").length != 0) ? $(".line-overlay-start-controlline").remove() : "";
+        }
+        else {
+          ($(".line-overlay-end-controlline").length != 0) ? $(".line-overlay-end-controlline").remove() : "";
+        }
       },
       addLineHightlight : function(canvas) {
         let ctx = canvas.getContext("2d");

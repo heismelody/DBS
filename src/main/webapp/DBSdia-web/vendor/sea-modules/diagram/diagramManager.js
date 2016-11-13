@@ -32,7 +32,7 @@ define(function(require, exports, module) {
     		orientation: "portrait"   //@see ORIENTATION
     };
     //diagram Object is identified by id
-    var defaultDiagramTemplate =  {
+    const defaultDiagramTemplate =  {
     		id: "",
     		name: "",
     		title: "",
@@ -186,30 +186,8 @@ define(function(require, exports, module) {
     };
     var _GlobalPathRef = {};
     var _GlobalConfig = {};
-    var _GlobalSelectedDiagrams = ["2","23"];
-    var _GlobalSelectedFirstEntity = [];
 
     var diagramManager = {
-      selectedDiagramManager : {
-        getSelected : function() {
-          return _GlobalSelectedDiagrams;
-        },
-        getSelectedFirstEntity : function() {
-          return _GlobalSelectedFirstEntity;
-        },
-        setSelected : function(diagramId) {
-          for(var i in diagramId) {
-            _GlobalSelectedDiagrams.push(diagramId[i]);
-          }
-          _GlobalSelectedFirstEntity.push(diagramId[0]);
-        },
-        removeSelected : function() {
-          for(let i in _GlobalSelectedDiagrams) {
-            _GlobalSelectedDiagrams.pop();
-          }
-          _GlobalSelectedFirstEntity.pop();
-        },
-      },
       pageManager : {
 
       },
@@ -342,8 +320,8 @@ define(function(require, exports, module) {
         getProperties : function getProperties(shapeName,diagramId) {
           return diagramManager.getAttrById(diagramId,{properties:[]});
         },
-        getAnchorsByName : function(shapeName,id) {
-          return diagramManager.templateManager.getAnchorsByName(shapeName);
+        getAnchorsByName : function(shapeName) {
+          return diagramManager.getAttrByShapeName(shapeName,{"anchors":[]});
         },
         updateDiagramPos : function (id,pos,argList) {
           let shapeName = this.getShapeNameById(id);
@@ -395,7 +373,6 @@ define(function(require, exports, module) {
       },
       isPointInDiagram : function(diagramId,x,y) {
         let curshapeName = this.objectManager.getShapeNameById(diagramId);
-        console.log(curshapeName)
         if(curshapeName == "line") {
           return lineManager.isPointOnLine(diagramId,{"x":x,"y":y});
         }
@@ -421,8 +398,10 @@ define(function(require, exports, module) {
             let attrObj = _GlobalDiagramTemplates[category][shapeName][attrName];
 
             if(args[attrName].length == 0) {
-              result = defaultDiagramTemplate[attrName];
-              for(var key in attrObj) {
+              for(let key in defaultDiagramTemplate[attrName]) {
+                result[key] = defaultDiagramTemplate[attrName][key];
+              }
+              for(let key in attrObj) {
                 result[key] = attrObj[key];
               }
 

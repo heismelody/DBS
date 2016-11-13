@@ -4,12 +4,13 @@ define(function(require, exports, module) {
   var DiagramUtil = require('./Util.js');
   var DiagramManager = require('./diagramManager.js');
   var DiagramUtil = require('./Util.js');
+  var SelectedManager = require('./selectedManager.js');
 
   var diagramDesigner = DiagramDesigner.diagramDesigner;
   var diagramUtil = DiagramUtil.diagramUtil;
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
-  var selectedDiagramManager = DiagramManager.diagramManager.selectedDiagramManager;
+  var selectedManager = SelectedManager.selectedManager;
 
   var diagramUtil = DiagramUtil.diagramUtil;
 
@@ -43,8 +44,7 @@ define(function(require, exports, module) {
         var toolbarVM = new Vue({
           el: '.toolbar',
           data: {
-            selectedObj : selectedDiagramManager.getSelected(),
-            selectedFirstObj : selectedDiagramManager.getSelectedFirstEntity(),
+            selectedObj : selectedManager.getSelected(),
 
             Uncollapsed:false,
             collapsed:true,
@@ -251,9 +251,6 @@ define(function(require, exports, module) {
                 }
               }
             },
-            aaa : function() {
-              console.log("1")
-            }
 
 
           }
