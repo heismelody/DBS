@@ -60,6 +60,7 @@ define(function(require, exports, module) {
         $(".design-layout").on('click',function(e) {
           if(e.target.id == "designer-grids" || e.target.className == "canvas-container") {
             selectedManager.removeSelected();
+            $("#designer-contextmenu").hide();
           }
         });
 
@@ -68,10 +69,22 @@ define(function(require, exports, module) {
             eventHelper.MouseDownHandler(e,eventHelper.drawLineMousedownHandler);
           }
         });
-        //diagram right click event
-        // $('selector').contextmenu(function() {
-        //     return false;
-        // });
+
+
+        $( ".design-layout" ).contextmenu(function(e) {
+          if(e.target.id != "designer-grids" && e.target.className != "canvas-container") {
+            $("#designer-contextmenu").css({
+              left : e.clientX + "px",
+              top : e.clientY + "px",
+            });
+            $("#designer-contextmenu").show();
+          }
+          else {
+            
+          }
+
+          return false;
+        });
 
         //panel item mouse down
         $(".design-panel").on('mousedown','.panel-item',function(e) {

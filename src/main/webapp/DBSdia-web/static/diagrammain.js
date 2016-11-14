@@ -31,6 +31,7 @@ define(function(require, exports, module) {
       diagramCreator.init();
       eventHelper.initEvent();
       uIManager.toolbarDisable();
+      uIManager.contextMenu();
 
       _initDom();
       _initEvent();

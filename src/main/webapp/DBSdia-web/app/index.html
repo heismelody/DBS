@@ -489,6 +489,39 @@
           </div>
         </div>
 
+        <ul id="designer-contextmenu" class="menu list options-menu" style="display: none; z-index: 7;">
+						<li ac="cut" v-bind:style="{ display: isCutShow }"><div class="icon cut"></div>Cut<div class="extend">Ctrl+X</div></li>
+						<li ac="copy" v-bind:style="{ display: isCopyShow }"><div class="icon copy"></div>Copy<div class="extend">Ctrl+C</div></li>
+						<li ac="paste" v-bind:style="{ display: isPasteShow }"><div class="icon paste"></div>Paste<div class="extend">Ctrl+V</div></li>
+						<li ac="duplicate" v-bind:style="{ display: isDuplicateShow }">Duplicate<div class="extend">Ctrl+D</div></li>
+						<li id="rightmenu-split-first" class="split devi-clip" v-bind:style="{ display: isFirstsplitShow }"></li>
+						<li ac="front" v-bind:style="{ display: isFrontShow }"><div class="icon ico-front"></div>Bring To Front<div class="extend">Ctrl+]</div></li>
+						<li ac="back" v-bind:style="{ display: isBackShow }"><div class="icon ico-back"></div>Send To Back<div class="extend">Ctrl+[</div></li>
+						<li ac="lock" v-bind:style="{ display: isLockShow }"><div class="icon ico-lock"></div>Lock<div class="extend">Ctrl+L</div></li>
+						<li ac="unlock" v-bind:style="{ display: isUnLockShow }"><div class="icon ico-unlock"></div>Unlock<div class="extend">Ctrl+Shift+L</div></li>
+						<li ac="group" v-bind:style="{ display: isGroupShow }">Group<div class="extend">Ctrl+G</div></li>
+						<li ac="ungroup" v-bind:style="{ display: isUnGroupShow }">Ungroup<div class="extend">Ctrl+Shift+G</div></li>
+						<li id="ctxmenu-align" v-bind:style="{ display: isAlignShow }">
+							Align Shapes<div class="extend ex-arrow">►</div>
+							<ul class="menu list extend-menu">
+								<li ac="align-shape" al="left">Left</li>
+								<li ac="align-shape" al="center">Center</li>
+								<li ac="align-shape" al="right">Right</li>
+								<li class="split"></li>
+								<li ac="align-shape" al="top">Top</li>
+								<li ac="align-shape" al="middle">Middle</li>
+								<li ac="align-shape" al="bottom">Bottom</li>
+							</ul>
+						</li>
+						<li id="rightmenu-split-second" class="split devi-shape" v-bind:style="{ display: isSecondsplitShow }"></li>
+						<li ac="changelink" v-bind:style="{ display: isChangeLinkShow }"><div class="icon icon-link"></div>Change Link</li>
+						<li ac="edit" v-bind:style="{ display: isEditShow }"><div class="icon edittext"></div>Edit Text<div class="extend">Space</div></li>
+						<li ac="delete" v-bind:style="{ display: isDeleteShow }"><div class="icon remove"></div>Delete<div class="extend">Delete/Backspace</div></li>
+						<li id="rightmenu-split-third" class="split devi-del" v-bind:style="{ display: isThirdsplitShow }"></li>
+						<li ac="selectall" v-bind:style="{ display: isSelecteAllShow }">Select All<div class="extend">Ctrl+A</div></li>
+						<li id="rightmenu-split-fourth" class="split devi-selectall" v-bind:style="{ display: isFourthsplitShow }"></li>
+						<li ac="drawline" v-bind:style="{ display: isDrawlineShow }"><div class="icon linkertype-normal"></div>Draw Line<div class="extend">L</div></li>
+					</ul>
       </div>
     </div>
 

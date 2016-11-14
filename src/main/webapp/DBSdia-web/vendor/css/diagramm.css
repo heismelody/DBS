@@ -766,6 +766,67 @@ input, textarea, div {
 .toolbar-button .ico {
     margin: 2px;
 }
+#designer-contextmenu {
+    cursor: default;
+}
+.menu.list {
+    padding: 4px 0px;
+}
+.options-menu {
+    display: none;
+}
+.options-menu li {
+    width: 180px;
+    position: relative;
+    color: #333;
+    text-shadow: none;
+    padding: 0px 30px;
+}
+.options-menu li .extend {
+    position: absolute;
+    right: 10px;
+    top: 0px;
+    color: #777;
+    text-align: right;
+}
+.options-menu li .icon {
+    position: absolute;
+    top: 3px;
+    left: 5px;
+}
+.menu .split {
+    height: 0px;
+    border-top: #ccc solid 1px;
+    margin: 4px 0;
+}
+.options-menu li:hover .extend-menu {
+    display: block;
+}
+.menu.list {
+    padding: 4px 0px;
+}
+
+.extend-menu {
+    position: absolute;
+    border-top-left-radius: 0px;
+    border-left: 1px solid #999;
+    top: -5px;
+    right: -162px;
+    display: none;
+}
+
+.options-menu li {
+    width: 180px;
+    position: relative;
+    color: #333;
+    text-shadow: none;
+    padding: 0px 30px;
+}
+
+.extend-menu li {
+    width: 120px;
+    padding: 0px 20px;
+}
 /*header end*/
 
 /* color picker start */

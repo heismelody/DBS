@@ -257,7 +257,63 @@ define(function(require, exports, module) {
         })
       },
 
-    };
+      contextMenu : function () {
+        var contextMenuVM = new Vue({
+          el: '#designer-contextmenu',
+          data: {
+            selectedObj : selectedManager.getSelected(),
+
+            isCutShow : "none",
+            isCopyShow : "none",
+            isPasteShow : "none",
+            isDuplicateShow : "none",
+            isFirstsplitShow : "none",
+            isFrontShow : "none",
+            isBackShow : "none",
+            isLockShow : "none",
+            isUnLockShow : "none",
+            isGroupShow : "none",
+            isUnGroupShow : "none",
+            isAlignShow : "none",
+            isSecondsplitShow : "none",
+            isChangeLinkShow : "none",
+            isEditShow : "none",
+            isDeleteShow : "none",
+            isThirdsplitShow : "none",
+            isSelecteAllShow : "none",
+            isFourthsplitShow : "none",
+            isDrawlineShow : "none",
+          },
+          watch: {
+            selectedObj : function (val) {
+              this.isCutShow = "block";
+              this.isCopyShow = "block";
+              this.isPasteShow = "block";
+              this.isDuplicateShow = "block";
+              this.isFirstsplitShow = "block";
+              this.isFrontShow = "block";
+              this.isBackShow = "block";
+              this.isLockShow = "block";
+              this.isUnLockShow = "block";
+              this.isGroupShow = "block";
+              this.isUnGroupShow = "block";
+              // isAlignShow = "none";
+              // isSecondsplitShow = "none";
+              // isChangeLinkShow = "none";
+              // isEditShow = "none";
+              // isDeleteShow = "none";
+              // isThirdsplitShow = "none";
+              // isSelecteAllShow = "none";
+              // isFourthsplitShow = "none";
+              // isDrawlineShow = "none";
+            },
+          },
+          methods: {
+
+          },
+        });
+      },
+    }
 
     return uIManager;
   })();
