@@ -9,6 +9,7 @@ define(function(require, exports, module) {
   var diagramDesigner = DiagramDesigner.diagramDesigner;
   var diagramUtil = DiagramUtil.diagramUtil;
   var templateManager = DiagramManager.diagramManager.templateManager;
+  var stateManager = DiagramManager.diagramManager.stateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
   var selectedManager = SelectedManager.selectedManager;
 
@@ -66,8 +67,7 @@ define(function(require, exports, module) {
             barlinecolorDisabled:true,
             barlinewidthDisabled:true,
             barlinestyleDisabled:true,
-            //Need to correct
-                    barlinkertypeDisabled:false,
+            barlinkertypeDisabled:false,
             barbeginarrowDisabled:true,
             barendarrowDisabled:true,
             barfrontDisabled:true,
@@ -280,36 +280,141 @@ define(function(require, exports, module) {
             isEditShow : "none",
             isDeleteShow : "none",
             isThirdsplitShow : "none",
-            isSelecteAllShow : "none",
-            isFourthsplitShow : "none",
-            isDrawlineShow : "none",
+            isSelecteAllShow : "block",
+            isFourthsplitShow : "block",
+            isDrawlineShow : "block",
           },
           watch: {
             selectedObj : function (val) {
-              this.isCutShow = "block";
-              this.isCopyShow = "block";
-              this.isPasteShow = "block";
-              this.isDuplicateShow = "block";
-              this.isFirstsplitShow = "block";
-              this.isFrontShow = "block";
-              this.isBackShow = "block";
-              this.isLockShow = "block";
-              this.isUnLockShow = "block";
-              this.isGroupShow = "block";
-              this.isUnGroupShow = "block";
-              // isAlignShow = "none";
-              // isSecondsplitShow = "none";
-              // isChangeLinkShow = "none";
-              // isEditShow = "none";
-              // isDeleteShow = "none";
-              // isThirdsplitShow = "none";
-              // isSelecteAllShow = "none";
-              // isFourthsplitShow = "none";
-              // isDrawlineShow = "none";
+              //dont have current selected diagram
+              if(val.length == 0) {
+                this.isCutShow = "none";
+                this.isCopyShow = "none";
+                this.isPasteShow = "none";
+                this.isDuplicateShow = "none";
+                this.isFirstsplitShow = "none";
+                this.isFrontShow = "none";
+                this.isBackShow = "none";
+                this.isLockShow = "none";
+                this.isUnLockShow = "none";
+                this.isGroupShow = "none";
+                this.isUnGroupShow = "none";
+                this.isAlignShow = "none";
+                this.isSecondsplitShow = "none";
+                this.isChangeLinkShow = "none";
+                this.isEditShow = "none";
+                this.isDeleteShow = "none";
+                this.isThirdsplitShow = "none";
+                this.isSelecteAllShow = "block";
+                this.isFourthsplitShow = "block";
+                this.isDrawlineShow = "block";
+              }
+              //current selected diagram is ONE diagram
+              else if(val.length == 1) {
+                //current selected diagram is diagramObj
+                this.isCutShow = "block";
+                this.isCopyShow = "block";
+                this.isPasteShow = "none";
+                this.isDuplicateShow = "block";
+                this.isFirstsplitShow = "block";
+                this.isFrontShow = "block";
+                this.isBackShow = "block";
+                this.isLockShow = "block";
+                this.isUnLockShow = "none";
+                this.isGroupShow = "none";
+                this.isUnGroupShow = "none";
+                this.isAlignShow = "none";
+                this.isSecondsplitShow = "block";
+                this.isChangeLinkShow = "none";
+                this.isEditShow = "block";
+                this.isDeleteShow = "block";
+                this.isThirdsplitShow = "block";
+                this.isSelecteAllShow = "block";
+                this.isFourthsplitShow = "block";
+                this.isDrawlineShow = "block";
+              }
+              //current selected diagram is a GROUP
+              else {
+              }
             },
           },
           methods: {
+            menuRightClickHandler : function (e) {
+              if(e.button == 2) {
+                e.preventDefault();
+                return false;
+              }
+            },
+            _hideMenu : function () {
+              $("#designer-contextmenu").hide();
+            },
+            menuCutClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuCopyClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuPasteClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuDuplicateClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuFrontClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuBackClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuLockClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuUnlockClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuGroupClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuUngroupClickHandler : function (e) {
+              this._hideMenu();
+            },
 
+            menuAlignLeftClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuAlignCenterClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuAlignRigthClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuAlignTopClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuAlignMiddleClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuAlignBottomClickHandler : function (e) {
+              this._hideMenu();
+            },
+
+            menuChangelinkClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuEditClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuDeleteClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuSelectAllClickHandler : function (e) {
+              this._hideMenu();
+            },
+            menuDrawlineClickHandler : function (e) {
+              stateManager.setState("drawline");
+              $(".canvas-container").css("cursor","crosshair");
+              this._hideMenu();
+            },
           },
         });
       },

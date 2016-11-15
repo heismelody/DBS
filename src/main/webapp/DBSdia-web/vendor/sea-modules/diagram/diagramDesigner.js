@@ -215,8 +215,22 @@ define(function(require, exports, module) {
         if(shapeName == "line") {
           let curStartRelative = argList["start"];
           let curEndRelative = argList["end"];
+          let curLineType = $("#bar-linkertype .icon").attr("class").split("-")[1];
 
-          lineManager.drawLine(canvas,"basic",curStartRelative,curEndRelative);
+          switch (curLineType) {
+            case "normal":
+              curLineType = "basic";
+              break;
+            case "curve":
+              curLineType = "curve";
+              break;
+            case "broken":
+              curLineType = "broken";
+              break;
+            default:
+              curLineType = "basic";
+          }
+          lineManager.drawLine(canvas,"curve",curStartRelative,curEndRelative);
         }
         else {
           this._tempVar._w = canvas.width;

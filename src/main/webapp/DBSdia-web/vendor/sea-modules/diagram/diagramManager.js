@@ -186,8 +186,22 @@ define(function(require, exports, module) {
     };
     var _GlobalPathRef = {};
     var _GlobalConfig = {};
+    var _GlobalState = [];
+    const _stateEnum = ["drawline"];
 
     var diagramManager = {
+      stateManager : {
+        setState : function (state) {
+          _GlobalState.pop();
+          _GlobalState.push(state);
+        },
+        resetState : function () {
+          _GlobalState.pop();
+        },
+        isInState : function (state) {
+          return _GlobalState.indexOf(state) != -1 ? true : false;
+        },
+      },
       pageManager : {
 
       },

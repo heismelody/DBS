@@ -373,6 +373,18 @@ define(function(require, exports, module) {
             this.drawStepLine.call(ctx,start,end);
             break;
           case "curve":
+            if (argList == undefined) {
+              argList = {
+                "startControl" : {
+                    x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                    y: start.y,
+                },
+                "endControl" : {
+                  x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                  y: end.y,
+                }
+              };
+            }
             this.drawBezierCurve.call(ctx,start,argList.startControl,end,argList.endControl);
             break;
           default:
@@ -437,18 +449,13 @@ define(function(require, exports, module) {
         let angle = Math.PI - Math.atan2(-b, a);
 
         $(lineHtml).appendTo($(appendedElement))
-                   .attr("style", 'border: 1px solid #833; '
-                                + 'width: ' + length + 'px; '
-                                + 'height: 0px; '
+                   .attr("style",'width: ' + length + 'px; '
                                 + '-moz-transform: rotate(' + angle + 'rad); '
                                 + '-webkit-transform: rotate(' + angle + 'rad); '
                                 + '-o-transform: rotate(' + angle + 'rad); '
                                 + '-ms-transform: rotate(' + angle + 'rad); '
-                                + 'position: absolute; '
                                 + 'top: ' + y + 'px; '
-                                + 'left: ' + x + 'px; '
-                                + 'opacity: 0.5; '
-                                + 'z-index: -1; ');
+                                + 'left: ' + x + 'px; ');
         return $(lineHtml);
       },
       addLineOverlay : function(lineId) {

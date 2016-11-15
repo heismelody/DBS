@@ -827,6 +827,9 @@ input, textarea, div {
     width: 120px;
     padding: 0px 20px;
 }
+#designer-contextmenu li:hover {
+  background-color : rgb(238,238,238);
+}
 /*header end*/
 
 /* color picker start */
@@ -1016,6 +1019,20 @@ input, textarea, div {
     -o-border-radius: 4px;
     border-radius: 4px;
     cursor: default;
+}
+.line-overlay-start-controlline {
+  border: 1px solid #833;
+  height: 0px;
+  position: absolute;
+  opacity: 0.5;
+  z-index: -1;
+}
+.line-overlay-end-controlline {
+  border: 1px solid #833;
+  height: 0px;
+  position: absolute;
+  opacity: 0.5;
+  z-index: -1;
 }
 /*design right end*/
 
