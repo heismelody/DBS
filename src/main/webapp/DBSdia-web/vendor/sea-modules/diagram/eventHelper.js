@@ -71,6 +71,11 @@ define(function(require, exports, module) {
           }
         });
 
+        $("#right-float-page .ico-dock-collapse").on("click",function (e) {
+          $("#right-float-btn-page").removeClass("selected");
+          $("#right-float-page").hide();
+        });
+
         $( ".design-layout" ).contextmenu(function(e) {
           if(e.target.id != "designer-grids" && e.target.className != "canvas-container") {
             $("#designer-contextmenu").css({

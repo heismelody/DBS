@@ -171,6 +171,71 @@
             </div>
             <div class="img-container"></div>
           </div>
+
+          <div id="right-float-menu" style="right: 12px;">
+      			<div class="right-float-header"></div>
+      			<div class="right-float-buttons">
+      				<div id="right-float-btn-navigator" title="Navigator" disabletitle="true" class="toolbar-button" @click="rightMenuNavClickHandler">
+                <div class="icon ico-dock-nav"></div>
+              </div>
+      		    <div id="right-float-btn-page" title="Page Settings" disabletitle="true" class="toolbar-button" @click="rightMenuPageClickHandler">
+                <div class="icon ico-dock-page"></div>
+              </div>
+      				<div id="right-float-btn-history" title="Revision History" disabletitle="true" class="toolbar-button" @click="rightMenuHistoryClickHandler">
+                <div class="icon ico-history"></div>
+              </div>
+      				<div id="right-float-btn-comment" title="Comments" disabletitle="true" class="toolbar-button" @click="rightMenuCommentClickHandler">
+                <div class="icon ico-comment"></div>
+              </div>
+      			</div>
+      		</div>
+
+          <div id="right-float-page" class="right-float-view" style="right: 45px; display: none;">
+            <div class="right-float-view-header">
+              Page Settings
+              <div class="icon ico-dock-collapse"></div>
+            </div>
+            <div class="right-float-content">
+              <div class="right-float-content-title">Page</div>
+              <div class="right-float-label" style="width: 80px;">Page Size:</div>
+              <div id="right-float-size" class="toolbar-button active btn-inline" style="width: 110px;display: inline-block;">
+                <div class="text-content">A4(1050x1500)</div>
+                <div class="icon ico-dropdown"></div>
+              </div>
+              <div style="height: 10px; clear: both"></div>
+              <div class="right-float-label" style="width: 80px;">Padding:</div>
+              <div id="right-float-padding" class="toolbar-button active btn-inline" style="width: 110px;display: inline-block;">
+                <div class="text-content">80px</div>
+                <div class="icon ico-dropdown"></div>
+              </div>
+              <div style="height: 10px; clear: both"></div>
+              <div class="right-float-label" style="width: 80px;">Background:</div>
+              <div id="right-float-color" class="picker-btn btn-inline">
+                <div class="picker-btn-holder" style="background-color: rgb(255, 255, 255);"></div>
+                <div class="icon ico-colordrop"></div>
+              </div>
+              <div style="height: 10px; clear: both"></div>
+              <div class="right-float-label" style="width: 80px;">Orientation:</div>
+              <div class="right-float-ori-list">
+                <input type="radio" name="right-float-ori" value="portrait">Portrait<br>
+                <input type="radio" name="right-float-ori" value="landscape" checked="checked">Landscape
+              </div>
+              <div style="clear: both"></div>
+              <div class="right-float-devider"></div>
+              <div class="right-float-content-title">Grid</div>
+              <input id="right-float-showgrid" type="checkbox" checked="checked">
+              <label for="right-float-showgrid">Show Grid</label>
+              <div id="right-float-gridsize-box" style="margin-top: 10px;">
+                <div class="right-float-label">Grid Size:</div>
+                <div id="right-float-gridsize" class="toolbar-button active btn-inline" style="width: 110px;display: inline-block;">
+                  <div class="text-content">Very Large</div>
+                  <div class="icon ico-dropdown"></div>
+                </div>
+                <div style="clear: both"></div>
+              </div>
+            </div>
+          </div>
+
         </div>
         <div id="creating-diagram" style="width:162px;height:885px;left:0px;top:86px;position:absolute;">
           <canvas id="creating-canvas" width="30" height="30"></canvas>
@@ -578,6 +643,52 @@
               <div class="extend">L</div>
             </li>
 					</ul>
+
+          <ul id="page-size-list" class="menu list dock-page-menu menu-ico" style="top: 195px; left: 927px; display: none;">
+        		<li ac="set-page-size" w="1500" h="2100">A3(1500x2100)</li>
+        		<li ac="set-page-size" w="1050" h="1500">
+              <div class="icon ico-selected"></div>A4(1050x1500)
+            </li>
+        		<li ac="set-page-size" w="750" h="1050">A5(750x1050)</li>
+        		<li class="split"></li>
+        		<li class="menu-text" id="dock-size-custom">Customize</li>
+        		<li class="menu-text" style="line-height: 30px;">
+              <span class="lbl">W:</span>
+              <div id="dock-size-w" class="spinner active" style="width: 75px;" min="200" old="1050px">
+                <div class="spinner-input"><input></div>
+                <div class="buttons">
+                  <div class="spinner-up"></div>
+                  <div class="spinner-down"></div>
+                </div>
+              </div>
+            </li>
+        		<li class="menu-text" style="line-height: 30px;">
+              <span class="lbl">H:</span>
+              <div id="dock-size-h" class="spinner active" style="width: 75px;" min="200" old="1500px">
+                <div class="spinner-input"><input></div>
+                <div class="buttons">
+                  <div class="spinner-up"></div>
+                  <div class="spinner-down"></div>
+                </div>
+              </div>
+            </li>
+        	</ul>
+
+          <ul id="page-padding-list" class="menu list dock-page-menu menu-ico" style="top: 231px; left: 927px; display: none;">
+        		<li p="0">0px</li>
+        		<li p="20">20px</li>
+        		<li p="40">40px</li>
+        		<li p="60">60px</li>
+        		<li p="80"><div class="icon ico-selected"></div>80px</li>
+        		<li p="100">100px</li>
+        	</ul>
+
+          <ul id="page-gridsize-list" class="menu list dock-page-menu menu-ico" style="top: 421px; left: 904.078px; display: none;">
+        		<li s="10">Small</li>
+        		<li s="15">Normal</li>
+        		<li s="20">Large</li>
+        		<li s="30"><div class="icon ico-selected"></div>Very Large</li>
+        	</ul>
 
       </div>
     </div>

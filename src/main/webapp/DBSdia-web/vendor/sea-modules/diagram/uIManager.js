@@ -418,6 +418,57 @@ define(function(require, exports, module) {
           },
         });
       },
+
+      rightFloatMenu : function() {
+        var rightFloatMenuVM = new Vue({
+          el: '#right-float-menu',
+          data: {
+          },
+          methods: {
+            rightMenuNavClickHandler : function (e) {
+              if($(e.target).parent().hasClass("selected")) {
+                $(e.target).parent().removeClass("selected");
+                //$("#" + this.targetMenuList[curId]).hide();
+              }
+              else {
+                $(e.target).parent().addClass("selected");
+                //$("#" + this.targetMenuList[curId]).hide();
+              }
+            },
+            rightMenuPageClickHandler : function (e) {
+              if($(e.target).parent().hasClass("selected")) {
+                $(e.target).parent().removeClass("selected");
+                $("#right-float-page").hide();
+              }
+              else {
+                $(e.target).parent().addClass("selected");
+                $("#right-float-page").show();
+              }
+            },
+            rightMenuHistoryClickHandler : function (e) {
+              if($(e.target).parent().hasClass("selected")) {
+                $(e.target).parent().removeClass("selected");
+                //$("#" + this.targetMenuList[curId]).hide();
+              }
+              else {
+                $(e.target).parent().addClass("selected");
+                //$("#" + this.targetMenuList[curId]).hide();
+              }
+            },
+            rightMenuCommentClickHandler : function (e) {
+              if($(e.target).parent().hasClass("selected")) {
+                $(e.target).parent().removeClass("selected");
+                //$("#" + this.targetMenuList[curId]).hide();
+              }
+              else {
+                $(e.target).parent().addClass("selected");
+                //$("#" + this.targetMenuList[curId]).hide();
+              }
+            },
+          },
+        });
+      },
+
     }
 
     return uIManager;
