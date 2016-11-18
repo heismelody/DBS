@@ -830,6 +830,18 @@ input, textarea, div {
 #designer-contextmenu li:hover {
   background-color : rgb(238,238,238);
 }
+.btn-color {
+    height: 3px;
+    width: 20px;
+    position: absolute;
+    left: 2px;
+    bottom: 2px;
+    background-color: #333;
+}
+#right-float-color.selected,
+#right-float-color:hover{
+  border: 2px solid #A9A9A9;
+}
 /*header end*/
 
 /* color picker start */
@@ -1270,6 +1282,32 @@ input, textarea, div {
 #bar-list-pagesize .lbl, #page-size-list .lbl {
     display: inline-block;
     width: 20px;
+}
+.color-hex {
+    display: inline-block;
+    width: 76px;
+    height: 18px;
+    line-height: 18px;
+    color: #666;
+    float: left;
+    clear: right;
+    margin-left: 0px;
+    position: relative;
+    margin-top: 4px;
+}
+.color-hex input {
+    position: absolute;
+    width: 54px;
+    height: 16px;
+    line-height: 16px;
+    color: #666;
+    margin: 0px;
+    padding: 0px 2px;
+    font-size: 12px;
+    top: 0px;
+    left: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
 }
 /*design right end*/
 

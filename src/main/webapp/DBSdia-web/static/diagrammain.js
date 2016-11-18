@@ -33,6 +33,7 @@ define(function(require, exports, module) {
       uIManager.toolbarDisable();
       uIManager.contextMenu();
       uIManager.rightFloatMenu();
+      uIManager.rightFloatPage();
 
       _initDom();
       _initEvent();

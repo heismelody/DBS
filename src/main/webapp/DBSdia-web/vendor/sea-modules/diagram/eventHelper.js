@@ -56,6 +56,7 @@ define(function(require, exports, module) {
        return n == null || isNaN(n) ? 0 : n;
      }
 
+    diagramUtil.initjQueryMethod();
     var eventHelper = {
       initEvent : function() {
         $(".design-layout").on('click',function(e) {

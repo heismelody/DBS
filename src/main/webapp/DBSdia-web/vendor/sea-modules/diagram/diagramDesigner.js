@@ -6,6 +6,7 @@ define(function(require, exports, module) {
   var lineManager = LineManager.lineManager;
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
+  var pageManager = DiagramManager.diagramManager.pageManager;
   var diagramUtil = DiagramUtil.diagramUtil;
 
   var diagramDesigner = (function () {
@@ -313,6 +314,63 @@ define(function(require, exports, module) {
           this.stroke();
           this.closePath();
   			},
+      },
+
+      drawPageAndGrid : function(canvas){
+        let ctx = canvas.getContext('2d');
+        let w = pageManager.get("width");
+        let h = pageManager.get("height");
+        let padding = pageManager.get("padding");
+        let gridSize = pageManager.get("gridSize");
+        let curW = w - padding * 2;
+        let curH = h - padding * 2;
+        let backgroundColor =
+              (pageManager.get("backgroundColor") == "transparent")
+              ?  "rgb(255,255,255)" : pageManager.get("backgroundColor");
+        let darkerColor = diagramUtil.shadeBlendConvert(-0.05,backgroundColor);
+        let darkererColor = diagramUtil.shadeBlendConvert(-0.05,darkerColor);
+
+        if(pageManager.get("orientation") == "landscape") {
+          let temp = w;
+          w = h;
+          h = w;
+        }
+        (gridSize <= 10) ? gridSize = 10 : "";
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = backgroundColor;
+        ctx.beginPath();
+        ctx.rect(padding, padding, curW, curH);
+        ctx.fill();
+        if(pageManager.get("showGrid")) {
+          ctx.translate(padding,padding);
+          ctx.lineWidth = 1;
+          ctx.save();
+          //http://stackoverflow.com/questions/4172246/grid-drawn-using-a-canvas-element-looking-stretched
+          //this i should be 0.5
+          let count = 0;    //use for count darken line
+          for(let i = 0.5; i <=  curH + 1; i+= pageManager.get("gridSize")) {
+            ctx.restore();
+            (count % 4 == 0) ? ctx.strokeStyle = darkererColor: ctx.strokeStyle = darkerColor;
+            ctx.beginPath();
+            ctx.moveTo(0, i);
+            ctx.lineTo(curW, i);
+            ctx.stroke();
+
+            count++;
+          }
+          count = 0;
+          for(let i = 0.5; i <=  curW + 1; i+= pageManager.get("gridSize")) {
+            ctx.restore();
+            (count % 4 == 0) ? ctx.strokeStyle = darkererColor : ctx.strokeStyle = darkerColor;
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, curH);
+            ctx.stroke();
+
+            count++;
+          }
+        }
       },
 
     };

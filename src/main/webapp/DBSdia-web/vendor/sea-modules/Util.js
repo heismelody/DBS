@@ -5,7 +5,6 @@ define(function(require, exports, module) {
     var Util = (function () {
 
       var Util = {
-
         getClientHeight : function getClientHeight() {
           var myWidth = 0, myHeight = 0;
           if( typeof( window.innerWidth ) == 'number' ) {

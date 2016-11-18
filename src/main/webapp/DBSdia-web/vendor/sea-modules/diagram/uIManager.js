@@ -12,6 +12,7 @@ define(function(require, exports, module) {
   var stateManager = DiagramManager.diagramManager.stateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
   var selectedManager = SelectedManager.selectedManager;
+  var pageManager = DiagramManager.diagramManager.pageManager;
 
   var diagramUtil = DiagramUtil.diagramUtil;
 
@@ -27,6 +28,7 @@ define(function(require, exports, module) {
      * Defination of the API;
      * --------------------------------------------------------------------------
      */
+     diagramUtil.initjQueryMethod();
      var targetMenu = {
        "bar-font-family" : "font-list",
        "bar-font-color" : "color-picker",
@@ -464,6 +466,27 @@ define(function(require, exports, module) {
                 $(e.target).parent().addClass("selected");
                 //$("#" + this.targetMenuList[curId]).hide();
               }
+            },
+          },
+        });
+      },
+
+      rightFloatPage : function() {
+        var rightFloatPageVM = new Vue({
+          el: '#right-float-page',
+          data: {
+          },
+          methods: {
+            pageColorClick : function (e) {
+              if($(e.target).parent().hasClass("selected")) {
+                $(e.target).parent().removeClass("selected");
+                $("#color-picker").hide();
+              }
+              else {
+                $(e.target).parent().addClass("selected");
+                $("#color-picker").show();
+              }
+
             },
           },
         });

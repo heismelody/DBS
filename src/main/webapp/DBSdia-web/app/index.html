@@ -210,7 +210,7 @@
               </div>
               <div style="height: 10px; clear: both"></div>
               <div class="right-float-label" style="width: 80px;">Background:</div>
-              <div id="right-float-color" class="picker-btn btn-inline">
+              <div id="right-float-color" class="picker-btn btn-inline" @click="pageColorClick">
                 <div class="picker-btn-holder" style="background-color: rgb(255, 255, 255);"></div>
                 <div class="icon ico-colordrop"></div>
               </div>
@@ -552,6 +552,7 @@
           	<div class="clear" col="(0,0,0,0">
           	</div>
           </div>
+          <div class="color-hex" col="(0,0,0,0">#<input type="text"></div>
         </div>
 
         <ul id="designer-contextmenu" class="menu list options-menu" style="display: none; z-index: 7;" v-on:contextmenu="menuRightClickHandler">

@@ -2,11 +2,14 @@ define(function(require, exports, module) {
   var DiagramDesigner = require('./diagramDesigner.js');
   var BasicDiagram = require('./diagrams/basicDiagram.js');
   var DiagramManager = require('./diagramManager.js');
+  var DiagramUtil = require('./Util.js');
 
   var basicDiagram = BasicDiagram.basicDiagram;
   var diagramDesigner = DiagramDesigner.diagramDesigner;
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
+  var pageManager = DiagramManager.diagramManager.pageManager;
+  var diagramUtil = DiagramUtil.diagramUtil;
 
   var diagramCreator = (function () {
     /**
@@ -21,9 +24,40 @@ define(function(require, exports, module) {
 
     var diagramCreator = {
       init : function() {
+        this.initPage();
         this.initTemplate();
         this.initPanelBoxes();
         this.initPanelBoxItems();
+      },
+      initPage : function () {
+        let width = pageManager.get("width");
+        let height = pageManager.get("height");
+        let padding = pageManager.get("padding");
+        let backgroundColor = pageManager.get("backgroundColor");
+        let darkerColor;
+
+        if(pageManager.get("orientation") == "landscape") {
+          let temp = width;
+          width = height;
+          height = temp;
+        }
+        if(backgroundColor == "transparent") {
+          backgroundColor = "rgb(255,255,255)";
+        }
+        darkerColor = diagramUtil.shadeBlendConvert(-0.03,backgroundColor);
+        $(".design-canvas").css("background-color",darkerColor);
+        $(".canvas-container").css({
+          "width": width,
+          "height": height,
+          "padding": 1000
+        });
+        $("#designer-grids").attr({
+          "width": width,
+          "height": height
+        });
+        diagramDesigner.drawPageAndGrid($("#designer-grids")[0]);
+        $(".designer-layout").scrollTop(1000 - 10);
+        $(".designer-layout").scrollLeft(1000 - 10);
       },
       //Must execute first
       initTemplate : function createTemplate() {

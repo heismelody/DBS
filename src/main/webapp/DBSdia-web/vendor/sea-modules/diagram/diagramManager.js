@@ -11,7 +11,7 @@ define(function(require, exports, module) {
      * Defination of the template arguments const;
      * --------------------------------------------------------------------------
      */
-    var ORIENTATION = {          //Page size:
+    const ORIENTATION = {          //Page size:
       portrait : "portrait",    //height >= width
       landscape : "landscape",  //others
     };
@@ -22,7 +22,7 @@ define(function(require, exports, module) {
      * --------------------------------------------------------------------------
      */
     //Defination of page default config.
-    var defaultPageTemplate = {
+    const defaultPageTemplate = {
     		width: 1250,
     		height: 1500,
     		padding: 20,
@@ -187,6 +187,15 @@ define(function(require, exports, module) {
     var _GlobalPathRef = {};
     var _GlobalConfig = {};
     var _GlobalState = [];
+    var _GlobalPage = {
+      width: 1250,
+      height: 1500,
+      padding: 100,
+      showGrid: true,
+      gridSize: 50,
+      backgroundColor: "transparent",
+      orientation: "portrait"   //@see ORIENTATION
+    };
     const _stateEnum = ["drawline"];
 
     var diagramManager = {
@@ -203,7 +212,19 @@ define(function(require, exports, module) {
         },
       },
       pageManager : {
-
+        getDefaultPageTemplate : function () {
+          return defaultPageTemplate;
+        },
+        get : function(key) {
+          if(_GlobalPage.hasOwnProperty(key)) {
+            return _GlobalPage[key];
+          }
+        },
+        set : function(key,value) {
+          if(_GlobalPage.hasOwnProperty(key)) {
+            _GlobalPage[key] = value;
+          }
+        },
       },
       configManager : {
 
