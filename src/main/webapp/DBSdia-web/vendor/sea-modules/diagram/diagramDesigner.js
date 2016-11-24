@@ -322,6 +322,11 @@ define(function(require, exports, module) {
         let h = pageManager.get("height");
         let padding = pageManager.get("padding");
         let gridSize = pageManager.get("gridSize");
+        if(pageManager.get("orientation") == "landscape") {
+          let temp = w;
+          w = h;
+          h = temp;
+        }
         let curW = w - padding * 2;
         let curH = h - padding * 2;
         let backgroundColor =
@@ -330,11 +335,6 @@ define(function(require, exports, module) {
         let darkerColor = diagramUtil.shadeBlendConvert(-0.05,backgroundColor);
         let darkererColor = diagramUtil.shadeBlendConvert(-0.05,darkerColor);
 
-        if(pageManager.get("orientation") == "landscape") {
-          let temp = w;
-          w = h;
-          h = w;
-        }
         (gridSize <= 10) ? gridSize = 10 : "";
 
         ctx.clearRect(0, 0, w, h);

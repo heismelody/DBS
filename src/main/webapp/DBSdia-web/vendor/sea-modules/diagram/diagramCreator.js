@@ -25,6 +25,7 @@ define(function(require, exports, module) {
     var diagramCreator = {
       init : function() {
         this.initPage();
+        this.initRightFloatPageMenu();
         this.initTemplate();
         this.initPanelBoxes();
         this.initPanelBoxItems();
@@ -58,6 +59,95 @@ define(function(require, exports, module) {
         diagramDesigner.drawPageAndGrid($("#designer-grids")[0]);
         $(".designer-layout").scrollTop(1000 - 10);
         $(".designer-layout").scrollLeft(1000 - 10);
+      },
+      initRightFloatPageMenu : function () {
+        let width = pageManager.get("width");
+        let height = pageManager.get("height");
+        let padding = pageManager.get("padding");
+        let showGrid = pageManager.get("showGrid");
+        let gridSize = pageManager.get("gridSize");
+        let backgroundColor =
+              (pageManager.get("backgroundColor") == "transparent")
+              ?  "rgb(255,255,255)" : pageManager.get("backgroundColor");
+        let orientation = pageManager.get("orientation");
+
+        let text = "";
+        //width height
+        if(width == 1500 && height == 2100) {
+          text = "A3(1500x2100)";
+        }
+        else if(width == 1050 && height == 1500){
+          text = "A4(1050x1500)";
+        }
+        else if(width == 750 && height == 1050){
+          text = "A5(750x1050)";
+        }
+        else {
+          text = "Customize";
+        }
+        $("#right-float-size").textcontent(text);
+        //orientation
+        if(orientation == "portrait") {
+          $($(".right-float-ori-list").find("input")[0]).attr("checked","checked");
+          $($(".right-float-ori-list").find("input")[1]).removeAttr("checked");
+        }
+        else {
+          $($(".right-float-ori-list").find("input")[1]).attr("checked","checked");
+          $($(".right-float-ori-list").find("input")[0]).removeAttr("checked");
+        }
+        //background-color
+        $("#right-float-color .picker-btn-holder").css("background-color",backgroundColor);
+        //padding
+        switch (padding) {
+          case 0:
+            text = "0px";
+            break;
+          case 20:
+            text = "20px";
+            break;
+          case 40:
+            text = "40px";
+            break;
+          case 60:
+            text = "60px";
+            break;
+          case 80:
+            text = "80px";
+            break;
+          case 100:
+            text = "100px";
+            break;
+          default:
+            text = "60px";
+        }
+        $("#right-float-padding").textcontent(text);
+        //showgird gridSize
+        if(showGrid == true) {
+          $("#right-float-showgrid").attr("checked","checked");
+          switch (gridSize) {
+            case 10:
+              text = "Small";
+              break;
+            case 20:
+              text = "Normal";
+              break;
+            case 30:
+              text = "Large";
+              break;
+            case 40:
+              text = "Very Large";
+              break;
+            default:
+              text = "Normal";
+          }
+          $("#right-float-gridsize").textcontent(text);
+        }
+        else {
+          $("#right-float-showgrid").removeAttr("checked");
+        }
+        ($("#right-float-showgrid").attr("checked") == "checked")
+                    ? $("#right-float-gridsize-box").css("display","block")
+                    : $("#right-float-gridsize-box").css("display","none");
       },
       //Must execute first
       initTemplate : function createTemplate() {

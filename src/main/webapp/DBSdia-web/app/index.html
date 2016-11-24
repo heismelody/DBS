@@ -193,18 +193,18 @@
           <div id="right-float-page" class="right-float-view" style="right: 45px; display: none;">
             <div class="right-float-view-header">
               Page Settings
-              <div class="icon ico-dock-collapse"></div>
+              <div class="icon ico-dock-collapse" @click="pageCollapseClick"></div>
             </div>
             <div class="right-float-content">
               <div class="right-float-content-title">Page</div>
               <div class="right-float-label" style="width: 80px;">Page Size:</div>
-              <div id="right-float-size" class="toolbar-button active btn-inline" style="width: 110px;display: inline-block;">
+              <div id="right-float-size" class="toolbar-button active btn-inline" style="width: 110px;display: inline-block;" @click="pageSizeClick">
                 <div class="text-content">A4(1050x1500)</div>
                 <div class="icon ico-dropdown"></div>
               </div>
               <div style="height: 10px; clear: both"></div>
               <div class="right-float-label" style="width: 80px;">Padding:</div>
-              <div id="right-float-padding" class="toolbar-button active btn-inline" style="width: 110px;display: inline-block;">
+              <div id="right-float-padding" class="toolbar-button active btn-inline" style="width: 110px;display: inline-block;" @click="pagePaddingClick">
                 <div class="text-content">80px</div>
                 <div class="icon ico-dropdown"></div>
               </div>
@@ -217,17 +217,17 @@
               <div style="height: 10px; clear: both"></div>
               <div class="right-float-label" style="width: 80px;">Orientation:</div>
               <div class="right-float-ori-list">
-                <input type="radio" name="right-float-ori" value="portrait">Portrait<br>
-                <input type="radio" name="right-float-ori" value="landscape" checked="checked">Landscape
+                <input type="radio" name="right-float-ori" value="portrait" @click="pagePortraitClick">Portrait<br>
+                <input type="radio" name="right-float-ori" value="landscape" @click="pageLandscapeClick" checked="checked">Landscape
               </div>
               <div style="clear: both"></div>
               <div class="right-float-devider"></div>
               <div class="right-float-content-title">Grid</div>
-              <input id="right-float-showgrid" type="checkbox" checked="checked">
+              <input id="right-float-showgrid" type="checkbox" checked="checked" @click="pageSelectClick">
               <label for="right-float-showgrid">Show Grid</label>
               <div id="right-float-gridsize-box" style="margin-top: 10px;">
                 <div class="right-float-label">Grid Size:</div>
-                <div id="right-float-gridsize" class="toolbar-button active btn-inline" style="width: 110px;display: inline-block;">
+                <div id="right-float-gridsize" class="toolbar-button active btn-inline" style="width: 110px;display: inline-block;" @click="pageGridsizeClick">
                   <div class="text-content">Very Large</div>
                   <div class="icon ico-dropdown"></div>
                 </div>
@@ -645,7 +645,7 @@
             </li>
 					</ul>
 
-          <ul id="page-size-list" class="menu list dock-page-menu menu-ico" style="top: 195px; left: 927px; display: none;">
+          <ul id="page-size-list" class="menu list dock-page-menu menu-ico" style="top: 195px; left: 927px; z-index: 2; display: none;">
         		<li ac="set-page-size" w="1500" h="2100">A3(1500x2100)</li>
         		<li ac="set-page-size" w="1050" h="1500">
               <div class="icon ico-selected"></div>A4(1050x1500)
@@ -686,9 +686,9 @@
 
           <ul id="page-gridsize-list" class="menu list dock-page-menu menu-ico" style="top: 421px; left: 904.078px; display: none;">
         		<li s="10">Small</li>
-        		<li s="15">Normal</li>
-        		<li s="20">Large</li>
-        		<li s="30"><div class="icon ico-selected"></div>Very Large</li>
+        		<li s="20">Normal</li>
+        		<li s="30">Large</li>
+        		<li s="40"><div class="icon ico-selected"></div>Very Large</li>
         	</ul>
 
       </div>

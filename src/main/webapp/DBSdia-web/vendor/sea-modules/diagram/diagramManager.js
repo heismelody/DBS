@@ -27,7 +27,7 @@ define(function(require, exports, module) {
     		height: 1500,
     		padding: 20,
     		showGrid: true,
-    		gridSize: 15,
+    		gridSize: 40,   //[10,20,30,40]
         backgroundColor: "transparent",
     		orientation: "portrait"   //@see ORIENTATION
     };
@@ -188,13 +188,13 @@ define(function(require, exports, module) {
     var _GlobalConfig = {};
     var _GlobalState = [];
     var _GlobalPage = {
-      width: 1250,
-      height: 1500,
-      padding: 100,
-      showGrid: true,
-      gridSize: 50,
-      backgroundColor: "transparent",
-      orientation: "portrait"   //@see ORIENTATION
+      width: 750,
+      height: 1050,
+      padding: 80,
+      showGrid: false,
+      gridSize: 40,
+      backgroundColor: "rgb(229, 229, 229)",
+      orientation: "landscape"   //@see ORIENTATION
     };
     const _stateEnum = ["drawline"];
 

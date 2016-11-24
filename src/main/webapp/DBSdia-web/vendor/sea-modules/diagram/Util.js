@@ -16,13 +16,34 @@ define(function(require, exports, module) {
     var diagramUtil = {
       initjQueryMethod : function () {
           (function($) {
-            $.fn.test = function(a) {
-              console.log(a);
-            };
             $.fn.colorpicker = function(a) {
               console.log(a);
             };
+            $.fn.textcontent = function(text) {
+              this.find(".text-content").text(text);
+            };
           })(jQuery);
+      },
+      dropdown : function (target,dropdownPanel) {
+        let _dropdownPanel = $(dropdownPanel);
+        let _target = $(target);
+        let curOffsetLeft = _target.offset().left;
+        let curOffsetTop = _target.offset().top;
+        let curHeight = _target.css("height");
+
+        _dropdownPanel.attr("for",_target.attr("id"));
+        _dropdownPanel.css({
+          left: curOffsetLeft,
+          top: parseInt(curOffsetTop) + parseInt(curHeight) + "px",
+        });
+        if(_target.hasClass("selected")) {
+          _target.removeClass("selected");
+          _dropdownPanel.hide();
+        }
+        else {
+          _target.addClass("selected");
+          _dropdownPanel.show();
+        }
       },
       getClientHeight : function getClientHeight() {
         var myWidth = 0, myHeight = 0;

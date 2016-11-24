@@ -5,7 +5,9 @@ define(function(require, exports, module) {
   var DiagramManager = require('./diagramManager.js');
   var DiagramUtil = require('./Util.js');
   var SelectedManager = require('./selectedManager.js');
+  var DiagramCreator = require("./diagramCreator.js");
 
+  var diagramCreator = DiagramCreator.diagramCreator;
   var diagramDesigner = DiagramDesigner.diagramDesigner;
   var diagramUtil = DiagramUtil.diagramUtil;
   var templateManager = DiagramManager.diagramManager.templateManager;
@@ -475,8 +477,59 @@ define(function(require, exports, module) {
         var rightFloatPageVM = new Vue({
           el: '#right-float-page',
           data: {
+            showGrid: pageManager.get("showGrid"),
+            orientation: pageManager.get("orientation"),
+
+            gridSize: pageManager.get("gridSize"),
+            pageSize: pageManager.get("gridSize"),
+            padding: pageManager.get("padding"),
+            // backgroundColor: ,
+          },
+          watch: {
+            pageSize: function (val) {
+              let width = val.split('x')[0];
+              let height = val.split('x')[1];
+              width = width.trim().substr(3, width.length - 1);
+              height = height.trim().substr(0, height.length - 1);
+              pageManager.set("width",parseInt(width));
+              pageManager.set("height",parseInt(height));
+              diagramCreator.initPage();
+            },
+            showGrid: function (val) {
+              pageManager.set("showGrid",val);
+              ($("#right-float-showgrid").attr("checked") == "checked")
+                          ? $("#right-float-gridsize-box").css("display","block")
+                          : $("#right-float-gridsize-box").css("display","none");
+              diagramCreator.initPage();
+            },
+            gridSize : function (val) {
+              pageManager.set("gridSize",parseInt(val));
+              diagramCreator.initPage();
+            },
+            padding : function (val) {
+              pageManager.set("padding",parseInt(val));
+              diagramCreator.initPage();
+            },
+            orientation: function (val) {
+              pageManager.set("orientation",val);
+              diagramCreator.initPage();
+            },
           },
           methods: {
+            pageSelectClick : function (e) {
+              if($(e.target).attr("checked") == "checked") {
+                $(e.target).removeAttr("checked");
+                this.showGrid = false;
+              }
+              else {
+                $(e.target).attr("checked","checked");
+                this.showGrid = true;
+              }
+            },
+            pageCollapseClick : function (e) {
+              $("#right-float-page").hide();
+              $("#right-float-btn-page").removeClass("selected");
+            },
             pageColorClick : function (e) {
               if($(e.target).parent().hasClass("selected")) {
                 $(e.target).parent().removeClass("selected");
@@ -486,10 +539,64 @@ define(function(require, exports, module) {
                 $(e.target).parent().addClass("selected");
                 $("#color-picker").show();
               }
-
+            },
+            pageSizeClick : function (e) {
+              diagramUtil.dropdown("#right-float-size","#page-size-list");
+            },
+            pagePaddingClick : function (e) {
+              diagramUtil.dropdown("#right-float-padding","#page-padding-list");
+            },
+            pageGridsizeClick : function (e) {
+              diagramUtil.dropdown("#right-float-gridsize","#page-gridsize-list");
+            },
+            pagePortraitClick : function (e) {
+              this.orientation = "portrait";
+              $($(".right-float-ori-list input")[0]).attr("checked","checked");
+              $($(".right-float-ori-list input")[1]).removeAttr("checked");
+            },
+            pageLandscapeClick : function (e) {
+              this.orientation = "landscape";
+              $($(".right-float-ori-list input")[1]).attr("checked","checked");
+              $($(".right-float-ori-list input")[0]).removeAttr("checked");
             },
           },
         });
+
+        //dropdown menu event
+        $("#page-gridsize-list").on("click","li",function (e) {
+          let forMenuId = $("#page-gridsize-list").attr("for");
+          let forMenu = $("#" + forMenuId);
+
+          $("#page-gridsize-list").find(".ico-selected").remove();
+          $(e.target).html('<div class="icon ico-selected"></div>' + $(e.target).text());
+          rightFloatPageVM.gridSize = $(e.target).attr("s");
+          forMenu.textcontent($(e.target).text());
+          forMenu.removeClass("selected");
+          $("#page-gridsize-list").hide();
+        });
+        $("#page-padding-list").on("click","li",function (e) {
+          let forMenuId = $("#page-padding-list").attr("for");
+          let forMenu = $("#" + forMenuId);
+
+          $("#page-padding-list").find(".ico-selected").remove();
+          $(e.target).html('<div class="icon ico-selected"></div>' + $(e.target).text());
+          rightFloatPageVM.padding = $(e.target).attr("p");
+          forMenu.textcontent($(e.target).text());
+          forMenu.removeClass("selected");
+          $("#page-padding-list").hide();
+        });
+        $("#page-size-list").on("click","[ac='set-page-size']",function (e) {
+          let forMenuId = $("#page-size-list").attr("for");
+          let forMenu = $("#" + forMenuId);
+
+          $("#page-size-list").find(".ico-selected").remove();
+          $(e.target).html('<div class="icon ico-selected"></div>' + $(e.target).text());
+          rightFloatPageVM.pageSize = $(e.target).text();
+          forMenu.textcontent($(e.target).text());
+          forMenu.removeClass("selected");
+          $("#page-size-list").hide();
+        });
+
       },
 
     }

@@ -59,6 +59,8 @@ define(function(require, exports, module) {
     diagramUtil.initjQueryMethod();
     var eventHelper = {
       initEvent : function() {
+        eventHelper.initFloatMenuEvent();
+
         $(".design-layout").on('click',function(e) {
           if(e.target.id == "designer-grids" || e.target.className == "canvas-container") {
             selectedManager.removeSelected();
@@ -134,6 +136,9 @@ define(function(require, exports, module) {
         $(".design-layout").on('mousedown','.line-overlay-controlpoint',function(e) {
           eventHelper.MouseDownHandler(e,eventHelper.lineControlOverlayMouseDownHandle);
         });
+      },
+      initFloatMenuEvent : function () {
+
       },
 
       MouseDownHandler : function(e,actualHandler) {
