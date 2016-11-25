@@ -24,9 +24,10 @@ a {
     color: #4183C4;
     cursor: pointer;
 }
-ul {
-    margin: 0px;
-    padding: 0px;
+li, ul {
+    border: 0;
+    padding: 0;
+    margin: 0;
     list-style: none;
 }
 input, textarea, div {
@@ -602,7 +603,10 @@ input, textarea, div {
     float: left;
     margin-top: 5px;
 }
-
+.toolbar-button.disabled .btn-color {
+    opacity: 0.3;
+    filter: alpha(opacity=30);
+}
 .toolbar-button {
     height: 24px;
     line-height: 24px;
@@ -1293,6 +1297,373 @@ input, textarea, div {
     border-radius: 3px;
 }
 /*design right end*/
+
+/*UI container start*/
+    /*#page-contextual-properties-dialog start*/
+#page-contextual-properties-dialog {
+  position: absolute;
+  margin-left: -200px;
+  font-family: verdana,tahoma,helvetica;
+  width: 318px;
+  left: 500px;
+  top: 108px;
+  z-index: 3000;
+  display: block;
+}
+#page-contextual-properties-dialog .contextual-properties-container {
+  box-shadow: 2px 3px 7px rgba(0,0,0,0.25);
+  -moz-box-shadow: 2px 3px 7px rgba(0,0,0,0.25);
+  -webkit-box-shadow: 2px 3px 7px rgba(0,0,0,0.25);
+  background: #eee no-repeat left bottom;
+  border: 1px solid #ddd;
+  padding-bottom: 7px;
+}
+#contextual-properties-controls-tabs {
+  padding-top: 8px;
+  background-color: #f5f5f5;
+  background-image: -moz-linear-gradient(top,#eee,#ddd);
+  background-image: -ms-linear-gradient(top,#eee,#ddd);
+  background-image: -webkit-gradient(linear,0 0,0 100%,from(#eee),to(#ddd));
+  background-image: -webkit-linear-gradient(top,#eee,#BFBFBF);
+  background-image: -o-linear-gradient(top,#eee,#ddd);
+  background-image: linear-gradient(top,#eee,#ddd);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr = '#eee',endColorstr = '#ddd',GradientType = 0);
+  border-color: #ddd #ddd #bfbfbf;
+  border-color: rgba(0,0,0,0.1) rgba(0,0,0,0.1) rgba(0,0,0,0.25);
+  filter: progid:dximagetransform.microsoft.gradient(enabled = false);
+}
+#page-contextual-properties-dialog .nav {
+  margin-bottom: 0px;
+}
+.nav {
+  margin-left: 0;
+  margin-bottom: 18px;
+  list-style: none;
+}
+.nav-tabs {
+  border-bottom: 1px solid #ddd;
+}
+.nav-tabs>li {
+    margin-bottom: -1px;
+}
+.nav-tabs>li, .nav-pills>li {
+    float: left;
+}
+#contextual-properties-controls-tabs .icon {
+  display: inline-block;
+}
+.ico-shape-properties-tab {
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -492px -450px;
+  width: 20px;
+  height: 20px;
+}
+.ico-text-properties-tab {
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -512px -216px;
+  width: 20px;
+  height: 20px;
+}
+.ico-line-properties-tab {
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -492px -216px;
+  width: 20px;
+  height: 20px;
+}
+.ico-properties-shapecolor {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #000;
+  background-color: #f00;
+  margin: 0px 7px 1px 0px;
+  position: relative;
+  float: left;
+}
+.ico-properties-linecolor {
+  height: 17px;
+  width: 17px;
+  margin: 0px 7px 1px 0px;
+  background-position: 0px -160px;
+  position: relative;
+  float: left;
+}
+.ico-properties-lineweight {
+  height: 17px;
+  width: 17px;
+  margin: 0px 7px 1px 0px;
+  background-position: -20px -160px;
+  position: relative;
+  float: left;
+}
+.ico-properties-linestyle {
+  height: 17px;
+  width: 17px;
+  margin: 0px 7px 1px 0px;
+  background-position: 0px -180px;
+  position: relative;
+  float: left;
+}
+.ico-properties-gradient{
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -392px -450px;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  float: left;
+}
+.icon-properties-dropshadow{
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -372px -450px;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  float: left;
+}
+.ico-properties-opacity {
+  height: 18px;
+  width: 18px;
+  margin: 1px 7px 1px 1px;
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -249px -554px;
+  position: relative;
+  float: left;
+}
+#contextual-properties-controls-tabs li a{
+  padding: 1px 4px 0;
+  color: #333;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  border-bottom-color: transparent;
+  cursor: default;
+  margin-left: 3px;
+  line-height: 18px;
+  display: block;
+}
+.dock-history-remove {
+  float: right;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 18px;
+  color: #000;
+  text-shadow: 0 1px 0 #fff;
+  opacity: 0.4;
+  filter: alpha(opacity = 40);
+}
+.dock-history-remove:hover {
+  color: #000;
+  text-decoration: none;
+  opacity: 1;
+  filter: alpha(opacity = 100);
+  cursor: pointer;
+}
+.ico-dropdown{
+  position: absolute;
+  right: 0px;
+  top: 2px;
+  background-position: -3px -40px;
+  height: 20px;
+  width: 13px;
+  margin: 0px;
+}
+#contextual-properties-contents {
+  padding: 0;
+  padding-top: 4px;
+  display: table;
+  width: 100%;
+}
+.nav-tabs:before, .nav-pills:before, .nav-tabs:after, .nav-pills:after {
+    display: table;
+    content: "";
+}
+.tab-body-toprow{
+  border-bottom: 1px solid #ccc;
+  -webkit-box-shadow: 0 1px 0 0 white;
+  -moz-box-shadow: 0 1px 0 0 #fff;
+  box-shadow: 0 1px 0 0 white;
+  padding-bottom: 5px;
+  padding-left: 0;
+  padding-top: 10px;
+  margin-bottom: 5px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+#page-contextual-properties-dialog .nav-tab-body{
+  margin-bottom: 6px;
+  height: 29px;
+}
+.nav-tab-body>li {
+    margin-bottom: -1px;
+    float: left;
+}
+li>.button-group {
+    margin-left: 0;
+    margin-right: 11px;
+    display: block;
+}
+.button-group>li {
+    float: left;
+}
+button:focus {
+  outline:0;
+}
+#page-contextual-properties-dialog .btn:hover,
+#page-contextual-properties-dialog .dropdown .btn:hover {
+  -webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+  -moz-box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+}
+.button-group .btn {
+  height: 30px;
+  padding: 4px 6px;
+  background-color: #e5e5e5;
+  background-image: -moz-linear-gradient(top,#eee,#ddd);
+  background-image: -ms-linear-gradient(top,#eee,#ddd);
+  background-image: -webkit-gradient(linear,0 0,0 100%,from(#eee),to(#ddd));
+  background-image: -webkit-linear-gradient(top,#eee,#ddd);
+  background-image: -o-linear-gradient(top,#eee,#ddd);
+  background-image: linear-gradient(top,#eee,#ddd);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr = '#eee',endColorstr = '#ddd',GradientType = 0);
+  filter: progid:dximagetransform.microsoft.gradient(enabled = false);
+  border: 1px solid #bbb;
+  border-bottom: 1px solid #999;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  -webkit-box-shadow: inset 1px 1px 0 0 #fff,1px 1px 0 0 #fff;
+  -moz-box-shadow: inset 1px 1px 0 0 #fff,1px 1px 0 0 #fff;
+  box-shadow: inset 1px 1px 0 0 #fff,1px 1px 0 0 #fff;
+  cursor: pointer;
+}
+.button-group .btn.active {
+  background-image: none;
+  -webkit-box-shadow: inset 0 1px 0 rgba(0,0,0,0.2),0 1px 1px rgba(0,0,0,0.05);
+  -moz-box-shadow: inset 0 1px 0 rgba(0,0,0,0.2),0 1px 1px rgba(0,0,0,0.05);
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.2),0 1px 1px rgba(0,0,0,0.05);
+  background-color: #c6c6c6;
+  outline: 0;
+}
+#page-contextual-properties-dialog  .button-group>li:first-child>* {
+    border-radius: 0;
+    -webkit-border-top-left-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    border-top-left-radius: 3px;
+    -webkit-border-bottom-left-radius: 3px;
+    -moz-border-radius-bottomleft: 3px;
+    border-bottom-left-radius: 3px;
+}
+#page-contextual-properties-dialog  .button-group>li:last-child>* {
+    border-radius: 0;
+    -webkit-border-top-right-radius: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-right-radius: 3px;
+    -webkit-border-bottom-right-radius: 3px;
+    -moz-border-radius-bottomright: 3px;
+    border-bottom-right-radius: 3px;
+}
+#page-contextual-properties-dialog .button-group>li:not(:first-child)>* {
+  margin-left: -1px;
+}
+#page-contextual-properties-dialog .btn:first-child {
+}
+#page-contextual-properties-dialog .button-group>li>* {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+}
+#contextual-properties-contents .icon {
+  display: inline-block;
+}
+.tab-body-col1 {
+  margin-right: 5px;
+  padding-top: 10px;
+  padding-left: 6px;
+  float: left;
+  width: 78px;
+  text-align: left;
+}
+.tab-body-col1>* {
+  width: 78px;
+  display: block;
+}
+.tab-body-col1 li,
+.tab-body-col2 li,
+.tab-body-col3 li {
+  height: 35px;
+}
+.tab-body-col2 {
+  margin-right: 4px;
+  padding-top: 10px;
+  float: left;
+  width: 85px;
+}
+.tab-body-col2>* {
+  width: 77px;
+  display: block;
+}
+.tab-body-col3 {
+  padding-top: 10px;
+  float: left;
+  color: #333;
+  max-width: 138px;
+}
+.tab-body-col3 span {
+  margin-bottom: 10px;
+  display: block;
+}
+.ico-x{
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -532px -426px;
+}
+.ico-y{
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -112px -450px;
+}
+.ico-rotate{
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -532px -216px;
+}
+.ico-properties-W{
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -532px -406px;
+}
+.ico-properties-H{
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -532px -366px;
+}
+.ico-properties-lock{
+  background-position: -40px -140px;
+}
+.tab-content .spinner {
+  width: 50px;
+  float: right;
+}
+.tab-body-col1 li span,
+.tab-body-col2 li span,
+.tab-body-col3 li span{
+  margin-top: 5px;
+}
+.tab-body-col3 .ico-properties-lock{
+  margin-top: 0px;
+  vertical-align: bottom;
+  margin-bottom: 0px;
+}
+    /*#page-contextual-properties-dialog end*/
+
+/*UI container end*/
 
 .design-layout {
   height: 828px;

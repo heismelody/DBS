@@ -193,7 +193,7 @@ define(function(require, exports, module) {
       padding: 80,
       showGrid: false,
       gridSize: 40,
-      backgroundColor: "rgb(229, 229, 229)",
+      backgroundColor: "transparent",
       orientation: "landscape"   //@see ORIENTATION
     };
     const _stateEnum = ["drawline"];
