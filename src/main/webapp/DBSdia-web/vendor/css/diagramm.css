@@ -57,6 +57,7 @@ input, textarea, div {
     padding: 0px 30px;
 }
 .icon {
+  display: block;
   background: url(../images/diagram/sprite.png?9) no-repeat;
   height: 20px;
   width: 20px;
@@ -1353,6 +1354,9 @@ input, textarea, div {
 #contextual-properties-controls-tabs .icon {
   display: inline-block;
 }
+#contextual-properties-controls-tabs .icon{
+  pointer-events:none;
+}
 .ico-shape-properties-tab {
   background-image: url(../images/diagram/icon.png);
   background-repeat: no-repeat;
@@ -1375,12 +1379,10 @@ input, textarea, div {
   height: 20px;
 }
 .ico-properties-shapecolor {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 1px solid #000;
-  background-color: #f00;
+  height: 17px;
+  width: 17px;
   margin: 0px 7px 1px 0px;
+  background-position: -20px -140px;
   position: relative;
   float: left;
 }
@@ -1439,13 +1441,16 @@ input, textarea, div {
 #contextual-properties-controls-tabs li a{
   padding: 1px 4px 0;
   color: #333;
-  background-color: #eee;
+  background-color: #BFBFBF;
   border: 1px solid #ccc;
   border-bottom-color: transparent;
-  cursor: default;
+  cursor: pointer;
   margin-left: 3px;
   line-height: 18px;
   display: block;
+}
+#contextual-properties-controls-tabs li a.active{
+  background-color: #eee;
 }
 .dock-history-remove {
   float: right;
@@ -1463,6 +1468,15 @@ input, textarea, div {
   opacity: 1;
   filter: alpha(opacity = 100);
   cursor: pointer;
+}
+.contextual-properties-dragarea{
+  position: absolute;
+  width: 181px;
+  height: 37px;
+  left: 105px;
+  top: 0;
+  overflow: hidden;
+  cursor: move;
 }
 .ico-dropdown{
   position: absolute;
@@ -1662,7 +1676,79 @@ button:focus {
   margin-bottom: 0px;
 }
     /*#page-contextual-properties-dialog end*/
+    /*#page-contextual-properties-dialog  text-tab start*/
+.tab-body-row1>li,
+.tab-body-row2>li,
+.tab-body-row3>li {
+    margin-bottom: -1px;
+    float: left;
+}
+.tab-body-row1,
+.tab-body-row2,
+.tab-body-row3 {
+    padding-top: 10px;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.tab-body-row1,
+.tab-body-row2,
+.tab-body-row3 {
+  height: 30px;
+}
+#contextual-properties-text-font{
+  border: 1px solid transparent;
+  width: 80px;
+  border-color: #c6c6c6;
+  -webkit-box-shadow: 0px 1px 1px rgba(0,0,0,.1);
+  -moz-box-shadow: 0px 1px 1px rgba(0,0,0,.1);
+  -ms-box-shadow: 0px 1px 1px rgba(0,0,0,.1);
+  box-shadow: 0px 1px 1px rgba(0,0,0,.1);
+  background: #FFF;
+}
+.ico-properties-text-align{
+  margin: 0px 7px 0px 0px;
+  background-image: url(../images/diagram/icon.png);
+  background-repeat: no-repeat;
+  background-position: -532px -256px;
+}
+.ico-unlink {
+  max-height: 20px;
+  max-width: 20px;
+  display: block;
+  background-image: url(../images/diagram/unlink.png);
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-size:contain;
+}
+#contextual-properties-text-fontcolor-button .fontcolor{
+  margin: 0px 7px 0px 0px;
+}
+#contextual-properties-text-align-button{
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+#contextual-properties-contents {
+  display: none;
+}
+#contextual-properties-tab-text{
+  display: none;
+}
+#contextual-properties-tab-line{
+  display: none;
+}
+#contextual-properties-contents.active {
+  display: inline-block;
+}
+#contextual-properties-tab-text.active {
+  display: inline-block;
+}
+#contextual-properties-tab-line.active {
+  display: inline-block;
+}
 
+
+    /*#page-contextual-properties-dialog  text-tab end*/
 /*UI container end*/
 
 .design-layout {

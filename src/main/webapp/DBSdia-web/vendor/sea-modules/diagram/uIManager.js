@@ -599,6 +599,124 @@ define(function(require, exports, module) {
 
       },
 
+      contextDialog : function () {
+        var target,_dragElement;
+        var contextDialogControlVM = new Vue({
+          el: '#contextual-properties-controls-tabs',
+          data: {
+            shapeActive : true,
+            lineActive : false,
+            textActive : false,
+          },
+          watch: {
+          },
+          methods: {
+            closeDialog : function () {
+              $("#page-contextual-properties-dialog").hide();
+            },
+            dragareaMousedown : function (e) {
+              // IE uses srcElement, others use target
+              target = e.target != null ? e.target : e.srcElement;
+
+              // grab the mouse position
+              _startX = e.clientX;
+              _startY = e.clientY;
+
+              // grab the clicked element's position
+              _offsetX = parseInt($("#page-contextual-properties-dialog").css("left"));
+              _offsetY = parseInt($("#page-contextual-properties-dialog").css("top"));
+              _startX = e.clientX;
+              _startY = e.clientY;
+
+              // tell our code to start moving the element with the mouse
+              _dragElement = target;
+              document.onmousemove = this.dragareaMousemoveHandler;
+              document.onmouseup = this.dragareaMouseupHandler;
+
+              // cancel out any text selections
+              document.body.focus();
+
+              // prevent text selection in IE
+              document.onselectstart = function () { return false; };
+              // prevent IE from trying to drag an image
+              target.ondragstart = function() { return false; };
+
+              // prevent text selection (except IE)
+              return false;
+            },
+            dragareaMousemoveHandler : function (e) {
+              //Mouse move in the left panel
+              let curOffsetX = _offsetX + e.clientX - _startX;
+              let curOffsetY = _offsetY + e.clientY - _startY;
+              $("#page-contextual-properties-dialog").css("left",curOffsetX);
+              $("#page-contextual-properties-dialog").css("top",curOffsetY);
+            },
+            dragareaMouseupHandler: function (e) {
+              if (_dragElement != null) {
+                  // we're done with these events until the next OnMouseDown
+                  document.onmousemove = null;
+                  document.onselectstart = null;
+                  _dragElement.ondragstart = null;
+
+                  // this is how we know we're not dragging
+                  _dragElement = null;
+              }
+            },
+            contextualControlShapeClick :function (e) {
+              this.shapeActive = true;
+              this.lineActive = false;
+              this.textActive = false;
+              $("#contextual-properties-contents").addClass("active");
+              $("#contextual-properties-tab-text").removeClass("active");
+              $("#contextual-properties-tab-line").removeClass("active");
+            },
+            contextualControlLineClick :function (e) {
+              this.shapeActive = false;
+              this.lineActive = true;
+              this.textActive = false;
+              $("#contextual-properties-contents").removeClass("active");
+              $("#contextual-properties-tab-text").removeClass("active");
+              $("#contextual-properties-tab-line").addClass("active");
+            },
+            contextualControlShapTexteClick :function (e) {
+              this.shapeActive = false;
+              this.lineActive = false;
+              this.textActive = true;
+              $("#contextual-properties-contents").removeClass("active");
+              $("#contextual-properties-tab-text").addClass("active");
+              $("#contextual-properties-tab-line").removeClass("active");
+            },
+          },
+        });
+
+        var contextDialogShapeTabVM = new Vue({
+          el: '#contextual-properties-contents',
+          data: {
+
+          },
+          methods: {
+          },
+        });
+        var contextDialogTextTabVM = new Vue({
+          el: '#contextual-properties-tab-text',
+          data: {
+
+          },
+          methods: {
+          },
+        });
+        var contextDialogLineTabVM = new Vue({
+          el: '#contextual-properties-tab-line',
+          data: {
+
+          },
+          methods: {
+          },
+        });
+
+
+      },
+
     }
 
     return uIManager;

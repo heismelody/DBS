@@ -696,29 +696,29 @@
 
               <div id="contextual-properties-controls-tabs">
                 <ul class="nav nav-tabs" style="height:27px;">
-                  <li class="shape-properties-tab active">
-                    <a class="ico-shape-properties-tab-container" target="contextual-properties-tab-shape">
+                  <li class="properties-tab shape-properties-tab active">
+                    <a class="ico-shape-properties-tab-container" :class="{active:shapeActive}" target="contextual-properties-tab-shape" @click="contextualControlShapeClick">
                       <span class="icon ico-shape-properties-tab"></span>
                     </a>
                   </li>
-                  <li class="line-properties-tab">
-                    <a class="ico-line-properties-tab-container" target="contextual-properties-tab-line">
+                  <li class="properties-tab line-properties-tab">
+                    <a class="ico-line-properties-tab-container" :class="{active:lineActive}" target="contextual-properties-tab-line" @click="contextualControlLineClick">
                       <span class="icon ico-line-properties-tab"></span>
                     </a>
                   </li>
-                  <li class="text-properties-tab">
-                    <a class="ico-text-properties-tab-container" target="contextual-properties-tab-text">
+                  <li class="properties-tab text-properties-tab">
+                    <a class="ico-text-properties-tab-container" :class="{active:textActive}" target="contextual-properties-tab-text" @click="contextualControlShapTexteClick">
                       <span class="icon ico-text-properties-tab"></span>
                     </a>
                   </li>
-                  <i class="icon dlg-close dock-history-remove">×</i>
+                  <i class="icon dlg-close dock-history-remove" style="pointer-events: auto;" @click="closeDialog">×</i>
                 </ul>
-                <div class="contextual-properties-dragarea" style="width: 210px;"></div>
+                <div class="contextual-properties-dragarea" v-on:mousedown="dragareaMousedown"></div>
               </div>
 
-              <div id="contextual-properties-contents" class="tab-content">
-                <!-- Shape Tab Content -->
-                <div class="tab-body active" id="contextual-properties-tab-shape">
+              <!-- Shape Tab Content -->
+              <div id="contextual-properties-contents" class="tab-content active">
+                <div id="contextual-properties-tab-shape" class="tab-body">
                   <div class="tab-body-toprow" style="display: block;">
                     <ul class="nav nav-tab-body">
                       <li>
@@ -841,6 +841,191 @@
                   </ul>
                 </div>
                </div>
+
+               <!-- Text Tab Content -->
+               <div id="contextual-properties-tab-text" class="tab-body">
+                 <ul class="tab-body-row1">
+                   <li>
+                     <ul class="button-group">
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-text-bold-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                           <span class="icon bold"></span>
+                         </button>
+                       </li>
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-text-italic-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                           <span class="icon italic"></span>
+                         </button>
+                       </li>
+                       <li class="dropdown shape-cprops-dropdown">
+                         <button id="contextual-properties-text-underline-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                           <span class="icon underline"></span>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                   <li>
+                     <ul class="button-group">
+                       <li class="dropdown shape-cprops-dropdown">
+                         <button id="contextual-properties-text-alignleft-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                           <span class="icon alignleft"></span>
+                         </button>
+                       </li>
+                       <li data-original-title="gradient">
+                         <button id="contextual-properties-text-aligncenter-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;">
+                           <div class="icon aligncenter"></div>
+                         </button>
+                       </li>
+                       <li data-original-title="drop shadow">
+                         <button id="contextual-properties-text-alignright-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                           <span class="icon alignright"></span>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                   <li>
+                     <ul class="button-group">
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-text-align-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                           <div class="icon ico-properties-text-align"></div>
+                           <div class="icon ico-dropdown"></div>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                 </ul>
+                 <ul class="tab-body-row2">
+                   <li style="margin-right: 16px;">
+                     <div id="contextual-properties-text-font" title="Font" style="width: 80px;" class="toolbar-button">
+                       <div class="text-content">Arial</div>
+                       <div class="icon ico-dropdown"></div>
+                     </div>
+                   </li>
+                   <li>
+                     <div id="contextual-properties-text-fontsize" class="spinner active btn-inline">
+                        <div class="spinner-input"><input maxlength="4" style="width:60px;"></div>
+                        <div class="buttons">
+                          <div class="spinner-up"></div>
+                          <div class="spinner-down"></div>
+                        </div>
+                      </div>
+                   </li>
+                 </ul>
+                 <ul class="tab-body-row3">
+                   <li>
+                     <ul class="button-group">
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-text-link-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                           <span class="icon ico-link"></span>
+                         </button>
+                       </li>
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-text-unlink-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                           <span class="icon ico-unlink"></span>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                   <li>
+                     <ul class="button-group">
+                       <li class="dropdown shape-cprops-dropdown">
+                         <button id="contextual-properties-text-fontcolor-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                           <div class="icon fontcolor"></div>
+                           <div class="icon ico-dropdown"></div>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                   <li>
+                     <ul class="button-group">
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-text-aligntop-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;">
+                           <div class="icon aligntop"></div>
+                         </button>
+                       </li>
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-text-alignmiddle-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;">
+                           <div class="icon alignmiddle"></div>
+                         </button>
+                       </li>
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-text-alignbottom-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                           <span class="icon alignbottom"></span>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                 </ul>
+               </div>
+
+               <!-- line Tab Content -->
+               <div id="contextual-properties-tab-line" class="tab-body">
+                 <ul class="tab-body-row1">
+                   <li>
+                     <ul class="button-group">
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-line-linkertype-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                           <div class="icon linkertype-normal" style="margin: 0px 7px 0px 0px;"></div>
+                           <div class="icon ico-dropdown"></div>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                   <li>
+                     <ul class="button-group">
+                       <li class="dropdown shape-cprops-dropdown">
+                         <button id="contextual-properties-line-larrow-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                           <div class="icon ico-arrow larrow-none" style="margin: 0px 7px 0px 0px;"></div>
+                           <div class="icon ico-dropdown"></div>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                   <li>
+                     <ul class="button-group">
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-line-rarrow-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                           <div class="icon ico-arrow rarrow-none" style="margin: 0px 7px 0px 0px;"></div>
+                           <div class="icon ico-dropdown"></div>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                 </ul>
+                 <ul class="tab-body-row2">
+                   <li>
+                     <ul class="button-group">
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-line-linecolor-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                           <div class="icon linecolor" style="margin: 0px 7px 0px 0px;"></div>
+                           <div class="icon ico-dropdown"></div>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                   <li>
+                     <ul class="button-group">
+                       <li class="dropdown shape-cprops-dropdown">
+                         <button id="contextual-properties-line-linewidth-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                           <div class="icon linewidth" style="margin: 0px 7px 0px 0px;"></div>
+                           <div class="icon ico-dropdown"></div>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                   <li>
+                     <ul class="button-group">
+                       <li class="shape-cprops-dropdown">
+                         <button id="contextual-properties-line-linedash-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                           <div class="icon linedash" style="margin: 0px 7px 0px 0px;"></div>
+                           <div class="icon ico-dropdown"></div>
+                         </button>
+                       </li>
+                     </ul>
+                   </li>
+                 </ul>
+               </div>
+
             </div>
           </div>
 
