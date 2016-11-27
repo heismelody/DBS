@@ -889,6 +889,11 @@ input, textarea, div {
     border: #FFFFFF solid 2px;
     margin: -1px -2px -2px -1px;
 }
+.color-items .selected {
+    position: relative;
+    border: #f7ddaa solid 2px;
+    margin: -1px -2px -2px -1px;
+}
 /* color picker end*/
 
 
@@ -1276,7 +1281,7 @@ input, textarea, div {
     width: 76px;
     height: 18px;
     line-height: 18px;
-    color: #666;
+    color: #000;
     float: left;
     clear: right;
     margin-left: 0px;
@@ -1746,11 +1751,18 @@ button:focus {
 #contextual-properties-tab-line.active {
   display: inline-block;
 }
+#page-contextual-properties-dialog .btn-color{
+    left: 7px;
+    bottom: 4px;
+}
 
 
     /*#page-contextual-properties-dialog  text-tab end*/
 /*UI container end*/
-
+  /*this used for hide the upper layer when click diagram*/
+.event-none{
+  pointer-events: none;
+}
 .design-layout {
   height: 828px;
 }

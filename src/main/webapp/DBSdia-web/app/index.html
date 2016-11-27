@@ -316,7 +316,7 @@
         </ul>
 
         <div id="color-picker" class="menu color-picker" style="top: 78px; left: 381px; display: none;" init="true">
-          <div class="color-items" col="(0,0,0,0">
+          <div class="color-items" col="(0,0,0,0" v-on:mousemove="colorPickMouseMove" @click="colorPickClick">
             <div style="background-color:rgb(255,255,255);" col="255,255,255"></div>
             <div style="background-color:rgb(229,229,229);" col="229,229,229"></div>
             <div style="background-color:rgb(207,207,207);" col="207,207,207"></div>
@@ -332,7 +332,7 @@
             <div class="clear" col="(0,0,0,0"></div>
           </div>
 
-          <div class="color-items" col="(0,0,0,0">
+          <div class="color-items" col="(0,0,0,0" v-on:mousemove="colorPickMouseMove" @click="colorPickClick">
           	<div style="background-color:rgb(255,204,204);" col="255,204,204">
           	</div>
           	<div style="background-color:rgb(255,230,204);" col="255,230,204">
@@ -552,7 +552,7 @@
           	<div class="clear" col="(0,0,0,0">
           	</div>
           </div>
-          <div class="color-hex" col="(0,0,0,0">#<input type="text"></div>
+          <div class="color-hex" col="(0,0,0,0">#<input type="text" v-model="curColor"></div>
         </div>
 
         <ul id="designer-contextmenu" class="menu list options-menu" style="display: none; z-index: 7;" v-on:contextmenu="menuRightClickHandler">
@@ -726,12 +726,14 @@
                           <li class="shape-cprops-dropdown">
                             <button id="contextual-properties-fill-button" class="btn" data-toggle="button" data-original-title="shape color" style="display: inline-block;">
                               <div class="icon ico-properties-shapecolor"></div>
+                              <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
                               <div class="icon ico-dropdown"></div>
                             </button>
                           </li>
                           <li class="shape-cprops-dropdown">
                             <button id="contextual-properties-bordercolor-button" class="btn" data-toggle="button" data-original-title="border color" style="display: inline-block;">
                               <div class="icon ico-properties-linecolor"></div>
+                              <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
                               <div class="icon ico-dropdown"></div>
                             </button>
                           </li>
@@ -931,6 +933,7 @@
                        <li class="dropdown shape-cprops-dropdown">
                          <button id="contextual-properties-text-fontcolor-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon fontcolor"></div>
+                           <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
                        </li>
@@ -998,6 +1001,7 @@
                        <li class="shape-cprops-dropdown">
                          <button id="contextual-properties-line-linecolor-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon linecolor" style="margin: 0px 7px 0px 0px;"></div>
+                           <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
                        </li>

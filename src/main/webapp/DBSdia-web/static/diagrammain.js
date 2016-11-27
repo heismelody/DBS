@@ -35,6 +35,7 @@ define(function(require, exports, module) {
       uIManager.rightFloatMenu();
       uIManager.rightFloatPage();
       uIManager.contextDialog();
+      uIManager.colorPicker();
 
       _initDom();
       _initEvent();

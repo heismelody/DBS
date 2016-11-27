@@ -51,6 +51,8 @@ define(function(require, exports, module) {
      var end;
      var isStart;
 
+     var _mousePosDiagramArray = new Array();
+
      function ExtractNumber(value) {
        let n = parseInt(value);
        return n == null || isNaN(n) ? 0 : n;
@@ -58,6 +60,45 @@ define(function(require, exports, module) {
 
     diagramUtil.initjQueryMethod();
     var eventHelper = {
+      forwardDiagramEvent : function (eventName,inPathFunction,notInPathFunction,e,position) {
+        if(e.target.className.indexOf("diagram-object-canvas") != -1) {
+          let curId = $(e.target).parent().attr("id");
+          let ctx = $(e.target)[0].getContext("2d");
+          let curX;
+          let curY;
+          if(position != undefined) {
+            curX = position.x;
+            curY = position.y;
+          }
+          else {
+            curX = e.pageX;
+            curY = e.pageY;
+          }
+          let pos = diagramUtil.getRelativePosOffset(curX,curY,$(e.target));
+
+          if(ctx.isPointInPath(pos.x,pos.y)) {
+            inPathFunction(e);
+            for(var i in _mousePosDiagramArray) {
+              $("#" + _mousePosDiagramArray[i]).removeClass("event-none");
+            }
+            _mousePosDiagramArray = [];
+          }
+          else {
+            _mousePosDiagramArray.push(curId);
+            $("#"+curId).addClass("event-none");
+            $(document.elementFromPoint(curX,curY)).trigger(eventName,{x:curX,y:curY});
+          }
+        }
+        else {
+          if(_mousePosDiagramArray.length != 0) {
+            for(var i in _mousePosDiagramArray) {
+              $("#" + _mousePosDiagramArray[i]).removeClass("event-none");
+            }
+            _mousePosDiagramArray = [];
+            notInPathFunction();
+          }
+        }
+      },
       initEvent : function() {
         eventHelper.initFloatMenuEvent();
 
@@ -104,10 +145,37 @@ define(function(require, exports, module) {
           eventHelper.MouseDownHandler(e,eventHelper.panelitemMouseDownHandler);
         });
         //diagram mouse down / click
-        $(".design-layout").on('mousedown','.diagram-object-canvas',function(e) {
-          eventHelper.MouseDownHandler(e,eventHelper.diagramObjMouseDownHandler);
+        $(".design-layout").on('mousedown',function(e,position) {
+          eventHelper.forwardDiagramEvent('mousedown',function(e) {
+            if(position != undefined) {
+              e.clientX = position.x;
+              e.clientY = position.y;
+              e.pageX = position.x;
+              e.pageY = position.y;
+              e.button = 0;
+            }
+            eventHelper.MouseDownHandler(e,eventHelper.diagramObjMouseDownHandler);
+          },
+          function(){
+            selectedManager.removeSelected();
+            $("#designer-contextmenu").hide();
+          },
+          e,position);
         });
-        $(".design-layout").on('click','.diagram-object-canvas', eventHelper.diagramObjClickHandler);
+        $(".design-layout").on('dblclick',function diagramdbClick(e,position) {
+          //diagramManager.getDiagramByPosition(100,200);
+        });
+        $(".design-layout").on('mousemove',function(e,position)  {
+          eventHelper.forwardDiagramEvent('mousemove',function(e) {
+            let curId = $(e.target).parent().attr("id");
+            diagramDesigner.addDiagramAnchorOverlay(curId);
+          },
+          function(){
+            $('.anchor-overlay').remove();
+          },
+          e,position);
+        });
+        //$(".design-layout").on('click','.diagram-object-canvas', eventHelper.diagramObjClickHandler);
         //line mouse down / click
         $(".design-layout").on('mousedown','.line-object-canvas',function(e) {
           eventHelper.MouseDownHandler(e,eventHelper.lineObjMouseDownHandler);
@@ -217,7 +285,6 @@ define(function(require, exports, module) {
             if(e.clientX > 178) {
               let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$("#creating-diagram"));
               let newId = diagramDesigner.afterCreatingDiagram(pos.x,pos.y,_shapeName);
-              $("#" + newId).find("canvas").hover(eventHelper.diagramObjMouseEnterHandler,eventHelper.diagramObjMouseLeaveHandler);
             }
             else {
               $('#creating-designer-diagram').hide();
@@ -225,6 +292,7 @@ define(function(require, exports, module) {
             }
             $('#creating-diagram').hide();
             target.style.zIndex = 0;
+            target = null;
 
             // this is how we know we're not dragging
             _dragElement = null;
@@ -275,15 +343,6 @@ define(function(require, exports, module) {
             // this is how we know we're not dragging
             _dragElement = null;
         }
-      },
-      diagramObjMouseEnterHandler : function(e) {
-        let curId = $(e.target).parent().attr("id");
-
-        diagramDesigner.addDiagramAnchorOverlay(curId);
-        $('.anchor-overlay-container').addClass("anchor-hover");
-      },
-      diagramObjMouseLeaveHandler : function(e) {
-        $('.anchor-hover').remove();
       },
       diagramObjClickHandler: function(e) {
         let curId = $(target).parent().attr("id");

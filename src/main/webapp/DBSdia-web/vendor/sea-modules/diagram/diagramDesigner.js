@@ -252,6 +252,7 @@ define(function(require, exports, module) {
       drawDiagramById : function () {
 
       },
+      
       resolvePath : function resolvePath(ctx,shapeName,diagramId) {
         //draw template diagram
         if(arguments.length == 2) {

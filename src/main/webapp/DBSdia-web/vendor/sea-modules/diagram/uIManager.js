@@ -717,6 +717,36 @@ define(function(require, exports, module) {
 
       },
 
+      colorPicker : function () {
+        var colorPickerVM = new Vue({
+            el: '#color-picker',
+            data: {
+                curColor : "FFFFFF",
+            },
+            watch: {
+
+            },
+            methods: {
+                colorPickMouseMove :function (e) {
+                    let rgb = $(e.target).attr("col").split(",");
+                    this.curColor =
+                    ("0" + parseInt(rgb[0],10).toString(16)).slice(-2) +
+                    ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+                    ("0" + parseInt(rgb[2],10).toString(16)).slice(-2);
+                },
+                colorPickClick : function (e) {
+                    $("#color-picker").find(".selected").removeClass("selected");
+                    $(e.target).addClass("selected");
+                    let rgb = $(e.target).attr("col").split(",");
+                    this.curColor =
+                        ("0" + parseInt(rgb[0],10).toString(16)).slice(-2) +
+                        ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+                        ("0" + parseInt(rgb[2],10).toString(16)).slice(-2);
+                },
+            },
+        });
+      },
+
     }
 
     return uIManager;
