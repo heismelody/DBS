@@ -252,7 +252,7 @@ define(function(require, exports, module) {
       drawDiagramById : function () {
 
       },
-      
+
       resolvePath : function resolvePath(ctx,shapeName,diagramId) {
         //draw template diagram
         if(arguments.length == 2) {
@@ -373,6 +373,79 @@ define(function(require, exports, module) {
           }
         }
       },
+
+      /**
+     * Get all Points given radius and centre of this circle(36 points)
+     * @param {number} x - The centre of this circle x value.
+     * @param {number} y - The centre of this circle y value.
+     * @param {number} r - The radius.
+     * @return {Array} Points in this circle(36 points).
+     */
+      getCirclePoints: function(x,y,r) {
+    		let theta = Math.PI / 18;
+    		let result = [];
+    		for (let i = 0; i < 36; i++) {
+    			let curAngle = theta * i;
+    			let point = {
+    				"x": x - Math.cos(curAngle) * r,
+    				"y": y - Math.sin(curAngle) * r,
+    				"angle": curAngle
+    			};
+    			result.push(point)
+    		}
+    		return result;
+    	},
+      /**
+     * check if a point within the border area of given diagram object.
+     * @param {number} ctx - diagram object canvas ctx
+     * @param {number} x - The point x value.(must be coordinate relative to canvas)
+     * @param {number} y - The point y value.
+     * @param {number} d - The max distance of the border area.
+     * @return {boolean} true if is within the border area.
+     */
+      isPointWithinBorderArea : function (ctx,x,y,d) {
+        let circlePoints = this.getCirclePoints(x,y,d);
+
+        for(let i in circlePoints) {
+          if(ctx.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
+            return true;
+          }
+        }
+        return false;
+      },
+      /**
+     * Given a point within the border area, return the corresponding anchor position
+     * in this diagramObj/canvas.
+     */
+      getAnchorPosByCurPos : function (ctx,x,y,d) {
+        let curAnchor;
+        let circlePoints = this.getCirclePoints(x,y,d);
+        let pointsInDiagram = [];
+
+        for(let i in circlePoints) {
+          if(ctx.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
+            pointsInDiagram.push(circlePoints[i]);
+          }
+        }
+        let farthestPointIndiagram = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)];
+        let record;
+        for(let lamda = 0.0; lamda <= 1.0; lamda += 0.1) {
+          let curX = lambda * x + (1 - lambda) * farthestPointIndiagram.x;
+          let curY = lambda * y + (1 - lambda) * farthestPointIndiagram.y;
+          let iscurPointInPath = ctx.isPointInPath(curX,curY);
+
+          if(lamda == 0.0) {
+            record = iscurPointInPath;
+          }
+          if(record != iscurPointInPath) {
+            return {
+              x: curX,
+              y: curY,
+            }
+          }
+        }
+      },
+
 
     };
 
