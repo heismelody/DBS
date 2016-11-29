@@ -47,6 +47,8 @@ define(function(require, exports, module) {
       },
       removeSelected : function() {
         if(_GlobalSelectedDiagrams.length != 0) {
+          $(".canvas-container").css("cursor","default");
+          $("#page-contextual-properties-dialog-trigger").hide();
           for(let i =_GlobalSelectedDiagrams.length - 1; i >= 0; i--) {
             diagramDesigner.removeControlOverlay(_GlobalSelectedDiagrams[i]);
             _GlobalSelectedDiagrams.pop();

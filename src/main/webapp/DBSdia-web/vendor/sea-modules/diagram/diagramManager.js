@@ -367,7 +367,7 @@ define(function(require, exports, module) {
         },
         //Remove later
         isLine : function(id) {
-          return this.getShapeNameById(id) ? true : false;
+          return this.getShapeNameById(id) == "line" ? true : false;
         },
       },
 

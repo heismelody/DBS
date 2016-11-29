@@ -601,6 +601,90 @@ define(function(require, exports, module) {
 
       contextDialog : function () {
         var target,_dragElement;
+        var contextTriggerVM = new Vue({
+          el: '#page-contextual-properties-dialog-trigger',
+          data: {
+            selectedObj : selectedManager.getSelected(),
+
+            isShape : true,
+            isLine : false,
+            isGroup : false,
+            shapeDisplay : "block",
+            lineDisplay : "none",
+            groupDisplay : "none",
+          },
+          watch: {
+            selectedObj : function (val) {
+              if(val.length == 0) {
+
+              }
+              else if(val.length == 1) {
+                //line
+                if(objectManager.isLine(val[0])) {
+                  this.isShape = false;
+                  this.isLine = true;
+                  this.isGroup = false;
+                  this.shapeDisplay = "none";
+                  this.lineDisplay = "block";
+                  this.groupDisplay = "none";
+                }
+                //shape
+                else {
+                  this.isShape = true;
+                  this.isLine = false;
+                  this.isGroup = false;
+                  this.shapeDisplay = "block";
+                  this.lineDisplay = "none";
+                  this.groupDisplay = "none";
+                }
+              }
+              //group
+              else {
+                this.isShape = false;
+                this.isLine = false;
+                this.isGroup = true;
+                this.shapeDisplay = "none";
+                this.lineDisplay = "none";
+                this.groupDisplay = "block";
+              }
+            },
+          },
+          methods: {
+            triggerShapeClick : function (e) {
+              $(this.$el).hide();
+              $("#page-contextual-properties-dialog").css({
+                "left" : $(this.$el).css("left"),
+                "top" : $(this.$el).css("top"),
+              }).show();
+              $(".shape-properties-tab")[0].click();
+            },
+            triggerLineClick : function (e) {
+              $(this.$el).hide();
+              $("#page-contextual-properties-dialog").css({
+                "left" : $(this.$el).css("left"),
+                "top" : $(this.$el).css("top"),
+              }).show();
+              $(".line-properties-tab")[0].click();
+            },
+            triggerGroupClick : function (e) {
+              $(this.$el).hide();
+              $("#page-contextual-properties-dialog").css({
+                "left" : $(this.$el).css("left"),
+                "top" : $(this.$el).css("top"),
+              }).show();
+              //$(".group-properties-tab").trigger("click");
+            },
+            triggerTextClick : function (e) {
+              $(this.$el).hide();
+              $("#page-contextual-properties-dialog").css({
+                "left" : $(this.$el).css("left"),
+                "top" : $(this.$el).css("top"),
+              }).show();
+              $(".ico-text-properties-tab-container")[0].click();
+            },
+          },
+        });
+
         var contextDialogControlVM = new Vue({
           el: '#contextual-properties-controls-tabs',
           data: {
@@ -648,8 +732,8 @@ define(function(require, exports, module) {
               //Mouse move in the left panel
               let curOffsetX = _offsetX + e.clientX - _startX;
               let curOffsetY = _offsetY + e.clientY - _startY;
-              $("#page-contextual-properties-dialog").css("left",curOffsetX);
-              $("#page-contextual-properties-dialog").css("top",curOffsetY);
+              $("#page-contextual-properties-dialog").css("left",curOffsetX)
+                                                     .css("top",curOffsetY);
             },
             dragareaMouseupHandler: function (e) {
               if (_dragElement != null) {

@@ -691,7 +691,22 @@
         		<li s="40"><div class="icon ico-selected"></div>Very Large</li>
         	</ul>
 
-          <div id="page-contextual-properties-dialog">
+          <div id="page-contextual-properties-dialog-trigger" class="button-group" style="display: none;">
+              <button id="contextual-properties-shape-trigger" v-bind:class="{ 'enabled': isShape }" v-bind:style="{ 'display': shapeDisplay }" @click="triggerShapeClick" value="shape" class="btn-blue" data-original-title="edit shape properties">
+                <i class="tool-rect icon-toolbar-rectangle-white"></i>
+              </button>
+              <button id="contextual-properties-line-trigger" v-bind:class="{ 'enabled': isLine }" v-bind:style="{ 'display': lineDisplay }" @click="triggerLineClick" value="line" class="btn-blue" data-original-title="edit table properties">
+                <i class="tool-type icon-toolbar-line-white"></i>
+              </button>
+              <button id="contextual-properties-group-trigger" v-bind:class="{ 'enabled': isGroup }" v-bind:style="{ 'display': groupDisplay }" @click="triggerGroupClick" value="group" class="btn-blue" data-original-title="edit custom properties">
+                <i class="tool-type icon-toolbar-group-white"></i>
+              </button>
+              <button id="contextual-properties-text-trigger" @click="triggerTextClick" value="text" class="btn-blue" data-original-title="edit text properties">
+                <i class="tool-type icon-toolbar-text-white"></i>
+              </button>
+          </div>
+
+          <div id="page-contextual-properties-dialog" style="display:none;">
             <div class="contextual-properties-container">
 
               <div id="contextual-properties-controls-tabs">

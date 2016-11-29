@@ -60,7 +60,12 @@ define(function(require, exports, module) {
 
     diagramUtil.initjQueryMethod();
     var eventHelper = {
-      forwardDiagramEvent : function (eventName,inPathFunction,notInPathFunction,e,position) {
+      forwardDiagramEvent : function (eventName,
+                                      inPathFunction,
+                                      inBorderAreaFunction,
+                                      notInPathNBorderFunction,
+                                      e,
+                                      position) {
         if(e.target.className.indexOf("diagram-object-canvas") != -1) {
           let curId = $(e.target).parent().attr("id");
           let ctx = $(e.target)[0].getContext("2d");
@@ -84,9 +89,18 @@ define(function(require, exports, module) {
             _mousePosDiagramArray = [];
           }
           else {
-            _mousePosDiagramArray.push(curId);
-            $("#"+curId).addClass("event-none");
-            $(document.elementFromPoint(curX,curY)).trigger(eventName,{x:curX,y:curY});
+            if(diagramDesigner.isPointWithinBorderArea.call(ctx,pos.x,pos.y,7)) {
+              inBorderAreaFunction(e);
+              for(var i in _mousePosDiagramArray) {
+                $("#" + _mousePosDiagramArray[i]).removeClass("event-none");
+              }
+              _mousePosDiagramArray = [];
+            }
+            else {
+              _mousePosDiagramArray.push(curId);
+              $("#"+curId).addClass("event-none");
+              $(document.elementFromPoint(curX,curY)).trigger(eventName,{x:curX,y:curY});
+            }
           }
         }
         else {
@@ -95,7 +109,7 @@ define(function(require, exports, module) {
               $("#" + _mousePosDiagramArray[i]).removeClass("event-none");
             }
             _mousePosDiagramArray = [];
-            notInPathFunction();
+            notInPathNBorderFunction();
           }
         }
       },
@@ -106,6 +120,11 @@ define(function(require, exports, module) {
           if(e.target.id == "designer-grids" || e.target.className == "canvas-container") {
             selectedManager.removeSelected();
             $("#designer-contextmenu").hide();
+          }
+        });
+        $(".design-layout").on("mousemove",function (e) {
+          if(e.target.id == "designer-grids" || e.target.className == "canvas-container") {
+            $(".canvas-container").css("cursor","default");
           }
         });
 
@@ -156,6 +175,9 @@ define(function(require, exports, module) {
             }
             eventHelper.MouseDownHandler(e,eventHelper.diagramObjMouseDownHandler);
           },
+          function () {
+
+          },
           function(){
             selectedManager.removeSelected();
             $("#designer-contextmenu").hide();
@@ -168,10 +190,17 @@ define(function(require, exports, module) {
         $(".design-layout").on('mousemove',function(e,position)  {
           eventHelper.forwardDiagramEvent('mousemove',function(e) {
             let curId = $(e.target).parent().attr("id");
+            $(".canvas-container").css("cursor","move");
+            diagramDesigner.addDiagramAnchorOverlay(curId);
+          },
+          function () {
+            let curId = $(e.target).parent().attr("id");
+            $(".canvas-container").css("cursor","crosshair");
             diagramDesigner.addDiagramAnchorOverlay(curId);
           },
           function(){
             $('.anchor-overlay').remove();
+            $(".canvas-container").css("cursor","default");
           },
           e,position);
         });
@@ -194,6 +223,20 @@ define(function(require, exports, module) {
         });
         $(".design-layout").on('mousedown','.control-overlay.se',function(e) {
           eventHelper.MouseDownHandler(e,eventHelper.resizeMousedownHandler);
+        });
+        $(".design-layout").on('mousemove','.control-overlay',function(e) {
+          if(e.target.className.indexOf("nw") != -1) {
+            $(".canvas-container").css("cursor","nw-resize");
+          }
+          else if (e.target.className.indexOf("ne") != -1) {
+            $(".canvas-container").css("cursor","ne-resize");
+          }
+          else if (e.target.className.indexOf("sw") != -1) {
+            $(".canvas-container").css("cursor","sw-resize");
+          }
+          else if (e.target.className.indexOf("se") != -1) {
+            $(".canvas-container").css("cursor","se-resize");
+          }
         });
 
 
@@ -314,6 +357,17 @@ define(function(require, exports, module) {
 
         // tell our code to start moving the element with the mouse
         if(e.button == 0) {
+          let curId = $(_dragElement).attr("id");
+          for(let i = 0; i < $(".diagram-object-container").length; i++) {
+            if(curId != $($(".diagram-object-container")[i]).attr("id")) {
+              $($(".diagram-object-container")[i]).addClass("event-none");
+            }
+          }
+          $("#page-contextual-properties-dialog-trigger").css({
+            "left": $(_dragElement).offset()["left"] + parseInt($(_dragElement).css("width")) + "px",
+            "top" : $(_dragElement).offset()["top"] + 20 + "px",
+          }).show();
+          $("#page-contextual-properties-dialog").hide();
           document.onmousemove = eventHelper.diagramObjMouseMoveHandler;
           document.onmouseup = eventHelper.diagramObjMouseUpHandler;
         }
@@ -332,16 +386,22 @@ define(function(require, exports, module) {
       },
       diagramObjMouseUpHandler : function(e) {
         if (_dragElement != null) {
-            _dragElement.style.zIndex = _oldZIndex;
+          for(let i = 0; i < $(".diagram-object-container").length; i++) {
+            $($(".diagram-object-container")[i]).removeClass("event-none");
+          }
+          $("#page-contextual-properties-dialog-trigger").css({
+            "left": $(_dragElement).offset()["left"] + parseInt($(_dragElement).css("width")) + "px",
+            "top" : $(_dragElement).offset()["top"] + 20 + "px",
+          }).show();
+          $("#page-contextual-properties-dialog").hide();
 
-            // we're done with these events until the next OnMouseDown
-            document.onmousemove = null;
-            document.onselectstart = null;
-            _dragElement.ondragstart = null;
-            target.style.zIndex = 0;
+          // we're done with these events until the next OnMouseDown
+          document.onmousemove = null;
+          document.onselectstart = null;
+          _dragElement.ondragstart = null;
 
-            // this is how we know we're not dragging
-            _dragElement = null;
+          // this is how we know we're not dragging
+          _dragElement = null;
         }
       },
       diagramObjClickHandler: function(e) {

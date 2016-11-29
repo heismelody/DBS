@@ -397,17 +397,17 @@ define(function(require, exports, module) {
     	},
       /**
      * check if a point within the border area of given diagram object.
-     * @param {number} ctx - diagram object canvas ctx
+     * @param {call obj} ctx - diagram object canvas ctx
      * @param {number} x - The point x value.(must be coordinate relative to canvas)
      * @param {number} y - The point y value.
      * @param {number} d - The max distance of the border area.
      * @return {boolean} true if is within the border area.
      */
-      isPointWithinBorderArea : function (ctx,x,y,d) {
-        let circlePoints = this.getCirclePoints(x,y,d);
+      isPointWithinBorderArea : function (x,y,d) {
+        let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
 
         for(let i in circlePoints) {
-          if(ctx.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
+          if(this.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
             return true;
           }
         }
@@ -417,13 +417,13 @@ define(function(require, exports, module) {
      * Given a point within the border area, return the corresponding anchor position
      * in this diagramObj/canvas.
      */
-      getAnchorPosByCurPos : function (ctx,x,y,d) {
+      getAnchorPosByCurPos : function (x,y,d) {
         let curAnchor;
-        let circlePoints = this.getCirclePoints(x,y,d);
+        let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
         let pointsInDiagram = [];
 
         for(let i in circlePoints) {
-          if(ctx.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
+          if(this.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
             pointsInDiagram.push(circlePoints[i]);
           }
         }
@@ -432,7 +432,7 @@ define(function(require, exports, module) {
         for(let lamda = 0.0; lamda <= 1.0; lamda += 0.1) {
           let curX = lambda * x + (1 - lambda) * farthestPointIndiagram.x;
           let curY = lambda * y + (1 - lambda) * farthestPointIndiagram.y;
-          let iscurPointInPath = ctx.isPointInPath(curX,curY);
+          let iscurPointInPath = this.isPointInPath(curX,curY);
 
           if(lamda == 0.0) {
             record = iscurPointInPath;
