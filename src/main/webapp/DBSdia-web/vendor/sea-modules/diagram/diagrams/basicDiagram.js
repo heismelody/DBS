@@ -26,14 +26,14 @@ define(function(require, exports, module) {
           w: 80,
           h: 70
         },
-        textArea: [{
+        textArea: {
           position: {
             x: "10",
             y: "h*0.25",
             w: "w-20",
             h: "h*0.75"
           }
-        }],
+        },
         anchors: [{
           x: "w/2",
           y: "0"
@@ -73,14 +73,14 @@ define(function(require, exports, module) {
       		w: 70,
       		h: 70
       	},
-      	textArea: [{
+      	textArea: {
       		position: {
       			x: "10",
       			y: "10",
       			w: "w-20",
       			h: "h-20"
       		}
-      	}],
+      	},
       	path: [{
       		actions: [{
       			action: "move",
@@ -128,14 +128,14 @@ define(function(require, exports, module) {
       		h: 100
       	},
       	anchors: [],
-      	textBlock: [{
+      	textArea: {
       		position: {
       			x: 10,
       			y: 10,
       			w: "w-20",
       			h: "h-20"
       		}
-      	}],
+      	},
       	path: [{
       		actions: [{
       			action: "move",

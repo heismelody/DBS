@@ -3,6 +3,7 @@ define(function(require, exports, module) {
   var DiagramUtil = require('./Util.js');
   var LineManager = require('./lineManager.js');
 
+  var diagramManager = DiagramManager.diagramManager;
   var lineManager = LineManager.lineManager;
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
@@ -183,6 +184,142 @@ define(function(require, exports, module) {
         this.closePath();
       },
 
+      drawTextArea : function (jqObj) {
+        let curId = jqObj.attr("target");
+        let diagramEle = $("#" + curId);
+        let diagramTextArea = diagramManager.getAttrById(curId,{textArea:[]});
+        let diagramFontStyle = diagramManager.getAttrById(curId,{fontStyle:[]});
+        let textAlignTB = "middle";
+        let textAlignLMR = "left";
+        let w = jqObj.siblings("canvas")[0].width;
+        let h = jqObj.siblings("canvas")[0].height;
+        let text;
+        let textAreaStyle = {
+          "width"          : w - 40 + "px",
+          "z-index"        : "50",
+          "line-height"    : Math.round(diagramFontStyle.size * 1.25) + "px",
+          "font-size"      : diagramFontStyle.size + "px",
+          "font-family"    : diagramFontStyle.fontFamily,
+          "font-weight"    : diagramFontStyle.bold ? "bold" : "normal",
+          "font-style"     : diagramFontStyle.italic ? "italic" : "normal",
+          "text-align"     : textAlignLMR,
+          "color"          : "rgb(" + diagramFontStyle.color + ")",
+          "text-decoration": diagramFontStyle.underline ? "underline" : "none"
+        }
+        text = jqObj.val();
+        text = (text == undefined) ? "" : text ;
+        switch (textAlignTB) {
+          case "top":
+            anchor = templateManager.getDefaultAnchor("n");
+            curanchorXY = diagramUtil.evaluate(anchor,w,h);
+            $(jqObj).css({
+                      "left": curanchorXY.x - w/2 + 20,
+                      "top": curanchorXY.y,
+                    })
+                   .css(textAreaStyle)
+                   .val(text);
+            break;
+          case "bottom":
+            anchor = templateManager.getDefaultAnchor("s");
+            curanchorXY = diagramUtil.evaluate(anchor,w,h);
+            $(jqObj).css({
+                     "left": curanchorXY.x - w/2 + 20,
+                     "top": curanchorXY.y - parseInt(textAreaStyle["line-height"])*2,
+                    })
+                   .css(textAreaStyle)
+                   .val(text);
+            break;
+          case "middle":
+            $(jqObj).css({
+                       "left": 20,
+                       "top": h/2 - parseInt(textAreaStyle["line-height"])/2,
+                     })
+                     .css(textAreaStyle)
+                     .val(text);
+            break;
+          default:
+        }
+      },
+      addTextarea : function (diagramId) {
+        let curshapeName = objectManager.getShapeNameById(diagramId);
+        if(curshapeName == "line") {
+          this.addLineTextArea(diagramId);
+        }
+        else {
+          this.addDiagramTextArea(diagramId);
+        }
+      },
+      addLineTextArea : function (diagramId) {
+        let textAreaHtml = "<textarea id='line-textarea-editing'></textarea>";
+      },
+      addDiagramTextArea: function (diagramId) {
+        let diagramEle = $("#" + diagramId);
+        let canvas = diagramEle.find("canvas")[0];
+        let textAreaHtml = "<textarea id='shape-textarea-editing' target='" + diagramId + "'></textarea>";
+        let diagramTextArea = diagramManager.getAttrById(diagramId,{textArea:[]});
+        let diagramFontStyle = diagramManager.getAttrById(diagramId,{fontStyle:[]});
+        let textAlignTB = "middle";
+        let textAlignLMR = "left";
+        let anchor;
+        let w = canvas.width;
+        let h = canvas.height;
+        let curanchorXY = {};
+        let text;
+        let textAreaStyle = {
+          "width"          : w - 40 + "px",
+          "z-index"        : "50",
+          "line-height"    : Math.round(diagramFontStyle.size * 1.25) + "px",
+          "font-size"      : diagramFontStyle.size + "px",
+          "font-family"    : diagramFontStyle.fontFamily,
+          "font-weight"    : diagramFontStyle.bold ? "bold" : "normal",
+          "font-style"     : diagramFontStyle.italic ? "italic" : "normal",
+          "text-align"     : textAlignLMR,
+          "color"          : "rgb(" + diagramFontStyle.color + ")",
+          "text-decoration": diagramFontStyle.underline ? "underline" : "none"
+        }
+        text = diagramEle.find("textarea").val();
+        text = (text == undefined) ? "" : text ;
+        diagramEle.find("textarea").remove();
+
+        switch (textAlignTB) {
+          case "top":
+            anchor = templateManager.getDefaultAnchor("n");
+            curanchorXY = diagramUtil.evaluate(anchor,w,h);
+            $(textAreaHtml).appendTo($(".design-canvas"))
+                            .css({
+                              "left": parseInt(diagramEle.css("left")) + curanchorXY.x - w/2 + 20,
+                              "top": parseInt(diagramEle.css("top")) + curanchorXY.y,
+                            })
+                           .css(textAreaStyle)
+                           .val(text)
+                           .select();
+            break;
+          case "bottom":
+            anchor = templateManager.getDefaultAnchor("s");
+            curanchorXY = diagramUtil.evaluate(anchor,w,h);
+            $(textAreaHtml).appendTo($(".design-canvas"))
+                           .css({
+                             "left": parseInt(diagramEle.css("left")) + curanchorXY.x - w/2 + 20,
+                             "top": parseInt(diagramEle.css("top")) + curanchorXY.y - parseInt(textAreaStyle["line-height"])*2,
+                           })
+                           .css(textAreaStyle)
+                           .val(text)
+                           .select();
+            break;
+          case "middle":
+            $(textAreaHtml).appendTo($(".design-canvas"))
+                           .css({
+                             "left": parseInt(diagramEle.css("left")) + 20,
+                             "top": parseInt(diagramEle.css("top")) + h/2 - parseInt(textAreaStyle["line-height"])/2,
+                           })
+                           .css(textAreaStyle)
+                           .val(text)
+                           .select();
+            break;
+          default:
+        }
+
+      },
       addDiagramControlOverlay : function(diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         if(curshapeName == "line") {

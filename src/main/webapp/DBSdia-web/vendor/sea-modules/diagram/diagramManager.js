@@ -247,6 +247,23 @@ define(function(require, exports, module) {
         getDefaultTemplate : function getDefaultTemplate() {
           return defaultDiagramTemplate;
         },
+        getDefaultAnchor : function (dir) {
+          if(dir != undefined) {
+            switch (dir) {
+              case "n":
+                return defaultDiagramTemplate["anchors"][0];
+                break;
+              case "s":
+                return defaultDiagramTemplate["anchors"][1];
+                break;
+              default:
+              return defaultDiagramTemplate["anchors"];
+            }
+          }
+          else {
+            return defaultDiagramTemplate["anchors"];
+          }
+        },
         getAllCategory : function() {
           let allCategory = [];
           for(let category in _GlobalDiagramTemplates) {
@@ -468,7 +485,11 @@ define(function(require, exports, module) {
           for(let arg in args) {
             let attrObj = _GlobalDiagramOjects[id][arg];
             if(args[arg].length == 0) {
-              return attrObj;
+              result = this.getAttrByShapeName(shapeName,args)
+              for(let key in attrObj) {
+                result[key] = attrObj[key];
+              }
+              return result;
             }
             else {
               for(let i in args[arg]) {

@@ -19,8 +19,14 @@ define(function(require, exports, module) {
             $.fn.colorpicker = function(a) {
               console.log(a);
             };
+            $.fn.colorpickermenu = function(a) {
+              console.log(a);
+            };
             $.fn.textcontent = function(text) {
               this.find(".text-content").text(text);
+            };
+            $.fn.spininput = function(enteredHandler,spinUpHandler,spinDownHandler) {
+
             };
           })(jQuery);
       },
@@ -83,7 +89,7 @@ define(function(require, exports, module) {
         return pos;
       },
 
-      //not efficient because use eval();
+      //not efficient/safe because use eval();
       evaluate : function(expression,w,h) {
         if(typeof expression == "string") {
           return eval(expression);

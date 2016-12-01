@@ -121,6 +121,24 @@ define(function(require, exports, module) {
             selectedManager.removeSelected();
             $("#designer-contextmenu").hide();
           }
+        }).on("mousedown",function (e) {
+          if($("#shape-textarea-editing").length != 0) {
+            let editing = $("#shape-textarea-editing").detach();
+            let targetId = editing.attr("target");
+            let jqtarget = $("#" + targetId);
+
+            $(editing).appendTo(jqtarget)
+                      .css({
+                        "left": parseInt($(editing).css("left")) - parseInt(jqtarget.css("left")),
+                        "top": parseInt($(editing).css("top")) - parseInt(jqtarget.css("top")),
+                      })
+                      .attr("id","")
+                      .addClass("diagram-object-textare");
+          }
+          else if($("#line-textarea-editing").length != 0) {
+            let editing = $("#line-textarea-editing").detach();
+
+          }
         });
         $(".design-layout").on("mousemove",function (e) {
           if(e.target.id == "designer-grids" || e.target.className == "canvas-container") {
@@ -184,8 +202,14 @@ define(function(require, exports, module) {
           },
           e,position);
         });
-        $(".design-layout").on('dblclick',function diagramdbClick(e,position) {
-          //diagramManager.getDiagramByPosition(100,200);
+        $(".design-layout").on('dblclick',function(e,position)  {
+          eventHelper.forwardDiagramEvent('dblclick',function(e) {
+            let curId = $(e.target).parent().attr("id");
+            diagramDesigner.addTextarea(curId);
+          },
+          function(){},
+          function(){},
+          e,position);
         });
         $(".design-layout").on('mousemove',function(e,position)  {
           eventHelper.forwardDiagramEvent('mousemove',function(e) {
@@ -357,6 +381,7 @@ define(function(require, exports, module) {
 
         // tell our code to start moving the element with the mouse
         if(e.button == 0) {
+          $("#designer-contextmenu").hide();
           let curId = $(_dragElement).attr("id");
           for(let i = 0; i < $(".diagram-object-container").length; i++) {
             if(curId != $($(".diagram-object-container")[i]).attr("id")) {
@@ -496,6 +521,7 @@ define(function(require, exports, module) {
         if (_dragElement != null) {
             _dragElement.style.zIndex = _oldZIndex;
 
+            diagramDesigner.drawTextArea($("#" + curId).find("textarea"));
             // we're done with these events until the next OnMouseDown
             document.onmousemove = null;
             document.onselectstart = null;

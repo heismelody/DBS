@@ -1302,6 +1302,25 @@ input, textarea, div {
     border: 1px solid #ccc;
     border-radius: 3px;
 }
+#shape-textarea-editing,
+#line-textarea-editing {
+	position: absolute;
+	overflow: hidden;
+	background: rgba(255,255,255,.01);
+	border : 1px solid #B4B4B4;
+	padding: 0px;
+	cursor: text;
+}
+.diagram-object-textare,
+.line-object-textare {
+  pointer-events:none;
+  position: absolute;
+	overflow: hidden;
+	background: transparent;
+	border : 0px solid #B4B4B4;
+	padding: 0px;
+	cursor: text;
+}
 /*design right end*/
 
 /*UI container start*/

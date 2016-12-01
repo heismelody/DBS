@@ -601,6 +601,27 @@ define(function(require, exports, module) {
 
       contextDialog : function () {
         var target,_dragElement;
+        function initContext() {
+          let curSelected = selectedManager.getSelected();
+
+          if(curSelected.length == 0) {
+
+          }
+          else if(curSelected.length == 1) {
+            //line
+            if(objectManager.isLine(curSelected[0])) {
+
+            }
+            //shape
+            else {
+              
+            }
+          }
+          //group
+          else {
+
+          }
+        }
         var contextTriggerVM = new Vue({
           el: '#page-contextual-properties-dialog-trigger',
           data: {
@@ -655,7 +676,9 @@ define(function(require, exports, module) {
               $("#page-contextual-properties-dialog").css({
                 "left" : $(this.$el).css("left"),
                 "top" : $(this.$el).css("top"),
-              }).show();
+              }).show(function () {
+                initContext();
+              });
               $(".shape-properties-tab")[0].click();
             },
             triggerLineClick : function (e) {
@@ -663,7 +686,9 @@ define(function(require, exports, module) {
               $("#page-contextual-properties-dialog").css({
                 "left" : $(this.$el).css("left"),
                 "top" : $(this.$el).css("top"),
-              }).show();
+              }).show(function () {
+                initContext();
+              });
               $(".line-properties-tab")[0].click();
             },
             triggerGroupClick : function (e) {
@@ -671,7 +696,9 @@ define(function(require, exports, module) {
               $("#page-contextual-properties-dialog").css({
                 "left" : $(this.$el).css("left"),
                 "top" : $(this.$el).css("top"),
-              }).show();
+              }).show(function () {
+                initContext();
+              });
               //$(".group-properties-tab").trigger("click");
             },
             triggerTextClick : function (e) {
@@ -679,7 +706,9 @@ define(function(require, exports, module) {
               $("#page-contextual-properties-dialog").css({
                 "left" : $(this.$el).css("left"),
                 "top" : $(this.$el).css("top"),
-              }).show();
+              }).show(function () {
+                initContext();
+              });
               $(".ico-text-properties-tab-container")[0].click();
             },
           },
