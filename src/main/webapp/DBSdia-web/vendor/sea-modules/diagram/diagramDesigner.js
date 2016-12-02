@@ -185,6 +185,9 @@ define(function(require, exports, module) {
       },
 
       drawTextArea : function (jqObj) {
+        if(jqObj.length == 0) {
+          return;
+        }
         let curId = jqObj.attr("target");
         let diagramEle = $("#" + curId);
         let diagramTextArea = diagramManager.getAttrById(curId,{textArea:[]});

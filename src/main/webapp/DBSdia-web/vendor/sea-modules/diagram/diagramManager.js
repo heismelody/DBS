@@ -130,6 +130,7 @@ define(function(require, exports, module) {
     			underline: false,
     			textAlign: "center",
     			vAlign: "middle",
+          //borderAlign: "",
     			orientation: "vertical"
     		},
         //  the path and anchors properties are not stored in the diagram object.Please use the following rules.
@@ -450,11 +451,24 @@ define(function(require, exports, module) {
             let attrObj = _GlobalDiagramTemplates[category][shapeName][attrName];
 
             if(args[attrName].length == 0) {
-              for(let key in defaultDiagramTemplate[attrName]) {
-                result[key] = defaultDiagramTemplate[attrName][key];
+              if(defaultDiagramTemplate[attrName] instanceof Object) {
+                for(let key in defaultDiagramTemplate[attrName]) {
+                  result[key] = defaultDiagramTemplate[attrName][key];
+                }
               }
-              for(let key in attrObj) {
-                result[key] = attrObj[key];
+              else {
+                defaultDiagramTemplate[attrName] == undefined ?
+                  "" : result[attrName] = defaultDiagramTemplate[attrName];
+              }
+
+              if(attrObj instanceof Object) {
+                for(let key in attrObj) {
+                  result[key] = attrObj[key];
+                }
+              }
+              else {
+                attrObj == undefined ?
+                 "" : result[attrName] = attrObj;
               }
 
               return result;
@@ -485,10 +499,16 @@ define(function(require, exports, module) {
           for(let arg in args) {
             let attrObj = _GlobalDiagramOjects[id][arg];
             if(args[arg].length == 0) {
-              result = this.getAttrByShapeName(shapeName,args)
-              for(let key in attrObj) {
-                result[key] = attrObj[key];
+              result = this.getAttrByShapeName(shapeName,args);
+              if(attrObj instanceof Object) {
+                for(let key in attrObj) {
+                  result[key] = attrObj[key];
+                }
               }
+              else {
+                attrObj == undefined ? "" : result[arg] = attrObj;
+              }
+
               return result;
             }
             else {
@@ -513,10 +533,29 @@ define(function(require, exports, module) {
      * set diagram attribute by shapeName or id
      * @param {Array} shapeNameNId - EX:[shapeName,(diagramId optional)].
      * @param {Array} attrName - EX:["fontStyle","fontFamily"].
-     * @param {Array} attrValuee - EX:["fontStyle","fontFamily"].
+     * setAttr(id,{locked:true})
+     * setAttr(id,{properties:{
+     *   x: 100,
+     *   y: 250,
+     * }})
      */
-      setAttr : function(diagramId,attrName,attrValue) {
-
+      setAttr : function(diagramId,args) {
+        if(_GlobalDiagramOjects.hasOwnProperty(diagramId)) {
+          for(let arg in args) {
+            if(args[arg] instanceof Object) {
+              for(let key in args[arg]) {
+                _GlobalDiagramOjects[diagramId][arg][key] = args[arg][key];
+              }
+            }
+            else {
+              _GlobalDiagramOjects[diagramId][arg] = args[arg];
+            }
+          }
+          //send data here
+        }
+        else {
+          throw new Error("Diagram undefined!");
+        }
       },
 
     };

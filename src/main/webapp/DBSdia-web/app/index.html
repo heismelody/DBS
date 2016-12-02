@@ -739,14 +739,14 @@
                       <li>
                         <ul class="button-group">
                           <li class="shape-cprops-dropdown">
-                            <button id="contextual-properties-fill-button" class="btn" data-toggle="button" data-original-title="shape color" style="display: inline-block;">
+                            <button id="contextual-properties-fill-button" class="btn"  data-original-title="shape color" style="display: inline-block;">
                               <div class="icon ico-properties-shapecolor"></div>
                               <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
                               <div class="icon ico-dropdown"></div>
                             </button>
                           </li>
                           <li class="shape-cprops-dropdown">
-                            <button id="contextual-properties-bordercolor-button" class="btn" data-toggle="button" data-original-title="border color" style="display: inline-block;">
+                            <button id="contextual-properties-bordercolor-button" class="btn"  data-original-title="border color" style="display: inline-block;">
                               <div class="icon ico-properties-linecolor"></div>
                               <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
                               <div class="icon ico-dropdown"></div>
@@ -757,13 +757,13 @@
                       <li>
                         <ul class="button-group">
                           <li class="dropdown shape-cprops-dropdown">
-                            <button id="contextual-properties-border-width" class="btn shape-cprops-dropdown-button" data-toggle="button" data-original-title="border thickness" style="display: inline-block;">
+                            <button id="contextual-properties-border-width" class="btn shape-cprops-dropdown-button"  data-original-title="border thickness" style="display: inline-block;">
                               <div class="icon ico-properties-lineweight"></div>
                               <div class="icon ico-dropdown"></div>
                             </button>
                           </li>
                           <li class="dropdown shape-cprops-dropdown">
-                            <button id="contextual-properties-dash-style" class="btn shape-cprops-dropdown-button" data-toggle="button" data-original-title="line pattern" style="display: inline-block;">
+                            <button id="contextual-properties-dash-style" class="btn shape-cprops-dropdown-button"  data-original-title="line pattern" style="display: inline-block;">
                               <div class="icon ico-properties-linestyle"></div>
                               <div class="icon ico-dropdown"></div>
                             </button>
@@ -773,17 +773,17 @@
                       <li>
                         <ul class="button-group">
                           <li data-original-title="gradient">
-                            <button id="contextual-properties-gradient-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;">
+                            <button id="contextual-properties-gradient-button" class="btn"  data-original-title="Shape Opacity" style="display: inline-block;">
                               <div class="icon ico-properties-gradient"></div>
                             </button>
                           </li>
                           <li data-original-title="drop shadow">
-                            <button id="contextual-properties-shadow-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                            <button id="contextual-properties-shadow-button" class="btn"  data-original-title="" style="display: inline-block;">
                               <span class="icon icon-properties-dropshadow"></span>
                             </button>
                           </li>
                           <li class="shape-cprops-dropdown">
-                            <button id="contextual-properties-shape-opacity-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;">
+                            <button id="contextual-properties-shape-opacity-button" class="btn"  data-original-title="Shape Opacity" style="display: inline-block;">
                               <div class="icon ico-properties-opacity"></div>
                               <div class="icon ico-dropdown"></div>
                             </button>
@@ -796,7 +796,7 @@
                     <li>
                       <span class="icon ico-x"></span>
                       <div id="contextual-properties-textfield-x" class="spinner active btn-inline">
-                        <div class="spinner-input"><input maxlength="4"></div>
+                        <div class="spinner-input"><input maxlength="4" v-model="x"></div>
                         <div class="buttons">
                           <div class="spinner-up"></div>
                           <div class="spinner-down"></div>
@@ -806,7 +806,7 @@
                     <li>
                       <span class="icon ico-y"></span>
                       <div id="contextual-properties-textfield-y" class="spinner active btn-inline">
-                        <div class="spinner-input"><input maxlength="4"></div>
+                        <div class="spinner-input"><input maxlength="4" v-model="y"></div>
                         <div class="buttons">
                           <div class="spinner-up"></div>
                           <div class="spinner-down"></div>
@@ -816,7 +816,7 @@
                     <li>
                       <span class="icon ico-rotate"></span>
                       <div id="properties-textfield-rotation" class="spinner active btn-inline">
-                        <div class="spinner-input"><input maxlength="4"></div>
+                        <div class="spinner-input"><input maxlength="4" v-model="angle"></div>
                         <div class="buttons">
                           <div class="spinner-up"></div>
                           <div class="spinner-down"></div>
@@ -828,7 +828,7 @@
                     <li>
                       <span class="icon ico-properties-W"></span>
                       <div id="contextual-properties-textfield-width" class="spinner active btn-inline">
-                        <div class="spinner-input"><input maxlength="4"></div>
+                        <div class="spinner-input"><input maxlength="4" v-model="w"></div>
                         <div class="buttons">
                           <div class="spinner-up"></div>
                           <div class="spinner-down"></div>
@@ -838,7 +838,7 @@
                     <li>
                       <span class="icon ico-properties-H"></span>
                       <div id="contextual-properties-textfield-height" class="spinner active btn-inline">
-                        <div class="spinner-input"><input maxlength="4"></div>
+                        <div class="spinner-input"><input maxlength="4" v-model="h"></div>
                         <div class="buttons">
                           <div class="spinner-up"></div>
                           <div class="spinner-down"></div>
@@ -865,17 +865,17 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-text-bold-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                         <button id="contextual-properties-text-bold-button" class="btn" :class="boldActive" @click="boldClick" data-original-title="" style="display: inline-block;">
                            <span class="icon bold"></span>
                          </button>
                        </li>
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-text-italic-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                         <button id="contextual-properties-text-italic-button" class="btn" :class="italicActive" @click="italicClick"  data-original-title="" style="display: inline-block;">
                            <span class="icon italic"></span>
                          </button>
                        </li>
                        <li class="dropdown shape-cprops-dropdown">
-                         <button id="contextual-properties-text-underline-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                         <button id="contextual-properties-text-underline-button" class="btn" :class="underlineActive" @click="underlineClick"  data-original-title="" style="display: inline-block;">
                            <span class="icon underline"></span>
                          </button>
                        </li>
@@ -884,17 +884,17 @@
                    <li>
                      <ul class="button-group">
                        <li class="dropdown shape-cprops-dropdown">
-                         <button id="contextual-properties-text-alignleft-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                         <button id="contextual-properties-text-alignleft-button" class="btn" :class="textAlignLeftActive" @click="textalignLeftClick"  data-original-title="" style="display: inline-block;">
                            <span class="icon alignleft"></span>
                          </button>
                        </li>
                        <li data-original-title="gradient">
-                         <button id="contextual-properties-text-aligncenter-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;">
+                         <button id="contextual-properties-text-aligncenter-button" class="btn" :class="textAlignCenterActive" @click="textalignCenterClick"  data-original-title="Shape Opacity" style="display: inline-block;">
                            <div class="icon aligncenter"></div>
                          </button>
                        </li>
                        <li data-original-title="drop shadow">
-                         <button id="contextual-properties-text-alignright-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                         <button id="contextual-properties-text-alignright-button" class="btn" :class="textAlignRightActive" @click="textalignRightClick"  data-original-title="" style="display: inline-block;">
                            <span class="icon alignright"></span>
                          </button>
                        </li>
@@ -903,7 +903,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-text-align-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-text-align-button" class="btn"  data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon ico-properties-text-align"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
@@ -914,13 +914,13 @@
                  <ul class="tab-body-row2">
                    <li style="margin-right: 16px;">
                      <div id="contextual-properties-text-font" title="Font" style="width: 80px;" class="toolbar-button">
-                       <div class="text-content">Arial</div>
+                       <div class="text-content">{{fontfamily}}</div>
                        <div class="icon ico-dropdown"></div>
                      </div>
                    </li>
                    <li>
                      <div id="contextual-properties-text-fontsize" class="spinner active btn-inline">
-                        <div class="spinner-input"><input maxlength="4" style="width:60px;"></div>
+                        <div class="spinner-input"><input maxlength="4" style="width:60px;" v-model="fontsize"></div>
                         <div class="buttons">
                           <div class="spinner-up"></div>
                           <div class="spinner-down"></div>
@@ -932,12 +932,12 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-text-link-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                         <button id="contextual-properties-text-link-button" class="btn"  data-original-title="" style="display: inline-block;">
                            <span class="icon ico-link"></span>
                          </button>
                        </li>
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-text-unlink-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                         <button id="contextual-properties-text-unlink-button" class="btn"  data-original-title="" style="display: inline-block;">
                            <span class="icon ico-unlink"></span>
                          </button>
                        </li>
@@ -946,9 +946,9 @@
                    <li>
                      <ul class="button-group">
                        <li class="dropdown shape-cprops-dropdown">
-                         <button id="contextual-properties-text-fontcolor-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-text-fontcolor-button" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon fontcolor"></div>
-                           <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
+                           <div v-bind:style="{ 'background-color': fontcolor }" class="btn-color"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
                        </li>
@@ -957,17 +957,17 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-text-aligntop-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;">
+                         <button id="contextual-properties-text-aligntop-button" class="btn" :class="valignTopActive" @click="valignTopClick"  data-original-title="Shape Opacity" style="display: inline-block;">
                            <div class="icon aligntop"></div>
                          </button>
                        </li>
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-text-alignmiddle-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;">
+                         <button id="contextual-properties-text-alignmiddle-button" class="btn" :class="valignMiddleActive" @click="valignMiddleClick"  data-original-title="Shape Opacity" style="display: inline-block;">
                            <div class="icon alignmiddle"></div>
                          </button>
                        </li>
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-text-alignbottom-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;">
+                         <button id="contextual-properties-text-alignbottom-button" class="btn" :class="valignBottomActive" @click="valignBottomClick"  data-original-title="" style="display: inline-block;">
                            <span class="icon alignbottom"></span>
                          </button>
                        </li>
@@ -982,7 +982,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-line-linkertype-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-linkertype-button" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon linkertype-normal" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
@@ -992,7 +992,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="dropdown shape-cprops-dropdown">
-                         <button id="contextual-properties-line-larrow-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-larrow-button" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon ico-arrow larrow-none" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
@@ -1002,7 +1002,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-line-rarrow-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-rarrow-button" class="btn"  data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon ico-arrow rarrow-none" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
@@ -1014,7 +1014,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-line-linecolor-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-linecolor-button" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon linecolor" style="margin: 0px 7px 0px 0px;"></div>
                            <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
                            <div class="icon ico-dropdown"></div>
@@ -1025,7 +1025,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="dropdown shape-cprops-dropdown">
-                         <button id="contextual-properties-line-linewidth-button" class="btn" data-toggle="button" data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-linewidth-button" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon linewidth" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
@@ -1035,7 +1035,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-line-linedash-button" class="btn" data-toggle="button" data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-linedash-button" class="btn"  data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon linedash" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>

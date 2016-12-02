@@ -15,6 +15,7 @@ define(function(require, exports, module) {
   var objectManager = DiagramManager.diagramManager.objectManager;
   var selectedManager = SelectedManager.selectedManager;
   var pageManager = DiagramManager.diagramManager.pageManager;
+  var diagramManager = DiagramManager.diagramManager;
 
   var diagramUtil = DiagramUtil.diagramUtil;
 
@@ -601,118 +602,6 @@ define(function(require, exports, module) {
 
       contextDialog : function () {
         var target,_dragElement;
-        function initContext() {
-          let curSelected = selectedManager.getSelected();
-
-          if(curSelected.length == 0) {
-
-          }
-          else if(curSelected.length == 1) {
-            //line
-            if(objectManager.isLine(curSelected[0])) {
-
-            }
-            //shape
-            else {
-              
-            }
-          }
-          //group
-          else {
-
-          }
-        }
-        var contextTriggerVM = new Vue({
-          el: '#page-contextual-properties-dialog-trigger',
-          data: {
-            selectedObj : selectedManager.getSelected(),
-
-            isShape : true,
-            isLine : false,
-            isGroup : false,
-            shapeDisplay : "block",
-            lineDisplay : "none",
-            groupDisplay : "none",
-          },
-          watch: {
-            selectedObj : function (val) {
-              if(val.length == 0) {
-
-              }
-              else if(val.length == 1) {
-                //line
-                if(objectManager.isLine(val[0])) {
-                  this.isShape = false;
-                  this.isLine = true;
-                  this.isGroup = false;
-                  this.shapeDisplay = "none";
-                  this.lineDisplay = "block";
-                  this.groupDisplay = "none";
-                }
-                //shape
-                else {
-                  this.isShape = true;
-                  this.isLine = false;
-                  this.isGroup = false;
-                  this.shapeDisplay = "block";
-                  this.lineDisplay = "none";
-                  this.groupDisplay = "none";
-                }
-              }
-              //group
-              else {
-                this.isShape = false;
-                this.isLine = false;
-                this.isGroup = true;
-                this.shapeDisplay = "none";
-                this.lineDisplay = "none";
-                this.groupDisplay = "block";
-              }
-            },
-          },
-          methods: {
-            triggerShapeClick : function (e) {
-              $(this.$el).hide();
-              $("#page-contextual-properties-dialog").css({
-                "left" : $(this.$el).css("left"),
-                "top" : $(this.$el).css("top"),
-              }).show(function () {
-                initContext();
-              });
-              $(".shape-properties-tab")[0].click();
-            },
-            triggerLineClick : function (e) {
-              $(this.$el).hide();
-              $("#page-contextual-properties-dialog").css({
-                "left" : $(this.$el).css("left"),
-                "top" : $(this.$el).css("top"),
-              }).show(function () {
-                initContext();
-              });
-              $(".line-properties-tab")[0].click();
-            },
-            triggerGroupClick : function (e) {
-              $(this.$el).hide();
-              $("#page-contextual-properties-dialog").css({
-                "left" : $(this.$el).css("left"),
-                "top" : $(this.$el).css("top"),
-              }).show(function () {
-                initContext();
-              });
-              //$(".group-properties-tab").trigger("click");
-            },
-            triggerTextClick : function (e) {
-              $(this.$el).hide();
-              $("#page-contextual-properties-dialog").css({
-                "left" : $(this.$el).css("left"),
-                "top" : $(this.$el).css("top"),
-              }).show(function () {
-                initContext();
-              });
-              $(".ico-text-properties-tab-container")[0].click();
-            },
-          },
-        });
 
         var contextDialogControlVM = new Vue({
           el: '#contextual-properties-controls-tabs',
@@ -805,17 +694,94 @@ define(function(require, exports, module) {
         var contextDialogShapeTabVM = new Vue({
           el: '#contextual-properties-contents',
           data: {
+            //model variable
+            x : 0,
+            y : 0,
+            w : 0,
+            h : 0,
+            angle : 0,
+            locked : false,
+
+            //view variable
 
           },
           methods: {
+
           },
         });
         var contextDialogTextTabVM = new Vue({
           el: '#contextual-properties-tab-text',
           data: {
+            //model variable
+            bold : "",
+            italic : "",
+            underline : "",
+            textalign : "",
+            fontfamily : "",
+            fontsize : "",
+            fontcolor : "",
+            valign : "",
 
+            //view variable
+            boldActive : "",
+            italicActive : "",
+            underlineActive : "",
+            textAlignLeftActive : "",
+            textAlignRightActive : "",
+            textAlignCenterActive : "",
+            valignTopActive : "",
+            valignMiddleActive : "",
+            valignBottomActive : "",
+          },
+          watch: {
+            bold : function (val) {
+              (val == "bold") ? (this.boldActive = "active") : (this.boldActive = "");
+            },
+            italic : function (val) {
+              (val == "italic") ? (this.italicActive = "active") : (this.italicActive = "");
+            },
+            underline : function (val) {
+              (val == "underline") ? (this.underlineActive = "active") : (this.underlineActive = "");
+            },
+            textalign : function (val) {
+              (val == "left") ? (this.textAlignLeftActive = "active") : (this.textAlignLeftActive = "");
+              (val == "right") ? (this.textAlignRightActive = "active") : (this.textAlignRightActive = "");
+              (val == "center") ? (this.textAlignCenterActive = "active") : (this.textAlignCenterActive = "");
+            },
+            valign : function (val) {
+              (val == "top") ? (this.valignTopActive = "active") : (this.valignTopActive = "");
+              (val == "middle") ? (this.valignMiddleActive = "active") : (this.valignMiddleActive = "");
+              (val == "bottom") ? (this.valignBottomActive = "active") : (this.valignBottomActive = "");
+            },
           },
           methods: {
+            boldClick : function (e) {
+              this.bold == "bold" ? this.bold = "" : this.bold = "bold";
+            },
+            italicClick : function (e) {
+              this.italic == "italic" ? this.italic = "" : this.italic = "italic";
+            },
+            underlineClick : function (e) {
+              this.underline == "underline" ? this.underline = "" : this.underline = "underline";
+            },
+            textalignLeftClick : function (e) {
+              this.textalign = "left" ;
+            },
+            textalignCenterClick : function (e) {
+              this.textalign = "center";
+            },
+            textalignRightClick : function (e) {
+              this.textalign = "right";
+            },
+            valignTopClick : function (e) {
+              this.valign = "top" ;
+            },
+            valignMiddleClick : function (e) {
+              this.valign = "middle";
+            },
+            valignBottomClick : function (e) {
+              this.valign = "bottom";
+            },
           },
         });
         var contextDialogLineTabVM = new Vue({
@@ -827,6 +793,140 @@ define(function(require, exports, module) {
           },
         });
 
+        var contextTriggerVM = new Vue({
+          el: '#page-contextual-properties-dialog-trigger',
+          data: {
+            selectedObj : selectedManager.getSelected(),
+
+            isShape : true,
+            isLine : false,
+            isGroup : false,
+            shapeDisplay : "block",
+            lineDisplay : "none",
+            groupDisplay : "none",
+          },
+          watch: {
+            selectedObj : function (val) {
+              if(val.length == 0) {
+
+              }
+              else if(val.length == 1) {
+                //line
+                if(objectManager.isLine(val[0])) {
+                  this.isShape = false;
+                  this.isLine = true;
+                  this.isGroup = false;
+                  this.shapeDisplay = "none";
+                  this.lineDisplay = "block";
+                  this.groupDisplay = "none";
+                }
+                //shape
+                else {
+                  this.isShape = true;
+                  this.isLine = false;
+                  this.isGroup = false;
+                  this.shapeDisplay = "block";
+                  this.lineDisplay = "none";
+                  this.groupDisplay = "none";
+                }
+              }
+              //group
+              else {
+                this.isShape = false;
+                this.isLine = false;
+                this.isGroup = true;
+                this.shapeDisplay = "none";
+                this.lineDisplay = "none";
+                this.groupDisplay = "block";
+              }
+            },
+          },
+          methods: {
+            initContext : function() {
+              if(this.selectedObj.length == 0) {
+
+              }
+              else if(this.selectedObj.length == 1) {
+                //line
+                if(objectManager.isLine(this.selectedObj[0])) {
+
+                }
+                //shape
+                else {
+                  let diagramFontStyle = diagramManager.getAttrById(this.selectedObj[0],{fontStyle:[]});
+                  contextDialogTextTabVM.bold = diagramFontStyle.bold ? "bold" : "normal";
+                  contextDialogTextTabVM.italic = diagramFontStyle.italic ? "italic" : "normal";
+                  contextDialogTextTabVM.underline = diagramFontStyle.underline ? "underline" : "none";
+                  contextDialogTextTabVM.textalign = diagramFontStyle.textAlign;
+                  contextDialogTextTabVM.fontfamily = diagramFontStyle.fontFamily;
+                  contextDialogTextTabVM.fontsize = diagramFontStyle.size;
+                  contextDialogTextTabVM.fontcolor = "rgb(" + diagramFontStyle.color + ")";
+                  contextDialogTextTabVM.valign = diagramFontStyle.vAlign;
+
+                  let diagramProperties = diagramManager.getAttrById(this.selectedObj[0],{properties:[]});
+                  let diagramLock = diagramManager.getAttrById(this.selectedObj[0],{locked:[]});
+                  contextDialogShapeTabVM.x = diagramProperties.x;
+                  contextDialogShapeTabVM.y = diagramProperties.y;
+                  contextDialogShapeTabVM.w = diagramProperties.w;
+                  contextDialogShapeTabVM.h = diagramProperties.h;
+                  contextDialogShapeTabVM.angle = diagramProperties.angle;
+                  contextDialogShapeTabVM.locked = diagramLock.locked;
+                }
+              }
+              //group
+              else {
+
+              }
+            },
+            triggerShapeClick : function (e) {
+              let self = this;
+
+              $(this.$el).hide();
+              $("#page-contextual-properties-dialog").css({
+                "left" : $(this.$el).css("left"),
+                "top" : $(this.$el).css("top"),
+              }).show(function () {
+                self.initContext();
+              });
+              $(".shape-properties-tab")[0].click();
+            },
+            triggerLineClick : function (e) {
+              let self = this;
+
+              $(this.$el).hide();
+              $("#page-contextual-properties-dialog").css({
+                "left" : $(this.$el).css("left"),
+                "top" : $(this.$el).css("top"),
+              }).show(function () {
+                self.initContext();
+              });
+              $(".line-properties-tab")[0].click();
+            },
+            triggerGroupClick : function (e) {
+              let self = this;
+
+              $(this.$el).hide();
+              $("#page-contextual-properties-dialog").css({
+                "left" : $(this.$el).css("left"),
+                "top" : $(this.$el).css("top"),
+              }).show(function () {
+                self.initContext();
+              });
+              //$(".group-properties-tab").trigger("click");
+            },
+            triggerTextClick : function (e) {
+              let self = this;
+              $(this.$el).hide();
+              $("#page-contextual-properties-dialog").css({
+                "left" : $(this.$el).css("left"),
+                "top" : $(this.$el).css("top"),
+              }).show(function () {
+                self.initContext();
+              });
+              $(".ico-text-properties-tab-container")[0].click();
+            },
+          },
+        });
 
       },
 
