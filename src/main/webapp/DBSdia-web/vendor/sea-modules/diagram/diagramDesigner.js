@@ -192,8 +192,8 @@ define(function(require, exports, module) {
         let diagramEle = $("#" + curId);
         let diagramTextArea = diagramManager.getAttrById(curId,{textArea:[]});
         let diagramFontStyle = diagramManager.getAttrById(curId,{fontStyle:[]});
-        let textAlignTB = "middle";
-        let textAlignLMR = "left";
+        let textAlignTB = diagramFontStyle["vAlign"];
+        let textAlignLMR = diagramFontStyle["textAlign"];
         let w = jqObj.siblings("canvas")[0].width;
         let h = jqObj.siblings("canvas")[0].height;
         let text;
@@ -261,8 +261,8 @@ define(function(require, exports, module) {
         let textAreaHtml = "<textarea id='shape-textarea-editing' target='" + diagramId + "'></textarea>";
         let diagramTextArea = diagramManager.getAttrById(diagramId,{textArea:[]});
         let diagramFontStyle = diagramManager.getAttrById(diagramId,{fontStyle:[]});
-        let textAlignTB = "middle";
-        let textAlignLMR = "left";
+        let textAlignTB = diagramFontStyle["vAlign"];
+        let textAlignLMR = diagramFontStyle["textAlign"];
         let anchor;
         let w = canvas.width;
         let h = canvas.height;

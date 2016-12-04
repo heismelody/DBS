@@ -544,6 +544,9 @@ define(function(require, exports, module) {
           for(let arg in args) {
             if(args[arg] instanceof Object) {
               for(let key in args[arg]) {
+                if(_GlobalDiagramOjects[diagramId][arg] == undefined) {
+                  _GlobalDiagramOjects[diagramId][arg] = {};
+                }
                 _GlobalDiagramOjects[diagramId][arg][key] = args[arg][key];
               }
             }

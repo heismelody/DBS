@@ -350,7 +350,7 @@ define(function(require, exports, module) {
 
             //That is the actual mouse up code.
             if(e.clientX > 178) {
-              let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$("#creating-diagram"));
+              let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
               let newId = diagramDesigner.afterCreatingDiagram(pos.x,pos.y,_shapeName);
             }
             else {
@@ -414,6 +414,12 @@ define(function(require, exports, module) {
           for(let i = 0; i < $(".diagram-object-container").length; i++) {
             $($(".diagram-object-container")[i]).removeClass("event-none");
           }
+          let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+          let curId = $(_dragElement).attr("id");
+          diagramManager.setAttr(curId,{properties:{
+            x: pos.x,
+            y: pos.y,
+          }});
           $("#page-contextual-properties-dialog-trigger").css({
             "left": $(_dragElement).offset()["left"] + parseInt($(_dragElement).css("width")) + "px",
             "top" : $(_dragElement).offset()["top"] + 20 + "px",
@@ -521,6 +527,21 @@ define(function(require, exports, module) {
         if (_dragElement != null) {
             _dragElement.style.zIndex = _oldZIndex;
 
+            let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+            curId = $('#control-overlay-container').attr("targetid");
+            let x = parseInt($("#" + curId).css("left"));
+            let y = parseInt($("#" + curId).css("top"));
+            let w = parseInt($("#" + curId).css("width"));
+            let h = parseInt($("#" + curId).css("height"));
+            diagramManager.setAttr(curId,{properties:{
+              "x": parseInt(x + w/2),
+              "y": parseInt(y + h/2),
+              "w": w - 20,
+              "h": h - 20,
+            }});
+            if($("#page-contextual-properties-dialog").css("display") != "none") {
+              $("#contextual-properties-shape-trigger")[0].click();
+            }
             diagramDesigner.drawTextArea($("#" + curId).find("textarea"));
             // we're done with these events until the next OnMouseDown
             document.onmousemove = null;

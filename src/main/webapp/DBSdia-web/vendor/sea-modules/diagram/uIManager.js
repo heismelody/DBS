@@ -712,6 +712,7 @@ define(function(require, exports, module) {
         var contextDialogTextTabVM = new Vue({
           el: '#contextual-properties-tab-text',
           data: {
+            selectedObj : selectedManager.getSelected(),
             //model variable
             bold : "",
             italic : "",
@@ -757,30 +758,66 @@ define(function(require, exports, module) {
           methods: {
             boldClick : function (e) {
               this.bold == "bold" ? this.bold = "" : this.bold = "bold";
+              diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
+                bold: (this.bold == "bold") ? (true) : (false),
+              }});
+              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
             },
             italicClick : function (e) {
               this.italic == "italic" ? this.italic = "" : this.italic = "italic";
+              diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
+                italic: (this.italic == "italic") ? (true) : (false),
+              }});
+              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
             },
             underlineClick : function (e) {
               this.underline == "underline" ? this.underline = "" : this.underline = "underline";
+              diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
+                underline: (this.underline == "underline") ? (true) : (false),
+              }});
+              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
             },
             textalignLeftClick : function (e) {
               this.textalign = "left" ;
+              diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
+                textAlign: "left",
+              }});
+              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
             },
             textalignCenterClick : function (e) {
               this.textalign = "center";
+              diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
+                textAlign: "center",
+              }});
+              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
             },
             textalignRightClick : function (e) {
               this.textalign = "right";
+              diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
+                textAlign: "right",
+              }});
+              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
             },
             valignTopClick : function (e) {
               this.valign = "top" ;
+              diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
+                vAlign: "top",
+              }});
+              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
             },
             valignMiddleClick : function (e) {
               this.valign = "middle";
+              diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
+                vAlign: "middle",
+              }});
+              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
             },
             valignBottomClick : function (e) {
               this.valign = "bottom";
+              diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
+                vAlign: "bottom",
+              }});
+              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
             },
           },
         });
