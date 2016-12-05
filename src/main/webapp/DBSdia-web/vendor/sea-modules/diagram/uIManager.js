@@ -44,6 +44,43 @@ define(function(require, exports, module) {
        "bar-beginarrow": "beginarrow-list",
        "bar-endarrow": "endarrow-list",
      };
+     var targetMenuListInitHandler = {
+       "bar-font-family" : function () {
+       },
+       "bar-font-color" : function () {
+
+       },
+       "bar-font-align" : function () {
+
+       },
+       "bar-fill" : function () {
+
+       },
+       "bar-line-color" : function () {
+
+       },
+       "bar-line-width": function () {
+         let curDiagramId = selectedManager.getSelected()[0];
+         let lineStyle = diagramManager.getAttrById(curDiagramId,{lineStyle:["lineWidth"]});
+         let curLineWidth = lineStyle["lineWidth"]["lineWidth"];
+         $("#" + targetMenu["bar-line-width"] + " li[value=" + curLineWidth + "]").append('<div class="icon icon-selected"></div>');
+       },
+       "bar-line-style": function () {
+         let curDiagramId = selectedManager.getSelected()[0];
+         let lineStyle = diagramManager.getAttrById(curDiagramId,{lineStyle:["lineStyle"]});
+         let curLineStyle = lineStyle["lineStyle"]["lineStyle"];
+         $("#" + targetMenu["bar-line-style"] + " li[value=" + curLineStyle + "]").append('<div class="icon icon-selected"></div>');
+       },
+       "bar-linkertype" : function () {
+
+       },
+       "bar-beginarrow" : function () {
+
+       },
+       "bar-endarrow" : function () {
+
+       },
+     };
     var uIManager = {
 
       toolbarDisable : function() {
@@ -239,19 +276,29 @@ define(function(require, exports, module) {
                 curButton = $(e.target).parent()[0];
               }
 
+              let curId = $(curButton).attr("id");
+              let curOffsetLeft = $(curButton).offset().left;
+              let curOffsetTop = $(curButton).offset().top;
+              let curHeight = $(curButton).css("height");
+
+              $("#" + this.targetMenuList[curId]).css({
+                "left": curOffsetLeft,
+                "top": parseInt(curOffsetTop) + parseInt(curHeight) + "px",
+                "z-index": 5000
+              });
               if(!$(curButton).hasClass("disabled")) {
                 if($(curButton).hasClass("selected")) {
                   $(curButton).removeClass("selected");
-                  let curId = $(curButton).attr("id");
                   if(this.targetMenuList.hasOwnProperty(curId)) {
                     $("#" + this.targetMenuList[curId]).hide();
                   }
                 }
                 else {
                   $(curButton).addClass("selected");
-                  let curId = $(curButton).attr("id");
                   if(this.targetMenuList.hasOwnProperty(curId)) {
-                    $("#" + this.targetMenuList[curId]).show();
+                    targetMenuListInitHandler[curId]();
+                    $("#" + this.targetMenuList[curId]).attr("for",curId)
+                                                       .show();
                   }
                 }
               }
@@ -701,12 +748,19 @@ define(function(require, exports, module) {
             h : 0,
             angle : 0,
             locked : false,
+            lineWidth : 0,
+            lineStyle : "",
 
             //view variable
 
           },
           methods: {
-
+            borderWidthClick : function (e) {
+              diagramUtil.dropdown("#contextual-properties-border-width","#line-width-list",this.lineWidth);
+            },
+            dashStyleClick : function (e) {
+              diagramUtil.dropdown("#contextual-properties-dash-style","#line-style-list",this.lineStyle);
+            },
           },
         });
         var contextDialogTextTabVM = new Vue({
@@ -902,12 +956,16 @@ define(function(require, exports, module) {
 
                   let diagramProperties = diagramManager.getAttrById(this.selectedObj[0],{properties:[]});
                   let diagramLock = diagramManager.getAttrById(this.selectedObj[0],{locked:[]});
+                  let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:[]});
+
                   contextDialogShapeTabVM.x = diagramProperties.x;
                   contextDialogShapeTabVM.y = diagramProperties.y;
                   contextDialogShapeTabVM.w = diagramProperties.w;
                   contextDialogShapeTabVM.h = diagramProperties.h;
                   contextDialogShapeTabVM.angle = diagramProperties.angle;
                   contextDialogShapeTabVM.locked = diagramLock.locked;
+                  contextDialogShapeTabVM.lineWidth = lineStyle.lineWidth;
+                  contextDialogShapeTabVM.lineStyle = lineStyle.lineStyle;
                 }
               }
               //group

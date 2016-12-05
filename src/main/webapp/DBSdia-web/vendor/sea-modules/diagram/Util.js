@@ -30,17 +30,28 @@ define(function(require, exports, module) {
             };
           })(jQuery);
       },
-      dropdown : function (target,dropdownPanel) {
+      dropdown : function (target,dropdownPanel,initalValue) {
         let _dropdownPanel = $(dropdownPanel);
         let _target = $(target);
         let curOffsetLeft = _target.offset().left;
         let curOffsetTop = _target.offset().top;
         let curHeight = _target.css("height");
 
+        if(initalValue != undefined) {
+          let selectedHtml = '<div class="icon icon-selected"></div>';
+          _dropdownPanel.find(".icon-selected").remove();
+          for(let i = 0; i <= _dropdownPanel.find("li").length; i++) {
+            if($(_dropdownPanel.find("li")[i]).attr("value") == initalValue) {
+              $(_dropdownPanel.find("li")[i]).append(selectedHtml);
+              break;
+            }
+          }
+        }
         _dropdownPanel.attr("for",_target.attr("id"));
         _dropdownPanel.css({
-          left: curOffsetLeft,
-          top: parseInt(curOffsetTop) + parseInt(curHeight) + "px",
+          "left": curOffsetLeft,
+          "top": parseInt(curOffsetTop) + parseInt(curHeight) + "px",
+          "z-index": 5000
         });
         if(_target.hasClass("selected")) {
           _target.removeClass("selected");

@@ -273,7 +273,28 @@ define(function(require, exports, module) {
         });
       },
       initFloatMenuEvent : function () {
-
+        //line width float menu list
+        $("#line-width-list li").on("click",function (e) {
+          let jqcurEle;
+          if(e.target.className.indexOf("icon") != -1) {
+            jqcurEle = $(e.target).parent();
+          }
+          else {
+            jqcurEle = $(e.target);
+          }
+          //console.log(jqcurEle.attr("value"));
+        });
+        //line style float menu list
+        $("#line-style-list li").on("click",function (e) {
+          let jqcurEle;
+          if(e.target.className.indexOf("icon") != -1) {
+            jqcurEle = $(e.target).parent();
+          }
+          else {
+            jqcurEle = $(e.target);
+          }
+          //console.log(jqcurEle.attr("value"));
+        });
       },
 
       MouseDownHandler : function(e,actualHandler) {

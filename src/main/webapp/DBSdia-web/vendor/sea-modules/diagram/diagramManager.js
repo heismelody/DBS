@@ -477,7 +477,7 @@ define(function(require, exports, module) {
               for(let i in args[attrName]) {
                 let curKey = args[attrName][i];
 
-                (attrObj[curKey] == undefined) ?
+                (attrObj == undefined || attrObj[curKey] == undefined) ?
                       result[curKey] = defaultDiagramTemplate[attrName][curKey]
                     : result[curKey] = attrObj[curKey];
               }
@@ -515,7 +515,7 @@ define(function(require, exports, module) {
               for(let i in args[arg]) {
                 let curKey = args[arg][i];
 
-                (attrObj[curKey] == undefined) ?
+                (attrObj == undefined || attrObj[curKey] == undefined) ?
                       result[curKey] = this.getAttrByShapeName(shapeName,args)
                     : result[curKey] = attrObj[curKey];
               }

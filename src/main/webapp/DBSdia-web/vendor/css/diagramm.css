@@ -1704,7 +1704,8 @@ button:focus {
   box-shadow: inset 1px 1px 0 0 #fff,1px 1px 0 0 #fff;
   cursor: pointer;
 }
-.button-group .btn.active {
+.button-group .btn.active,
+.button-group .btn.selected {
   background-image: none;
   -webkit-box-shadow: inset 0 1px 0 rgba(0,0,0,0.2),0 1px 1px rgba(0,0,0,0.05);
   -moz-box-shadow: inset 0 1px 0 rgba(0,0,0,0.2),0 1px 1px rgba(0,0,0,0.05);
