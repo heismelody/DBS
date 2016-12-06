@@ -922,8 +922,8 @@
                      <div id="contextual-properties-text-fontsize" class="spinner active btn-inline">
                         <div class="spinner-input"><input maxlength="4" style="width:60px;" v-model="fontsize"></div>
                         <div class="buttons">
-                          <div class="spinner-up"></div>
-                          <div class="spinner-down"></div>
+                          <div class="spinner-up" @click="fontSizeUpClick"></div>
+                          <div class="spinner-down" @click="fontSizeDownClick"></div>
                         </div>
                       </div>
                    </li>

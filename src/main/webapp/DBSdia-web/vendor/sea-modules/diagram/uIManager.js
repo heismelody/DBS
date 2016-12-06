@@ -199,7 +199,7 @@ define(function(require, exports, module) {
                   this.barfontunderlineDisabled = false,
                   this.barfontcolorDisabled = false,
                   this.barfontalignDisabled = false,
-                  this.barfillDisabled = true,
+                  this.barfillDisabled = false,
                   this.barlinecolorDisabled = false,
                   this.barlinewidthDisabled = false,
                   this.barlinestyleDisabled = false,
@@ -872,6 +872,25 @@ define(function(require, exports, module) {
                 vAlign: "bottom",
               }});
               diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+            },
+
+            fontSizeUpClick : function (e) {
+              if((this.fontsize + 1) <= 100) {
+                this.fontsize++;
+                diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
+                  size: this.fontsize,
+                }});
+                diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+              }
+            },
+            fontSizeDownClick : function (e) {
+              if((this.fontsize - 1) >= 0) {
+                this.fontsize--;
+                diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
+                  size: this.fontsize,
+                }});
+                diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+              }
             },
           },
         });

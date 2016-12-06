@@ -106,11 +106,22 @@ define(function(require, exports, module) {
     		lineStyle: {
     			lineWidth: 2,
     			lineColor: "50,50,50",
-    			lineStyle: "solid"
+    			lineStyle: "solid" //dashed/solid/dot/dashdot
     		},
     		fillStyle: {
-    			type: "solid",
-    			color: "255,255,255"
+    			type: "solid",   //gradient/solid/none/image
+    			color: "0,0,255"
+
+          // "type": "gradient",
+          // "gradientType": "linear",
+          // "beginColor": "138,255,197",
+          // "endColor": "78,195,137",
+          // "angle": 0.2
+
+          // "type": "solid",
+          // "color": "255,255,255"
+
+          // "type": "none",
     		},
     		textArea: {
     			position: {

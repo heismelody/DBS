@@ -389,8 +389,63 @@ define(function(require, exports, module) {
           lineManager.drawCanvasAndLine(id,start,end,argList);
         }
       },
-      drawDiagramById : function () {
+      drawDiagramById : function (diagramId) {
+        let jqObj = $("#" + diagramId);
+        let canvas = jqObj.find("canvas")[0];
+        let ctx = canvas.getContext("2d");
+        let shapeName = objectManager.getShapeNameById(diagramId);
 
+        if(shapeName == "line") {
+
+        }
+        else {
+          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
+          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
+
+          //set line style here
+          if(lineStyle.lineWidth) {
+            switch (lineStyle.lineStyle) {
+              case "solid":
+                ctx.setLineDash([]);
+                break;
+              case "dashed":
+                ctx.setLineDash([lineStyle.lineWidth * 5 , lineStyle.lineWidth* 2])
+                break;
+              case "dot":
+                ctx.setLineDash([lineStyle.lineWidth, lineStyle.lineWidth * 2])
+                break;
+              case "dashdot":
+                ctx.setLineDash([lineStyle.lineWidth * 5, lineStyle.lineWidth * 2, lineStyle.lineWidth, lineStyle.lineWidth * 2])
+                break;
+              default:
+                throw new Error("Set lineStyle lineStyle error!");
+            }
+          }
+          else {
+            lineStyle.lineWidth = 0;
+          }
+
+          //set fill style here
+          switch (fillStyle.type) {
+            case "none":
+              ctx.fillStyle = "none";
+              break;
+            case "solid":
+              ctx.fillStyle = "rgb(" + fillStyle.color + ")";
+              break;
+            case "gradient":
+              ctx.fillStyle = "gradient";
+              break;
+            case "image":
+              break;
+            default:
+              throw new Error("Set fillStyle type error!");
+          }
+          ctx.lineJoin = "round";
+          ctx.lineCap = "round";
+          ctx.lineWidth = lineStyle.lineWidth;
+        }
+        this.drawDiagram(canvas,shapeName);
       },
 
       resolvePath : function resolvePath(ctx,shapeName,diagramId) {
@@ -452,6 +507,7 @@ define(function(require, exports, module) {
           this.startX = null;
           this.startY = null;
 
+          this.fill();
           this.stroke();
           this.closePath();
   			},

@@ -282,6 +282,11 @@ define(function(require, exports, module) {
           else {
             jqcurEle = $(e.target);
           }
+          let curId = selectedManager.getSelected()[0];
+          diagramManager.setAttr(curId,{lineStyle:{"lineWidth":jqcurEle.attr("value"),}});
+          diagramDesigner.drawDiagramById(curId);
+          $("#line-width-list").hide();
+          $("#" + jqcurEle.parent().attr("for")).removeClass("selected");
           //console.log(jqcurEle.attr("value"));
         });
         //line style float menu list
@@ -293,6 +298,11 @@ define(function(require, exports, module) {
           else {
             jqcurEle = $(e.target);
           }
+          let curId = selectedManager.getSelected()[0];
+          diagramManager.setAttr(curId,{lineStyle:{"lineStyle":jqcurEle.attr("value")}});
+          diagramDesigner.drawDiagramById(curId);
+          $("#line-style-list").hide();
+          $("#" + jqcurEle.parent().attr("for")).removeClass("selected");
           //console.log(jqcurEle.attr("value"));
         });
       },
