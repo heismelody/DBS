@@ -62,13 +62,15 @@ define(function(require, exports, module) {
        "bar-line-width": function () {
          let curDiagramId = selectedManager.getSelected()[0];
          let lineStyle = diagramManager.getAttrById(curDiagramId,{lineStyle:["lineWidth"]});
-         let curLineWidth = lineStyle["lineWidth"]["lineWidth"];
+         let curLineWidth = lineStyle["lineWidth"];
+         $("#" + targetMenu["bar-line-width"]).find(".icon-selected").remove();
          $("#" + targetMenu["bar-line-width"] + " li[value=" + curLineWidth + "]").append('<div class="icon icon-selected"></div>');
        },
        "bar-line-style": function () {
          let curDiagramId = selectedManager.getSelected()[0];
          let lineStyle = diagramManager.getAttrById(curDiagramId,{lineStyle:["lineStyle"]});
-         let curLineStyle = lineStyle["lineStyle"]["lineStyle"];
+         let curLineStyle = lineStyle["lineStyle"];
+         $("#" + targetMenu["bar-line-style"]).find(".icon-selected").remove();
          $("#" + targetMenu["bar-line-style"] + " li[value=" + curLineStyle + "]").append('<div class="icon icon-selected"></div>');
        },
        "bar-linkertype" : function () {
@@ -87,12 +89,15 @@ define(function(require, exports, module) {
         var toolbarVM = new Vue({
           el: '.toolbar',
           data: {
+            //model var
             selectedObj : selectedManager.getSelected(),
+            fontColor: "rgb(50,50,50)",
+            fillColor: "rgb(50,50,50)",
+            lineColor: "rgb(50,50,50)",
 
+            //view var
             Uncollapsed:false,
             collapsed:true,
-
-            targetMenuList:targetMenu,
 
             barthemeDisabled:false,
             barundoDisabled:true,
@@ -117,6 +122,9 @@ define(function(require, exports, module) {
             barlockDisabled:true,
             barunlockDisabled:true,
             barlinkdisabled:true,
+
+            //other var
+            targetMenuList:targetMenu,
           },
           watch : {
             Uncollapsed: function (val) {
@@ -211,6 +219,19 @@ define(function(require, exports, module) {
                   //this.barlockDisabled = true,
                   //this.barunlockDisabled = true,
                   this.barlinkdisabled = true;
+
+                  let fontStyle = diagramManager.getAttrById(val[0],{fontStyle:["color"]});
+                  let lineStyle = diagramManager.getAttrById(val[0],{lineStyle:["lineColor"]});
+                  let fillStyle = diagramManager.getAttrById(val[0],{fillStyle:[]});
+
+                  if(fillStyle.type == "solid") {
+                    this.fillColor = "rgb(" + fillStyle.color + ")";
+                  }
+                  else {
+                    this.fillColor = "#FFFFFF";
+                  }
+                  this.fontColor = "rgb(" + fontStyle.color + ")";
+                  this.lineColor = "rgb(" + lineStyle.lineColor + ")";
                 }
               }
               //current selected diagram is a GROUP

@@ -12,6 +12,7 @@ define(function(require, exports, module) {
      * --------------------------------------------------------------------------
      */
     var diagramPadding = 10;
+    var panelDiagramPadding = 1;
 
     var diagramUtil = {
       initjQueryMethod : function () {
@@ -101,9 +102,16 @@ define(function(require, exports, module) {
       },
 
       //not efficient/safe because use eval();
-      evaluate : function(expression,w,h) {
+      evaluate : function(expression,w,h,arg) {
         if(typeof expression == "string") {
-          return eval(expression);
+          if(arg) {
+            w = w - panelDiagramPadding * 2;
+            h = h - panelDiagramPadding * 2;
+            return eval(expression) + panelDiagramPadding;
+          }
+          else {
+            return eval(expression);
+          }
         }
         else {
           w = w - diagramPadding * 2;

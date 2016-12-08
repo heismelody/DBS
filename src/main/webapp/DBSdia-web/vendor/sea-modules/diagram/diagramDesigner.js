@@ -374,6 +374,9 @@ define(function(require, exports, module) {
           lineManager.drawLine(canvas,"curve",curStartRelative,curEndRelative);
         }
         else {
+          if(!ctx.fillStyleDefined || ctx.fillStyleDefined == false) {
+            ctx.fillStyle = "#FFFFFF";
+          }
           this._tempVar._w = canvas.width;
           this._tempVar._h = canvas.height;
           this.resolvePath(ctx,shapeName);
@@ -428,13 +431,16 @@ define(function(require, exports, module) {
           //set fill style here
           switch (fillStyle.type) {
             case "none":
-              ctx.fillStyle = "none";
+              ctx.fillStyle = "rgba(250, 250, 250, 0)";
+              ctx.fillStyleDefined = true;
               break;
             case "solid":
               ctx.fillStyle = "rgb(" + fillStyle.color + ")";
+              ctx.fillStyleDefined = true;
               break;
             case "gradient":
               ctx.fillStyle = "gradient";
+              ctx.fillStyleDefined = true;
               break;
             case "image":
               break;
@@ -444,6 +450,9 @@ define(function(require, exports, module) {
           ctx.lineJoin = "round";
           ctx.lineCap = "round";
           ctx.lineWidth = lineStyle.lineWidth;
+          (lineStyle.lineWidth != 0) ?
+                ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
+               :ctx.strokeStyle = "rgba(255,255,255,0.7)";
         }
         this.drawDiagram(canvas,shapeName);
       },
@@ -471,8 +480,8 @@ define(function(require, exports, module) {
           let curProperties = templateManager.getProperties(this.shapeName);
 
           if(w <= 40 || h <= 40) {
-            curXY.x = diagramUtil.evaluate(action.x,w,h);
-            curXY.y = diagramUtil.evaluate(action.y,w,h);
+            curXY.x = diagramUtil.evaluate(action.x,w,h,true);
+            curXY.y = diagramUtil.evaluate(action.y,w,h,true);
           }
           else {
             curXY = diagramUtil.evaluate(action,w,h);
@@ -493,8 +502,8 @@ define(function(require, exports, module) {
           let curProperties = templateManager.getProperties(this.shapeName);
 
           if(w <= 40 || h <= 40) {
-            curXY.x = diagramUtil.evaluate(action.x,w,h);
-            curXY.y = diagramUtil.evaluate(action.y,w,h);
+            curXY.x = diagramUtil.evaluate(action.x,w,h,true);
+            curXY.y = diagramUtil.evaluate(action.y,w,h,true);
           }
           else {
             curXY = diagramUtil.evaluate(action,w,h);

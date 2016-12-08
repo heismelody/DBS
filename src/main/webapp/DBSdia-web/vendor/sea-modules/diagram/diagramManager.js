@@ -105,7 +105,7 @@ define(function(require, exports, module) {
     		},
     		lineStyle: {
     			lineWidth: 2,
-    			lineColor: "50,50,50",
+    			lineColor: "0,0,50",
     			lineStyle: "solid" //dashed/solid/dot/dashdot
     		},
     		fillStyle: {
@@ -135,7 +135,7 @@ define(function(require, exports, module) {
         fontStyle: {
     			fontFamily: "微软雅黑",
     			size: 13,
-    			color: "50,50,50",
+    			color: "0,0,50",
     			bold: false,
     			italic: false,
     			underline: false,
@@ -527,7 +527,7 @@ define(function(require, exports, module) {
                 let curKey = args[arg][i];
 
                 (attrObj == undefined || attrObj[curKey] == undefined) ?
-                      result[curKey] = this.getAttrByShapeName(shapeName,args)
+                      result = this.getAttrByShapeName(shapeName,args)
                     : result[curKey] = attrObj[curKey];
               }
 

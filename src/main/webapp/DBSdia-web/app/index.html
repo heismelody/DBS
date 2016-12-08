@@ -82,7 +82,7 @@
             </div>
             <div id="bar-font-color" title="Text color" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfontcolorDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon fontcolor"></div>
-              <div class="btn-color" style="background-color: rgb(50,50,50)"></div>
+              <div class="btn-color" v-bind:style="{ 'background-color': fontColor}"></div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div id="bar-font-align" title="Align" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfontalignDisabled }" @click.select="toolbarButtonClickHandler">
@@ -92,12 +92,12 @@
             <div class="toolbar-devider"></div>
             <div id="bar-fill" title="Fill" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barfillDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon fillcolor"></div>
-              <div class="btn-color" style="background-color: rgb(255,255,255)"></div>
+              <div class="btn-color" v-bind:style="{ 'background-color': fillColor}"></div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div id="bar-line-color" title="Line color" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinecolorDisabled }" @click.select="toolbarButtonClickHandler">
               <div class="icon linecolor"></div>
-              <div class="btn-color" style="background-color: rgb(50,50,50)"></div>
+              <div class="btn-color" v-bind:style="{ 'background-color': lineColor}"></div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div id="bar-line-width" title="Line width" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barlinewidthDisabled }" @click.select="toolbarButtonClickHandler">

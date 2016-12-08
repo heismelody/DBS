@@ -187,6 +187,12 @@ define(function(require, exports, module) {
       drawPanelShape : function drawPanelShape(element,shapeName) {
         let ctx = element.getContext("2d");
         ctx.clearRect(0,0,30,30);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.7;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+
         diagramDesigner.drawDiagram(element,shapeName);
       },
     };
