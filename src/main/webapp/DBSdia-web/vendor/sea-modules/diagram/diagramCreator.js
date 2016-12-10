@@ -169,6 +169,14 @@ define(function(require, exports, module) {
           let curId = "panel-" + allCategory[category];
           this.addPanelBoxAllItems(curId);
         }
+        $(".panel-box").on({
+            mouseenter: function (e) {
+              diagramCreator.panelItemMouseOverHandler(e);
+            },
+            mouseleave: function (e) {
+              diagramCreator.panelItemMouseLeaveHandler(e);
+            }
+        });
       },
 
       addPanelBoxAllItems : function(id) {
@@ -185,15 +193,26 @@ define(function(require, exports, module) {
         this.drawPanelShape(panelCanvas,shapeName);
       },
       drawPanelShape : function drawPanelShape(element,shapeName) {
-        let ctx = element.getContext("2d");
-        ctx.clearRect(0,0,30,30);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.lineWidth = 2;
-        ctx.globalAlpha = 0.7;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
+        diagramDesigner.drawPanelItemDiagram(element,shapeName);
+      },
+      panelItemMouseOverHandler : function (e) {
+        let previewTop;
+        let curshapeName;
+        previewTop = $(e.target).offset().top - $(".titlebar").height() - 50;
+        (previewTop <= 0) ? previewTop = 0 : "";
 
-        diagramDesigner.drawDiagram(element,shapeName);
+        if(e.target.className.indexOf("item") != -1) {
+          curshapeName = $(e.target).parent().attr("shapename");
+        }
+        else {
+          curshapeName = $(e.target).attr("shapename");
+        }
+        diagramDesigner.drawThemeDiagram($("#panelitem-preview").find("canvas")[0],curshapeName);
+        $("#panelitem-preview").css("top",previewTop + "px")
+                               .show();
+      },
+      panelItemMouseLeaveHandler : function (e) {
+        $("#panelitem-preview").hide();
       },
     };
 

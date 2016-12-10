@@ -9,6 +9,7 @@ define(function(require, exports, module) {
   var objectManager = DiagramManager.diagramManager.objectManager;
   var pageManager = DiagramManager.diagramManager.pageManager;
   var diagramUtil = DiagramUtil.diagramUtil;
+  var themeManager = diagramManager.themeManager;
 
   var diagramDesigner = (function () {
     /**
@@ -40,7 +41,7 @@ define(function(require, exports, module) {
       },
       creatingDiagram : function(x,y,shapeName){
         let curProperties = templateManager.getProperties(shapeName);
-        diagramDesigner.drawDiagram($('#creating-designer-canvas')[0],shapeName);
+        diagramDesigner.drawThemeDiagram($('#creating-designer-canvas')[0],shapeName);
         $('#creating-designer-diagram').css('left',x - curProperties.w/2 - 10 + 'px');
         $('#creating-designer-diagram').css('top',y - curProperties.h/2 - 10 + 'px');
       },
@@ -350,6 +351,84 @@ define(function(require, exports, module) {
         this.drawDiagramAnchors(curCanvas,curshapeName);
       },
 
+      drawPanelItemDiagram : function (canvas,shapeName) {
+        let ctx = canvas.getContext("2d");
+        ctx.clearRect(0,0,30,30);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.lineWidth = 2;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+
+        this.drawDiagram(canvas,shapeName);
+      },
+      //this function used for creating diagram from the left panel item.
+      //when you drag the left panel item to the right canvas,once the mouse
+      //moved into the right canvas, you can use this function to draw new diagram.
+      drawThemeDiagram : function (canvas,shapeName,argList) {
+        let curTheme = themeManager.getCurrentThemeObj();
+        let curThemeConfig;
+        for(let i in curTheme) {curThemeConfig = curTheme[i];}
+
+        let ctx = canvas.getContext("2d");
+        ctx.shapeName = shapeName;
+        if(shapeName == "line") {
+
+        }
+        else {
+          let fillStyle = curThemeConfig.fillStyle;
+          let lineStyle = curThemeConfig.lineStyle;
+
+          //set line style here
+          if(lineStyle.lineWidth) {
+            switch (lineStyle.lineStyle) {
+              case "solid":
+                ctx.setLineDash([]);
+                break;
+              case "dashed":
+                ctx.setLineDash([lineStyle.lineWidth * 5 , lineStyle.lineWidth* 2])
+                break;
+              case "dot":
+                ctx.setLineDash([lineStyle.lineWidth, lineStyle.lineWidth * 2])
+                break;
+              case "dashdot":
+                ctx.setLineDash([lineStyle.lineWidth * 5, lineStyle.lineWidth * 2, lineStyle.lineWidth, lineStyle.lineWidth * 2])
+                break;
+              default:
+                throw new Error("Set lineStyle lineStyle error!");
+            }
+          }
+          else {
+            lineStyle.lineWidth = 0;
+          }
+
+          //set fill style here
+          switch (fillStyle.type) {
+            case "none":
+              ctx.fillStyle = "rgba(250, 250, 250, 0)";
+              ctx.fillStyleDefined = true;
+              break;
+            case "solid":
+              ctx.fillStyle = "rgb(" + fillStyle.color + ")";
+              ctx.fillStyleDefined = true;
+              break;
+            case "gradient":
+              ctx.fillStyle = "gradient";
+              ctx.fillStyleDefined = true;
+              break;
+            case "image":
+              break;
+            default:
+              throw new Error("Set fillStyle type error!");
+          }
+          ctx.lineJoin = "round";
+          ctx.lineCap = "round";
+          ctx.lineWidth = lineStyle.lineWidth;
+          (lineStyle.lineWidth != 0) ?
+                ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
+               :ctx.strokeStyle = "rgba(255,255,255,0.7)";
+          this.drawDiagram(canvas,shapeName);
+        }
+      },
       drawDiagram : function drawDiagram(canvas,shapeName,argList) {
         let ctx = canvas.getContext("2d");
         ctx.shapeName = shapeName;
@@ -402,6 +481,9 @@ define(function(require, exports, module) {
 
         }
         else {
+          if(jqObj.find("textarea").length != 0) {
+            this.drawTextArea(jqObj.find("textarea"));
+          }
           let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
           let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
 

@@ -110,7 +110,7 @@ define(function(require, exports, module) {
     		},
     		fillStyle: {
     			type: "solid",   //gradient/solid/none/image
-    			color: "0,0,255"
+    			color: "255,255,255"
 
           // "type": "gradient",
           // "gradientType": "linear",
@@ -208,6 +208,204 @@ define(function(require, exports, module) {
       backgroundColor: "transparent",
       orientation: "landscape"   //@see ORIENTATION
     };
+    var _GlobalThemes = {
+      "normal": {
+        lineStyle: {
+    			lineWidth: 2,
+    			lineColor: "0,0,50",
+    			lineStyle: "solid" //dashed/solid/dot/dashdot
+    		},
+    		fillStyle: {
+    			type: "solid",   //gradient/solid/none/image
+    			color: "255,255,255"
+        },
+        fontStyle: {
+    			fontFamily: "Arial",
+    			size: 13,
+    			color: "50,50,50",
+    			bold: false,
+    			italic: false,
+    			underline: false,
+    			textAlign: "center",
+    			vAlign: "middle",
+          //borderAlign: "",
+    			orientation: "vertical"
+    		},
+      },
+      "normal-ofont": {
+        lineStyle: {
+    			lineWidth: 2,
+    			lineColor: "0,0,50",
+    			lineStyle: "solid" //dashed/solid/dot/dashdot
+    		},
+    		fillStyle: {
+    			type: "solid",   //gradient/solid/none/image
+    			color: "255,255,255"
+        },
+        fontStyle: {
+    			fontFamily: "微软雅黑",
+    			size: 13,
+    			color: "50,50,50",
+    			bold: false,
+    			italic: false,
+    			underline: false,
+    			textAlign: "center",
+    			vAlign: "middle",
+          //borderAlign: "",
+    			orientation: "vertical"
+    		},
+      },
+      "normal-bold": {
+        lineStyle: {
+    			lineWidth: 4,
+    			lineColor: "0,0,50",
+    			lineStyle: "solid" //dashed/solid/dot/dashdot
+    		},
+    		fillStyle: {
+    			type: "solid",   //gradient/solid/none/image
+    			color: "255,255,255"
+        },
+        fontStyle: {
+    			fontFamily: "微软雅黑",
+    			size: 13,
+    			color: "50,50,50",
+    			bold: true,
+    			italic: false,
+    			underline: false,
+    			textAlign: "center",
+    			vAlign: "middle",
+          //borderAlign: "",
+    			orientation: "vertical"
+    		},
+      },
+      "color-green":{
+        lineStyle: {
+    			lineWidth: 2,
+    			lineColor: "0,0,50",
+    			lineStyle: "solid" //dashed/solid/dot/dashdot
+    		},
+    		fillStyle: {
+    			type: "solid",   //gradient/solid/none/image
+    			color: "110,212,100"
+        },
+        fontStyle: {
+    			fontFamily: "Arial",
+    			color: "50,50,50",
+    			bold: false,
+    			italic: false,
+    			underline: false,
+    			textAlign: "center",
+    			vAlign: "middle",
+          //borderAlign: "",
+    		},
+      },
+      "color-yellow": {
+        lineStyle: {
+    			lineWidth: 2,
+    			lineColor: "0,0,50",
+    			lineStyle: "solid" //dashed/solid/dot/dashdot
+    		},
+    		fillStyle: {
+    			type: "solid",   //gradient/solid/none/image
+    			color: "255,255,237"
+        },
+        fontStyle: {
+    			fontFamily: "Arial",
+    			color: "50,50,50",
+    			bold: false,
+    			italic: false,
+    			underline: false,
+    			textAlign: "center",
+    			vAlign: "middle",
+          //borderAlign: "",
+    		},
+      },
+      "color-red":{
+        lineStyle: {
+    			lineWidth: 2,
+    			lineColor: "0,0,50",
+    			lineStyle: "solid" //dashed/solid/dot/dashdot
+    		},
+    		fillStyle: {
+    			type: "solid",   //gradient/solid/none/image
+    			color: "245,146,1"
+        },
+        fontStyle: {
+    			fontFamily: "Arial",
+    			color: "50,50,50",
+    			bold: false,
+    			italic: false,
+    			underline: false,
+    			textAlign: "center",
+    			vAlign: "middle",
+          //borderAlign: "",
+    		},
+      },
+      "color-yellow-bold":{
+        lineStyle: {
+    			lineWidth: 4,
+    			lineColor: "173,165,141",
+    			lineStyle: "solid" //dashed/solid/dot/dashdot
+    		},
+    		fillStyle: {
+    			type: "solid",   //gradient/solid/none/image
+    			color: "248,238,206"
+        },
+        fontStyle: {
+    			fontFamily: "Arial",
+    			color: "50,50,50",
+    			bold: false,
+    			italic: false,
+    			underline: false,
+    			textAlign: "center",
+    			vAlign: "middle",
+          //borderAlign: "",
+    		},
+      },
+      "color-green-bold": {
+        lineStyle: {
+    			lineWidth: 4,
+    			lineColor: "92,106,82",
+    			lineStyle: "solid" //dashed/solid/dot/dashdot
+    		},
+    		fillStyle: {
+    			type: "solid",   //gradient/solid/none/image
+    			color: "192,212,163"
+        },
+        fontStyle: {
+    			fontFamily: "Arial",
+    			color: "50,50,50",
+    			bold: true,
+    			italic: false,
+    			underline: false,
+    			textAlign: "center",
+    			vAlign: "middle",
+          //borderAlign: "",
+    		},
+      },
+      "color-blue-bold": {
+        lineStyle: {
+    			lineWidth: 4,
+    			lineColor: "39,98,93",
+    			lineStyle: "solid" //dashed/solid/dot/dashdot
+    		},
+    		fillStyle: {
+    			type: "solid",   //gradient/solid/none/image
+    			color: "77,195,186"
+        },
+        fontStyle: {
+    			fontFamily: "Arial",
+    			color: "50,50,50",
+    			bold: true,
+    			italic: false,
+    			underline: false,
+    			textAlign: "center",
+    			vAlign: "middle",
+          //borderAlign: "",
+    		},
+      },
+    };
+    var _GlobalCurrentTheme = "normal";
     const _stateEnum = ["drawline"];
 
     var diagramManager = {
@@ -240,6 +438,38 @@ define(function(require, exports, module) {
       },
       configManager : {
 
+      },
+      themeManager : {
+        addNewTheme : function (theme) {
+          for(let themeName in theme) {
+            _GlobalThemes[themeName] = theme[themeName];
+          }
+        },
+        removeTheme : function (themeName) {
+          delete _GlobalThemes.themeName;
+        },
+        setCurrentTheme : function (themeName) {
+          if(_GlobalThemes.hasOwnProperty(themeName)) {
+            _GlobalCurrentTheme = themeName;
+            for(let curId in _GlobalDiagramOjects) {
+              diagramManager.setAttr(curId,{"lineStyle":_GlobalThemes[_GlobalCurrentTheme]["lineStyle"]});
+              diagramManager.setAttr(curId,{"fillStyle":_GlobalThemes[_GlobalCurrentTheme]["fillStyle"]});
+              diagramManager.setAttr(curId,{"fontStyle":_GlobalThemes[_GlobalCurrentTheme]["fontStyle"]});
+            }
+          }
+          else {
+            throw new Error("ThemeName undefined!");
+          }
+        },
+        getCurrentTheme : function () {
+          _GlobalCurrentTheme ? "" : _GlobalCurrentTheme = "normal";
+          return _GlobalCurrentTheme;
+        },
+        getCurrentThemeObj : function () {
+          return {
+            _GlobalCurrentTheme : _GlobalThemes[_GlobalCurrentTheme],
+          };
+        },
       },
       templateManager : {
         addTemplate : function addTemplate(template) {
@@ -315,6 +545,9 @@ define(function(require, exports, module) {
       },
 
       objectManager : {
+        getAllDiagram : function () {
+          return _GlobalDiagramOjects;
+        },
         generateDiagramId : function generateDiagramId() {
           //http://stackoverflow.com/questions/6248666/how-to-generate-short-uid-like-ax4j9z-in-js
           function generateUIDNotMoreThan1million() {

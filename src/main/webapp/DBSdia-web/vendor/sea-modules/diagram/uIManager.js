@@ -16,6 +16,7 @@ define(function(require, exports, module) {
   var selectedManager = SelectedManager.selectedManager;
   var pageManager = DiagramManager.diagramManager.pageManager;
   var diagramManager = DiagramManager.diagramManager;
+  var themeManager = diagramManager.themeManager;
 
   var diagramUtil = DiagramUtil.diagramUtil;
 
@@ -33,6 +34,7 @@ define(function(require, exports, module) {
      */
      diagramUtil.initjQueryMethod();
      var targetMenu = {
+       "bar-theme" : "diagram-themes",
        "bar-font-family" : "font-list",
        "bar-font-color" : "color-picker",
        "bar-font-align" : "font-align-list",
@@ -45,6 +47,12 @@ define(function(require, exports, module) {
        "bar-endarrow": "endarrow-list",
      };
      var targetMenuListInitHandler = {
+       "bar-theme" : function () {
+         let curTheme = themeManager.getCurrentTheme();
+         curTheme = curTheme + "-theme";
+         $("#diagram-themes").find("theme-selected").removeClass("theme-selected");
+         $("#" + curTheme).addClass("theme-selected");
+       },
        "bar-font-family" : function () {
        },
        "bar-font-color" : function () {
@@ -763,6 +771,7 @@ define(function(require, exports, module) {
           el: '#contextual-properties-contents',
           data: {
             //model variable
+            selectedObj : selectedManager.getSelected(),
             x : 0,
             y : 0,
             w : 0,
@@ -777,9 +786,13 @@ define(function(require, exports, module) {
           },
           methods: {
             borderWidthClick : function (e) {
+              let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineWidth"]});
+              this.lineWidth = lineStyle["lineWidth"];
               diagramUtil.dropdown("#contextual-properties-border-width","#line-width-list",this.lineWidth);
             },
             dashStyleClick : function (e) {
+              let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineStyle"]});
+              this.lineStyle = lineStyle["lineStyle"];
               diagramUtil.dropdown("#contextual-properties-dash-style","#line-style-list",this.lineStyle);
             },
           },

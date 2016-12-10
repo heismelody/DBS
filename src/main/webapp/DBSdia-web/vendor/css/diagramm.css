@@ -973,6 +973,18 @@ input, textarea, div {
     background: url(../images/diagram/canvasBackground.jpg) repeat;
     z-index: 0;
 }
+#panelitem-preview {
+    position: absolute;
+    left: 5px;
+    top: 0px;
+    padding: 5px;
+    display: none;
+}
+#panelitem-preview div {
+    padding: 0px 0px 10px;
+    text-align: center;
+    width: 180px;
+}
 .canvas-container {
   width: 1500px;
     height: 2100px;
@@ -1899,6 +1911,55 @@ button:focus {
     bottom: 4px;
 }
     /*#page-contextual-properties-dialog  text-tab end*/
+    /*#diagram-themes start*/
+#diagram-themes {
+  padding: 5px;
+  width: 444px;
+  max-height: 380px;
+  overflow: auto;
+}
+.theme-box {
+  width: 130px;
+  height: 130px;
+  margin: 3px;
+  border: #ccc solid 1px;
+  float: left;
+  cursor: pointer;
+}
+.theme-selected {
+  background-color: #DEDEDE;
+}
+.theme-box:hover {
+    border-color: #2EB5E5;
+}
+#normal-theme {
+  background-image: url(../images/diagram/themes/normal.png);
+}
+#normal-ofont-theme {
+  background-image: url(../images/diagram/themes/normalofont.png);
+}
+#normal-bold-theme {
+  background-image: url(../images/diagram/themes/normalbold.png);
+}
+#color-green-theme {
+  background-image: url(../images/diagram/themes/colorgreen.png);
+}
+#color-yellow-theme {
+  background-image: url(../images/diagram/themes/coloryellow.png);
+}
+#color-red-theme {
+  background-image: url(../images/diagram/themes/colorred.png);
+}
+#color-yellow-bold-theme {
+  background-image: url(../images/diagram/themes/coloryellowbold.png);
+}
+#color-green-bold-theme {
+  background-image: url(../images/diagram/themes/colorgreenbold.png);
+}
+#color-blue-bold-theme {
+  background-image: url(../images/diagram/themes/colorbluebold.png);
+}
+    /*#diagram-themes end*/
 /*UI container end*/
   /*this used for hide the upper layer when click diagram*/
 .event-none{

@@ -13,6 +13,7 @@ define(function(require, exports, module) {
   var stateManager = DiagramManager.diagramManager.stateManager;
   var lineManager = LineManager.lineManager;
   var selectedManager = SelectedManager.selectedManager;
+  var themeManager = diagramManager.themeManager;
 
   var eventHelper = (function () {
     /**
@@ -273,6 +274,17 @@ define(function(require, exports, module) {
         });
       },
       initFloatMenuEvent : function () {
+        //diagram themes float menu
+        $("#diagram-themes .theme-box").on("click",function (e) {
+          $("#diagram-themes").find(".theme-selected")
+                              .removeClass("theme-selected");
+          $(e.target).addClass("theme-selected");
+          let curThemeName = $(e.target).attr("id");
+          themeManager.setCurrentTheme(curThemeName.substring(0,curThemeName.length-6));
+          for(let curId in objectManager.getAllDiagram()) {
+            diagramDesigner.drawDiagramById(curId);
+          }
+        });
         //line width float menu list
         $("#line-width-list li").on("click",function (e) {
           let jqcurEle;
@@ -344,7 +356,7 @@ define(function(require, exports, module) {
         $('#creating-canvas').show();
         $('#creating-diagram').show();
         _shapeName = $(target).parent().attr('shapename');
-        diagramDesigner.drawDiagram($('#creating-canvas')[0],_shapeName);
+        diagramDesigner.drawPanelItemDiagram($('#creating-canvas')[0],_shapeName);
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$("#creating-diagram"));
         $('#creating-canvas').css('left',pos.x - 15 + 'px');
         $('#creating-canvas').css('top',pos.y - 15  + 'px');

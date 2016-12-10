@@ -41,12 +41,7 @@ define(function(require, exports, module) {
         if(initalValue != undefined) {
           let selectedHtml = '<div class="icon icon-selected"></div>';
           _dropdownPanel.find(".icon-selected").remove();
-          for(let i = 0; i <= _dropdownPanel.find("li").length; i++) {
-            if($(_dropdownPanel.find("li")[i]).attr("value") == initalValue) {
-              $(_dropdownPanel.find("li")[i]).append(selectedHtml);
-              break;
-            }
-          }
+          _dropdownPanel.find("li[value=" + initalValue + "]").append(selectedHtml);
         }
         _dropdownPanel.attr("for",_target.attr("id"));
         _dropdownPanel.css({
