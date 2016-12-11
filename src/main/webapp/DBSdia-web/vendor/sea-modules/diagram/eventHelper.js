@@ -295,7 +295,7 @@ define(function(require, exports, module) {
             jqcurEle = $(e.target);
           }
           let curId = selectedManager.getSelected()[0];
-          diagramManager.setAttr(curId,{lineStyle:{"lineWidth":jqcurEle.attr("value"),}});
+          diagramManager.setAttr(curId,{lineStyle:{"lineWidth":parseInt(jqcurEle.attr("value")),}});
           diagramDesigner.drawDiagramById(curId);
           $("#line-width-list").hide();
           $("#" + jqcurEle.parent().attr("for")).removeClass("selected");
@@ -442,6 +442,7 @@ define(function(require, exports, module) {
       },
       diagramObjMouseMoveHandler : function(e) {
         // this is the actual "drag code"
+        $("#page-contextual-properties-dialog-trigger").hide();
         $(_dragElement).css({
           left: parseFloat(_offsetX) + e.clientX - _startX,
           top: parseFloat(_offsetY) + e.clientY - _startY

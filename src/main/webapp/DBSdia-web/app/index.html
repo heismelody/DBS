@@ -762,14 +762,14 @@
                       <li>
                         <ul class="button-group">
                           <li class="shape-cprops-dropdown">
-                            <button id="contextual-properties-fill-button" class="btn"  data-original-title="shape color" style="display: inline-block;">
+                            <button id="contextual-properties-fill-button" class="btn" @click="fillColorClick"  data-original-title="shape color" style="display: inline-block;">
                               <div class="icon ico-properties-shapecolor"></div>
                               <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
                               <div class="icon ico-dropdown"></div>
                             </button>
                           </li>
                           <li class="shape-cprops-dropdown">
-                            <button id="contextual-properties-bordercolor-button" class="btn"  data-original-title="border color" style="display: inline-block;">
+                            <button id="contextual-properties-bordercolor-button" class="btn" @click="borderColorClick" data-original-title="border color" style="display: inline-block;">
                               <div class="icon ico-properties-linecolor"></div>
                               <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
                               <div class="icon ico-dropdown"></div>

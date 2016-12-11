@@ -17,21 +17,39 @@ define(function(require, exports, module) {
     var diagramUtil = {
       initjQueryMethod : function () {
           (function($) {
-            $.fn.colorpicker = function(a) {
-              console.log(a);
-            };
-            $.fn.colorpickermenu = function(a) {
-              console.log(a);
-            };
             $.fn.textcontent = function(text) {
               this.find(".text-content").text(text);
-            };
-            $.fn.spininput = function(enteredHandler,spinUpHandler,spinDownHandler) {
-
             };
           })(jQuery);
       },
       dropdown : function (target,dropdownPanel,initalValue) {
+        let _dropdownPanel = $(dropdownPanel);
+        let _target = $(target);
+        let curOffsetLeft = _target.offset().left;
+        let curOffsetTop = _target.offset().top;
+        let curHeight = _target.css("height");
+
+        if(initalValue != undefined) {
+          let selectedHtml = '<div class="icon icon-selected"></div>';
+          _dropdownPanel.find(".icon-selected").remove();
+          _dropdownPanel.find("li[value=" + initalValue + "]").append(selectedHtml);
+        }
+        _dropdownPanel.attr("for",_target.attr("id"));
+        _dropdownPanel.css({
+          "left": curOffsetLeft,
+          "top": parseInt(curOffsetTop) + parseInt(curHeight) + "px",
+          "z-index": 5000
+        });
+        if(_target.hasClass("selected")) {
+          _target.removeClass("selected");
+          _dropdownPanel.hide();
+        }
+        else {
+          _target.addClass("selected");
+          _dropdownPanel.show();
+        }
+      },
+      dropdownColorPicker : function (target,dropdownPanel,initalValue) {
         let _dropdownPanel = $(dropdownPanel);
         let _target = $(target);
         let curOffsetLeft = _target.offset().left;
@@ -148,7 +166,17 @@ define(function(require, exports, module) {
         if(!f||!t)return null; //ErrorCheck
         if(h)return "rgb("+r((t[0]-f[0])*p+f[0])+","+r((t[1]-f[1])*p+f[1])+","+r((t[2]-f[2])*p+f[2])+(f[3]<0&&t[3]<0?")":","+(f[3]>-1&&t[3]>-1?r(((t[3]-f[3])*p+f[3])*10000)/10000:t[3]<0?f[3]:t[3])+")");
         else return "#"+(0x100000000+(f[3]>-1&&t[3]>-1?r(((t[3]-f[3])*p+f[3])*255):t[3]>-1?r(t[3]*255):f[3]>-1?r(f[3]*255):255)*0x1000000+r((t[0]-f[0])*p+f[0])*0x10000+r((t[1]-f[1])*p+f[1])*0x100+r((t[2]-f[2])*p+f[2])).toString(16).slice(f[3]>-1||t[3]>-1?1:3);
-      }
+      },
+      RGBtoHEX : function (rgbColor) {
+        let hexColor;
+        let rgb = rgbColor.split(",");
+        hexColor =
+        ("0" + parseInt(rgb[0],10).toString(16)).slice(-2) +
+        ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+        ("0" + parseInt(rgb[2],10).toString(16)).slice(-2);
+
+        return hexColor;
+      },
 
     };
 

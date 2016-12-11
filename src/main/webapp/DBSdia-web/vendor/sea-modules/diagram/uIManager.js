@@ -33,6 +33,8 @@ define(function(require, exports, module) {
      * --------------------------------------------------------------------------
      */
      diagramUtil.initjQueryMethod();
+     //this obj is the corresponding dropdown menu of given menu;
+     //the key is the menu's id , the value is the dropdown menu.
      var targetMenu = {
        "bar-theme" : "diagram-themes",
        "bar-font-family" : "font-list",
@@ -46,6 +48,11 @@ define(function(require, exports, module) {
        "bar-beginarrow": "beginarrow-list",
        "bar-endarrow": "endarrow-list",
      };
+     function initColorPicker(color) {
+       $("#color-picker").find(".selected").removeClass("selected");
+       $(".color-hex input").val(diagramUtil.RGBtoHEX(color));
+       $("#color-picker div[col='" + color + "']").addClass("selected");
+     }
      var targetMenuListInitHandler = {
        "bar-theme" : function () {
          let curTheme = themeManager.getCurrentTheme();
@@ -56,16 +63,26 @@ define(function(require, exports, module) {
        "bar-font-family" : function () {
        },
        "bar-font-color" : function () {
-
+         let curDiagramId = selectedManager.getSelected()[0];
+         let fontStyle = diagramManager.getAttrById(curDiagramId,{fontStyle:["color"]});
+         let curFontColor = fontStyle["color"];
+          initColorPicker(curFontColor);
        },
        "bar-font-align" : function () {
 
        },
        "bar-fill" : function () {
-
+         let curDiagramId = selectedManager.getSelected()[0];
+         let fillStyle = diagramManager.getAttrById(curDiagramId,{fillStyle:[]});
+         let curFillColor;
+         if(fillStyle.type == "solid") { curFillColor = fillStyle.color; }
+          initColorPicker(curFillColor);
        },
        "bar-line-color" : function () {
-
+         let curDiagramId = selectedManager.getSelected()[0];
+         let lineStyle = diagramManager.getAttrById(curDiagramId,{lineStyle:["lineColor"]});
+         let curLineColor = lineStyle["lineColor"];
+         initColorPicker(curLineColor);
        },
        "bar-line-width": function () {
          let curDiagramId = selectedManager.getSelected()[0];
@@ -295,13 +312,14 @@ define(function(require, exports, module) {
               let isButton = e.target.className.indexOf("toolbar-button") != -1 ? true : false;
               let isTextContent = e.target.className.indexOf("text-content") != -1 ? true : false;
               let isIcon = e.target.className.indexOf("icon") != -1  ? true : false;
+              let isBtnColor = e.target.className.indexOf("btn-color") != -1  ? true : false;
               let curButton;
 
               //set the current click element
               if(isButton) {
                 curButton = e.target;
               }
-              else if(isIcon || isTextContent) {
+              else if(isIcon || isTextContent || isBtnColor) {
                 curButton = $(e.target).parent()[0];
               }
 
@@ -780,11 +798,23 @@ define(function(require, exports, module) {
             locked : false,
             lineWidth : 0,
             lineStyle : "",
+            lineColor : "",
+            fillColor : "",
 
             //view variable
 
           },
           methods: {
+            fillColorClick : function (e) {
+              let fillStyle = diagramManager.getAttrById(this.selectedObj[0],{fillStyle:[]});
+              if(fillStyle.type == "solid") { this.fillColor = fillStyle.color; }
+              diagramUtil.dropdown("#contextual-properties-fill-button","#color-picker");
+            },
+            borderColorClick : function (e) {
+              let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineWidth"]});
+              this.lineColor = lineStyle["lineColor"];
+              diagramUtil.dropdown("#contextual-properties-bordercolor-button","#color-picker");
+            },
             borderWidthClick : function (e) {
               let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineWidth"]});
               this.lineWidth = lineStyle["lineWidth"];
@@ -1010,7 +1040,10 @@ define(function(require, exports, module) {
                   let diagramProperties = diagramManager.getAttrById(this.selectedObj[0],{properties:[]});
                   let diagramLock = diagramManager.getAttrById(this.selectedObj[0],{locked:[]});
                   let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:[]});
+                  let fillStyle = diagramManager.getAttrById(this.selectedObj[0],{fillStyle:[]});
+                  let fillColor = "255,255,255";
 
+                  if(fillStyle.type == "solid") { fillColor = fillStyle.color;}
                   contextDialogShapeTabVM.x = diagramProperties.x;
                   contextDialogShapeTabVM.y = diagramProperties.y;
                   contextDialogShapeTabVM.w = diagramProperties.w;
@@ -1019,6 +1052,8 @@ define(function(require, exports, module) {
                   contextDialogShapeTabVM.locked = diagramLock.locked;
                   contextDialogShapeTabVM.lineWidth = lineStyle.lineWidth;
                   contextDialogShapeTabVM.lineStyle = lineStyle.lineStyle;
+                  contextDialogShapeTabVM.lineColor = lineStyle.lineColor;
+                  contextDialogShapeTabVM.fillColor = fillColor;
                 }
               }
               //group
@@ -1089,20 +1124,12 @@ define(function(require, exports, module) {
             },
             methods: {
                 colorPickMouseMove :function (e) {
-                    let rgb = $(e.target).attr("col").split(",");
-                    this.curColor =
-                    ("0" + parseInt(rgb[0],10).toString(16)).slice(-2) +
-                    ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
-                    ("0" + parseInt(rgb[2],10).toString(16)).slice(-2);
+                    this.curColor = diagramUtil.RGBtoHEX($(e.target).attr("col"));
                 },
                 colorPickClick : function (e) {
                     $("#color-picker").find(".selected").removeClass("selected");
                     $(e.target).addClass("selected");
-                    let rgb = $(e.target).attr("col").split(",");
-                    this.curColor =
-                        ("0" + parseInt(rgb[0],10).toString(16)).slice(-2) +
-                        ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
-                        ("0" + parseInt(rgb[2],10).toString(16)).slice(-2);
+                    this.curColor = diagramUtil.RGBtoHEX($(e.target).attr("col"));
                 },
             },
         });

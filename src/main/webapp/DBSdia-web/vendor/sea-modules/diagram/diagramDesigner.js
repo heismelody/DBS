@@ -425,7 +425,7 @@ define(function(require, exports, module) {
           ctx.lineWidth = lineStyle.lineWidth;
           (lineStyle.lineWidth != 0) ?
                 ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
-               :ctx.strokeStyle = "rgba(255,255,255,0.7)";
+               :ctx.strokeStyle = "rgba(255,255,255,0)";
           this.drawDiagram(canvas,shapeName);
         }
       },
@@ -534,7 +534,7 @@ define(function(require, exports, module) {
           ctx.lineWidth = lineStyle.lineWidth;
           (lineStyle.lineWidth != 0) ?
                 ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
-               :ctx.strokeStyle = "rgba(255,255,255,0.7)";
+               :ctx.strokeStyle = "rgba(255,255,255,0)";
         }
         this.drawDiagram(canvas,shapeName);
       },

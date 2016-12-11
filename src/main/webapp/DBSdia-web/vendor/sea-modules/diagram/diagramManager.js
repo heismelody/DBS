@@ -105,7 +105,7 @@ define(function(require, exports, module) {
     		},
     		lineStyle: {
     			lineWidth: 2,
-    			lineColor: "0,0,50",
+    			lineColor: "0,0,0",
     			lineStyle: "solid" //dashed/solid/dot/dashdot
     		},
     		fillStyle: {
@@ -212,7 +212,7 @@ define(function(require, exports, module) {
       "normal": {
         lineStyle: {
     			lineWidth: 2,
-    			lineColor: "0,0,50",
+    			lineColor: "0,0,0",
     			lineStyle: "solid" //dashed/solid/dot/dashdot
     		},
     		fillStyle: {
@@ -235,7 +235,7 @@ define(function(require, exports, module) {
       "normal-ofont": {
         lineStyle: {
     			lineWidth: 2,
-    			lineColor: "0,0,50",
+    			lineColor: "0,0,0",
     			lineStyle: "solid" //dashed/solid/dot/dashdot
     		},
     		fillStyle: {
@@ -258,7 +258,7 @@ define(function(require, exports, module) {
       "normal-bold": {
         lineStyle: {
     			lineWidth: 4,
-    			lineColor: "0,0,50",
+    			lineColor: "0,0,0",
     			lineStyle: "solid" //dashed/solid/dot/dashdot
     		},
     		fillStyle: {
@@ -281,7 +281,7 @@ define(function(require, exports, module) {
       "color-green":{
         lineStyle: {
     			lineWidth: 2,
-    			lineColor: "0,0,50",
+    			lineColor: "0,0,0",
     			lineStyle: "solid" //dashed/solid/dot/dashdot
     		},
     		fillStyle: {
@@ -302,7 +302,7 @@ define(function(require, exports, module) {
       "color-yellow": {
         lineStyle: {
     			lineWidth: 2,
-    			lineColor: "0,0,50",
+    			lineColor: "0,0,0",
     			lineStyle: "solid" //dashed/solid/dot/dashdot
     		},
     		fillStyle: {
@@ -323,7 +323,7 @@ define(function(require, exports, module) {
       "color-red":{
         lineStyle: {
     			lineWidth: 2,
-    			lineColor: "0,0,50",
+    			lineColor: "0,0,0",
     			lineStyle: "solid" //dashed/solid/dot/dashdot
     		},
     		fillStyle: {
@@ -466,9 +466,11 @@ define(function(require, exports, module) {
           return _GlobalCurrentTheme;
         },
         getCurrentThemeObj : function () {
-          return {
-            _GlobalCurrentTheme : _GlobalThemes[_GlobalCurrentTheme],
-          };
+          let copiedObject = JSON.parse(JSON.stringify(_GlobalThemes[_GlobalCurrentTheme]));
+          copiedObject = {
+            _GlobalCurrentTheme :copiedObject,
+          }
+          return copiedObject;
         },
       },
       templateManager : {
@@ -585,6 +587,13 @@ define(function(require, exports, module) {
             let newId =  this.generateDiagramId();
             let newCategory = diagramManager.templateManager.getCategoryByName(shapeName);
             let newProperties = diagramManager.templateManager.getProperties(shapeName);
+            let curTheme = diagramManager.themeManager.getCurrentThemeObj();
+            let curThemeConfig;
+            for(let i in curTheme) {curThemeConfig = curTheme[i];}
+            let fillStyle = curThemeConfig.fillStyle;
+            let lineStyle = curThemeConfig.lineStyle;
+            let fontStyle = curThemeConfig.fontStyle;
+
             _GlobalDiagramOjects[newId] = {
               "id" : newId,
               "name" : shapeName,
@@ -595,6 +604,9 @@ define(function(require, exports, module) {
                 "w": newProperties.w,
                 "h": newProperties.h,
               },
+              "fontStyle": fontStyle,
+              "lineStyle": lineStyle,
+              "fillStyle": fillStyle
             };
 
             return newId;
