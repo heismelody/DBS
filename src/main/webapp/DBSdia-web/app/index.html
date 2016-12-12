@@ -249,7 +249,7 @@
 
       <div id="footer"></div>
       <div id="UIcontainer">
-        <div id="diagram-themes" class="menu" style="top: 102px; left: 35px; display: none;">
+        <div id="diagram-themes" class="menu float-menu" style="top: 102px; left: 35px; display: none;">
           <div id="normal-theme" class="theme-box"></div>
           <div id="normal-ofont-theme" class="theme-box"></div>
           <div id="normal-bold-theme" class="theme-box"></div>
@@ -267,7 +267,7 @@
           <div style="clear:both"></div>
         </div>
 
-        <ul id="font-list" class="menu list menu-icon" style="top: 78px; left: 155px; display: none;">
+        <ul id="font-list" class="menu list menu-icon float-menu" style="top: 78px; left: 155px; display: none;">
           <li value="Arial" style="font-family: Arial">Arial</li>
           <li value="Verdana" style="font-family: Verdana">Verdana</li>
           <li value="Georgia" style="font-family: Georgia">Georgia</li>
@@ -280,7 +280,7 @@
           <li value="Lucida" style="font-family: Lucida Console">Lucida Console</li>
         </ul>
 
-        <ul id="font-align-list" class="menu list" style="top: 78px; left: 418px; display: none;">
+        <ul id="font-align-list" class="menu list float-menu" style="top: 78px; left: 418px; display: none;">
           <li value="textAlignLeft"><div class="icon alignleft"></div></li>
           <li value="textAlignCenter"><div class="icon aligncenter"></div></li>
           <li value="textAlignRight"><div class="icon alignright"></div></li>
@@ -289,7 +289,7 @@
           <li value="vAlignBottom"><div class="icon alignbottom"></div></li>
         </ul>
 
-        <ul id="line-width-list" class="menu list menu-icon" style="top: 78px; left: 544px; display: none;">
+        <ul id="line-width-list" class="menu list menu-icon float-menu" style="top: 78px; left: 544px; display: none;">
           <li value="0">0px</li>
           <li value="1">1px</li>
           <li value="2">2px</li>
@@ -301,20 +301,20 @@
           <li value="10">10px</li>
         </ul>
 
-        <ul id="line-style-list" class="menu list menu-icon" style="top: 78px; left: 583px; display: none;">
+        <ul id="line-style-list" class="menu list menu-icon float-menu" style="top: 78px; left: 583px; display: none;">
           <li value="solid"><div class="icon linestyle linesolid"></div></li>
           <li value="dashed"><div class="icon linestyle linedashed"></div></li>
           <li value="dot"><div class="icon linestyle linedot"></div></li>
           <li value="dashdot"><div class="icon linestyle linedashdot"></div></li>
         </ul>
 
-        <ul id="line-type-list" class="menu list" style="top: 78px; left: 630px; display: none;">
+        <ul id="line-type-list" class="menu list float-menu" style="top: 78px; left: 630px; display: none;">
           <li value="step"><div class="icon linkertype-broken"></div></li>
           <li value="curve"><div class="icon linkertype-curve"></div></li>
           <li value="basic"><div class="icon linkertype-normal"></div></li>
         </ul>
 
-        <ul id="beginarrow-list" class="menu list menu-icon" style="top: 78px; left: 670px; display: none;">
+        <ul id="beginarrow-list" class="menu list menu-icon float-menu" style="top: 78px; left: 670px; display: none;">
           <li value="none"><div class="icon icon-arrow larrow-none"></div></li>
           <li value="solidArrow"><div class="icon icon-selected"></div></li>
           <li value="dashedArrow"><div class="icon icon-arrow larrow-dashedarrow"></div></li>
@@ -326,7 +326,7 @@
           <li value="cross"><div class="icon icon-arrow larrow-cross"></div></li>
         </ul>
 
-        <ul id="endarrow-list" class="menu list menu-icon" style="top: 78px; left: 715px; display: none;">
+        <ul id="endarrow-list" class="menu list menu-icon float-menu" style="top: 78px; left: 715px; display: none;">
           <li value="none"><div class="icon icon-selected"></div></li>
           <li value="solidArrow"><div class="icon icon-arrow rarrow-solidarrow"></div></li>
           <li value="dashedArrow"><div class="icon icon-arrow rarrow-dashedarrow"></div></li>
@@ -338,7 +338,7 @@
           <li value="cross"><div class="icon icon-arrow rarrow-cross"></div></li>
         </ul>
 
-        <div id="color-picker" class="menu color-picker" style="top: 78px; left: 381px; display: none;" init="true">
+        <div id="color-picker" targetpro="none" class="menu color-picker float-menu" style="top: 78px; left: 381px; display: none;">
           <div class="color-items" col="(0,0,0,0" v-on:mousemove="colorPickMouseMove" @click="colorPickClick">
             <div style="background-color:rgb(255,255,255);" col="255,255,255"></div>
             <div style="background-color:rgb(229,229,229);" col="229,229,229"></div>
@@ -349,7 +349,7 @@
             <div style="background-color:rgb(115,115,115);" col="115,115,115"></div>
             <div style="background-color:rgb(92,92,92);" col="92,92,92"></div>
             <div style="background-color:rgb(69,69,69);" col="69,69,69"></div>
-            <div style="background-color:rgb(50,50,50);" col="50,50,50" class="selected"></div>
+            <div style="background-color:rgb(50,50,50);" col="50,50,50"></div>
             <div style="background-color:rgb(23,23,23);" col="23,23,23"></div>
             <div style="background-color:rgb(0,0,0);" col="0,0,0"></div>
             <div class="clear" col="(0,0,0,0"></div>
@@ -668,7 +668,7 @@
             </li>
 					</ul>
 
-          <ul id="page-size-list" class="menu list dock-page-menu menu-ico" style="top: 195px; left: 927px; z-index: 2; display: none;">
+          <ul id="page-size-list" class="menu list dock-page-menu menu-ico float-menu" style="top: 195px; left: 927px; z-index: 2; display: none;">
         		<li ac="set-page-size" w="1500" h="2100">A3(1500x2100)</li>
         		<li ac="set-page-size" w="1050" h="1500">
               <div class="icon ico-selected"></div>A4(1050x1500)
@@ -698,7 +698,7 @@
             </li>
         	</ul>
 
-          <ul id="page-padding-list" class="menu list dock-page-menu menu-ico" style="top: 231px; left: 927px; display: none;">
+          <ul id="page-padding-list" class="menu list dock-page-menu menu-ico float-menu" style="top: 231px; left: 927px; display: none;">
         		<li p="0">0px</li>
         		<li p="20">20px</li>
         		<li p="40">40px</li>
@@ -707,7 +707,7 @@
         		<li p="100">100px</li>
         	</ul>
 
-          <ul id="page-gridsize-list" class="menu list dock-page-menu menu-ico" style="top: 421px; left: 904.078px; display: none;">
+          <ul id="page-gridsize-list" class="menu list dock-page-menu menu-ico float-menu" style="top: 421px; left: 904.078px; display: none;">
         		<li s="10">Small</li>
         		<li s="20">Normal</li>
         		<li s="30">Large</li>
@@ -764,14 +764,14 @@
                           <li class="shape-cprops-dropdown">
                             <button id="contextual-properties-fill-button" class="btn" @click="fillColorClick"  data-original-title="shape color" style="display: inline-block;">
                               <div class="icon ico-properties-shapecolor"></div>
-                              <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
+                              <div v-bind:style="{ 'background-color': 'rgb(' + fillColor + ')' }" class="btn-color"></div>
                               <div class="icon ico-dropdown"></div>
                             </button>
                           </li>
                           <li class="shape-cprops-dropdown">
                             <button id="contextual-properties-bordercolor-button" class="btn" @click="borderColorClick" data-original-title="border color" style="display: inline-block;">
                               <div class="icon ico-properties-linecolor"></div>
-                              <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
+                              <div v-bind:style="{ 'background-color': 'rgb(' + lineColor + ')' }" class="btn-color"></div>
                               <div class="icon ico-dropdown"></div>
                             </button>
                           </li>
@@ -969,7 +969,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="dropdown shape-cprops-dropdown">
-                         <button id="contextual-properties-text-fontcolor-button" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-text-fontcolor-button" @click="fontColorClick" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon fontcolor"></div>
                            <div v-bind:style="{ 'background-color': fontcolor }" class="btn-color"></div>
                            <div class="icon ico-dropdown"></div>

@@ -36,17 +36,18 @@ define(function(require, exports, module) {
      //this obj is the corresponding dropdown menu of given menu;
      //the key is the menu's id , the value is the dropdown menu.
      var targetMenu = {
-       "bar-theme" : "diagram-themes",
-       "bar-font-family" : "font-list",
-       "bar-font-color" : "color-picker",
-       "bar-font-align" : "font-align-list",
-       "bar-fill" : "color-picker",
-       "bar-line-color": "color-picker",
-       "bar-line-width": "line-width-list",
-       "bar-line-style": "line-style-list",
-       "bar-linkertype": "line-type-list",
-       "bar-beginarrow": "beginarrow-list",
-       "bar-endarrow": "endarrow-list",
+       //toolbar element
+       "#bar-theme" : "#diagram-themes",
+       "#bar-font-family" : "#font-list",
+       "#bar-font-color" : "#color-picker",
+       "#bar-font-align" : "#font-align-list",
+       "#bar-fill" : "#color-picker",
+       "#bar-line-color": "#color-picker",
+       "#bar-line-width": "#line-width-list",
+       "#bar-line-style": "#line-style-list",
+       "#bar-linkertype": "#line-type-list",
+       "#bar-beginarrow": "#beginarrow-list",
+       "#bar-endarrow": "#endarrow-list",
      };
      function initColorPicker(color) {
        $("#color-picker").find(".selected").removeClass("selected");
@@ -54,57 +55,61 @@ define(function(require, exports, module) {
        $("#color-picker div[col='" + color + "']").addClass("selected");
      }
      var targetMenuListInitHandler = {
-       "bar-theme" : function () {
+       //toolbar element
+       "#bar-theme" : function () {
          let curTheme = themeManager.getCurrentTheme();
          curTheme = curTheme + "-theme";
          $("#diagram-themes").find("theme-selected").removeClass("theme-selected");
          $("#" + curTheme).addClass("theme-selected");
        },
-       "bar-font-family" : function () {
+       "#bar-font-family" : function () {
        },
-       "bar-font-color" : function () {
+       "#bar-font-color" : function () {
          let curDiagramId = selectedManager.getSelected()[0];
          let fontStyle = diagramManager.getAttrById(curDiagramId,{fontStyle:["color"]});
          let curFontColor = fontStyle["color"];
+         $("#color-picker").attr("targetpro","fontStyle-color");
           initColorPicker(curFontColor);
        },
-       "bar-font-align" : function () {
+       "#bar-font-align" : function () {
 
        },
-       "bar-fill" : function () {
+       "#bar-fill" : function () {
          let curDiagramId = selectedManager.getSelected()[0];
          let fillStyle = diagramManager.getAttrById(curDiagramId,{fillStyle:[]});
          let curFillColor;
+         $("#color-picker").attr("targetpro","fillStyle-color");
          if(fillStyle.type == "solid") { curFillColor = fillStyle.color; }
           initColorPicker(curFillColor);
        },
-       "bar-line-color" : function () {
+       "#bar-line-color" : function () {
          let curDiagramId = selectedManager.getSelected()[0];
          let lineStyle = diagramManager.getAttrById(curDiagramId,{lineStyle:["lineColor"]});
          let curLineColor = lineStyle["lineColor"];
+         $("#color-picker").attr("targetpro","lineStyle-lineColor");
          initColorPicker(curLineColor);
        },
-       "bar-line-width": function () {
+       "#bar-line-width": function () {
          let curDiagramId = selectedManager.getSelected()[0];
          let lineStyle = diagramManager.getAttrById(curDiagramId,{lineStyle:["lineWidth"]});
          let curLineWidth = lineStyle["lineWidth"];
-         $("#" + targetMenu["bar-line-width"]).find(".icon-selected").remove();
-         $("#" + targetMenu["bar-line-width"] + " li[value=" + curLineWidth + "]").append('<div class="icon icon-selected"></div>');
+         $(targetMenu["#bar-line-width"]).find(".icon-selected").remove();
+         $(targetMenu["#bar-line-width"] + " li[value=" + curLineWidth + "]").append('<div class="icon icon-selected"></div>');
        },
-       "bar-line-style": function () {
+       "#bar-line-style": function () {
          let curDiagramId = selectedManager.getSelected()[0];
          let lineStyle = diagramManager.getAttrById(curDiagramId,{lineStyle:["lineStyle"]});
          let curLineStyle = lineStyle["lineStyle"];
-         $("#" + targetMenu["bar-line-style"]).find(".icon-selected").remove();
-         $("#" + targetMenu["bar-line-style"] + " li[value=" + curLineStyle + "]").append('<div class="icon icon-selected"></div>');
+         $(targetMenu["#bar-line-style"]).find(".icon-selected").remove();
+         $(targetMenu["#bar-line-style"] + " li[value=" + curLineStyle + "]").append('<div class="icon icon-selected"></div>');
        },
-       "bar-linkertype" : function () {
+       "#bar-linkertype" : function () {
 
        },
-       "bar-beginarrow" : function () {
+       "#bar-beginarrow" : function () {
 
        },
-       "bar-endarrow" : function () {
+       "#bar-endarrow" : function () {
 
        },
      };
@@ -154,13 +159,13 @@ define(function(require, exports, module) {
           watch : {
             Uncollapsed: function (val) {
               for(let src in this.targetMenuList) {
-                $("#" + this.targetMenuList[src]).css("top","32px");
+                $(this.targetMenuList[src]).css("top","32px");
               }
             },
             collapsed: function (val) {
               if(val == true) {
                 for(let src in this.targetMenuList) {
-                  $("#" + this.targetMenuList[src]).css("top","78px");
+                  $(this.targetMenuList[src]).css("top","78px");
                 }
               }
             },
@@ -324,33 +329,13 @@ define(function(require, exports, module) {
               }
 
               let curId = $(curButton).attr("id");
-              let curOffsetLeft = $(curButton).offset().left;
-              let curOffsetTop = $(curButton).offset().top;
-              let curHeight = $(curButton).css("height");
-
-              $("#" + this.targetMenuList[curId]).css({
-                "left": curOffsetLeft,
-                "top": parseInt(curOffsetTop) + parseInt(curHeight) + "px",
-                "z-index": 5000
+              curId = "#" + curId;
+              diagramUtil.dropdown({
+                src          : curButton,
+                target       : this.targetMenuList[curId],
+                initFunction : targetMenuListInitHandler[curId]
               });
-              if(!$(curButton).hasClass("disabled")) {
-                if($(curButton).hasClass("selected")) {
-                  $(curButton).removeClass("selected");
-                  if(this.targetMenuList.hasOwnProperty(curId)) {
-                    $("#" + this.targetMenuList[curId]).hide();
-                  }
-                }
-                else {
-                  $(curButton).addClass("selected");
-                  if(this.targetMenuList.hasOwnProperty(curId)) {
-                    targetMenuListInitHandler[curId]();
-                    $("#" + this.targetMenuList[curId]).attr("for",curId)
-                                                       .show();
-                  }
-                }
-              }
             },
-
 
           }
         })
@@ -636,13 +621,22 @@ define(function(require, exports, module) {
               }
             },
             pageSizeClick : function (e) {
-              diagramUtil.dropdown("#right-float-size","#page-size-list");
+              diagramUtil.dropdown({
+                src          : "#right-float-size",
+                target       : "#page-size-list",
+              });
             },
             pagePaddingClick : function (e) {
-              diagramUtil.dropdown("#right-float-padding","#page-padding-list");
+              diagramUtil.dropdown({
+                src          : "#right-float-padding",
+                target       : "#page-padding-list",
+              });
             },
             pageGridsizeClick : function (e) {
-              diagramUtil.dropdown("#right-float-gridsize","#page-gridsize-list");
+              diagramUtil.dropdown({
+                src          : "#right-float-gridsize",
+                target       : "#page-gridsize-list",
+              });
             },
             pagePortraitClick : function (e) {
               this.orientation = "portrait";
@@ -759,6 +753,7 @@ define(function(require, exports, module) {
               }
             },
             contextualControlShapeClick :function (e) {
+              diagramUtil.hideAllFloatMenuList();
               this.shapeActive = true;
               this.lineActive = false;
               this.textActive = false;
@@ -767,6 +762,7 @@ define(function(require, exports, module) {
               $("#contextual-properties-tab-line").removeClass("active");
             },
             contextualControlLineClick :function (e) {
+              diagramUtil.hideAllFloatMenuList();
               this.shapeActive = false;
               this.lineActive = true;
               this.textActive = false;
@@ -775,6 +771,7 @@ define(function(require, exports, module) {
               $("#contextual-properties-tab-line").addClass("active");
             },
             contextualControlShapTexteClick :function (e) {
+              diagramUtil.hideAllFloatMenuList();
               this.shapeActive = false;
               this.lineActive = false;
               this.textActive = true;
@@ -808,22 +805,56 @@ define(function(require, exports, module) {
             fillColorClick : function (e) {
               let fillStyle = diagramManager.getAttrById(this.selectedObj[0],{fillStyle:[]});
               if(fillStyle.type == "solid") { this.fillColor = fillStyle.color; }
-              diagramUtil.dropdown("#contextual-properties-fill-button","#color-picker");
+              $("#color-picker").attr("targetpro","fillStyle-color");
+              let fillColor = this.fillColor;
+              diagramUtil.dropdown({
+                src          : "#contextual-properties-fill-button",
+                target       : "#color-picker",
+                initFunction : function () {
+                  initColorPicker(fillColor);
+                }
+              });
             },
             borderColorClick : function (e) {
-              let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineWidth"]});
+              let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineColor"]});
               this.lineColor = lineStyle["lineColor"];
-              diagramUtil.dropdown("#contextual-properties-bordercolor-button","#color-picker");
+              $("#color-picker").attr("targetpro","lineStyle-lineColor");
+              let lineColor = this.lineColor;
+              diagramUtil.dropdown({
+                src          : "#contextual-properties-bordercolor-button",
+                target       : "#color-picker",
+                initFunction : function () {
+                  initColorPicker(lineColor);
+                }
+              });
             },
             borderWidthClick : function (e) {
               let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineWidth"]});
               this.lineWidth = lineStyle["lineWidth"];
-              diagramUtil.dropdown("#contextual-properties-border-width","#line-width-list",this.lineWidth);
+              let lineWidth = this.lineWidth;
+              diagramUtil.dropdown({
+                src          : "#contextual-properties-border-width",
+                target       : "#line-width-list",
+                initFunction : function () {
+                  let selectedHtml = '<div class="icon icon-selected"></div>';
+                  $("#line-width-list").find(".icon-selected").remove();
+                  $("#line-width-list").find("li[value=" + lineWidth + "]").append(selectedHtml);
+                }
+              });
             },
             dashStyleClick : function (e) {
               let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineStyle"]});
               this.lineStyle = lineStyle["lineStyle"];
-              diagramUtil.dropdown("#contextual-properties-dash-style","#line-style-list",this.lineStyle);
+              lineStyle = this.lineStyle;
+              diagramUtil.dropdown({
+                src          : "#contextual-properties-dash-style",
+                target       : "#line-style-list",
+                initFunction : function () {
+                    let selectedHtml = '<div class="icon icon-selected"></div>';
+                    $("#line-style-list").find(".icon-selected").remove();
+                    $("#line-style-list").find("li[value=" + lineStyle + "]").append(selectedHtml);
+                }
+              });
             },
           },
         });
@@ -955,6 +986,19 @@ define(function(require, exports, module) {
                 }});
                 diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
               }
+            },
+            fontColorClick : function (e) {
+              let fontStyle = diagramManager.getAttrById(this.selectedObj[0],{fontStyle:["color"]});
+              this.fontcolor = fontStyle["color"];
+              $("#color-picker").attr("targetpro","fontStyle-color");
+              let fontcolor = this.fontcolor;
+              diagramUtil.dropdown({
+                src          : "#contextual-properties-text-fontcolor-button",
+                target       : "#color-picker",
+                initFunction : function () {
+                  initColorPicker(fontcolor);
+                }
+              });
             },
           },
         });
@@ -1117,20 +1161,56 @@ define(function(require, exports, module) {
         var colorPickerVM = new Vue({
             el: '#color-picker',
             data: {
-                curColor : "FFFFFF",
+              selectedObj : selectedManager.getSelected(),
+              curColor : "FFFFFF",
             },
             watch: {
 
             },
             methods: {
-                colorPickMouseMove :function (e) {
-                    this.curColor = diagramUtil.RGBtoHEX($(e.target).attr("col"));
-                },
-                colorPickClick : function (e) {
-                    $("#color-picker").find(".selected").removeClass("selected");
-                    $(e.target).addClass("selected");
-                    this.curColor = diagramUtil.RGBtoHEX($(e.target).attr("col"));
-                },
+              UIupdateMenucolor : function (property,curRGBColor) {
+                let propertyParent = property[0];
+                let propertySon = property[1];
+
+                switch (propertyParent) {
+                  case "lineStyle":
+                    $("#bar-line-color .btn-color").css("background-color","rgb(" + curRGBColor + ")");
+                    $("#contextual-properties-bordercolor-button .btn-color").css("background-color","rgb(" + curRGBColor + ")");
+                    $("#contextual-properties-line-linecolor-button .btn-color").css("background-color","rgb(" + curRGBColor + ")");
+                    break;
+                  case "fillStyle":
+                    $("#bar-fill .btn-color").css("background-color","rgb(" + curRGBColor + ")");
+                    $("#contextual-properties-fill-button .btn-color").css("background-color","rgb(" + curRGBColor + ")");
+                    break;
+                  case "fontStyle":
+                    $("#bar-font-color .btn-color").css("background-color","rgb(" + curRGBColor + ")");
+                    $("#contextual-properties-text-fontcolor-button .btn-color").css("background-color","rgb(" + curRGBColor + ")");
+                    break;
+                  default:
+                }
+              },
+              colorPickMouseMove :function (e) {
+                this.curColor = diagramUtil.RGBtoHEX($(e.target).attr("col"));
+              },
+              colorPickClick : function (e) {
+                let curRGBColor = $(e.target).attr("col");
+                let targetProperty = $(this.$el).attr("targetpro");
+                targetProperty = targetProperty.split("-");
+                let propertyParent = targetProperty[0];
+                let propertySon = targetProperty[1];
+
+                $("#color-picker").find(".selected").removeClass("selected");
+                $(e.target).addClass("selected");
+                this.curColor = diagramUtil.RGBtoHEX(curRGBColor);
+
+                let attr = {};
+                let attrValue = {};
+                attrValue[propertySon] = curRGBColor;
+                attr[propertyParent] = attrValue;
+                diagramManager.setAttr(this.selectedObj[0],attr);
+                diagramDesigner.drawDiagramById(this.selectedObj[0]);
+                this.UIupdateMenucolor(targetProperty,curRGBColor);
+              },
             },
         });
       },

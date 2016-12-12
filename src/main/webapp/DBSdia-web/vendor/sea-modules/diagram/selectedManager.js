@@ -47,11 +47,24 @@ define(function(require, exports, module) {
       },
       removeSelected : function() {
         if(_GlobalSelectedDiagrams.length != 0) {
+          //update ui
           $(".canvas-container").css("cursor","default");
           $("#page-contextual-properties-dialog-trigger").hide();
           $("#page-contextual-properties-dialog").hide();
+          for (let i = 0; i < $("#UIcontainer .menu").length; i++) {
+            let curJqueryEle = $($("#UIcontainer .menu")[i]);
+            if(curJqueryEle.css("display") == "block") {
+              curJqueryEle.hide();
+              let targetMenu = curJqueryEle.attr("for");
+              if(targetMenu && targetMenu != "") {
+                $("#" + targetMenu).removeClass("selected");
+              }
+            }
+          }
           for(let i =_GlobalSelectedDiagrams.length - 1; i >= 0; i--) {
             diagramDesigner.removeControlOverlay(_GlobalSelectedDiagrams[i]);
+
+            //update model
             _GlobalSelectedDiagrams.pop();
           }
         }

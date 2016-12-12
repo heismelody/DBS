@@ -22,57 +22,49 @@ define(function(require, exports, module) {
             };
           })(jQuery);
       },
-      dropdown : function (target,dropdownPanel,initalValue) {
-        let _dropdownPanel = $(dropdownPanel);
-        let _target = $(target);
-        let curOffsetLeft = _target.offset().left;
-        let curOffsetTop = _target.offset().top;
-        let curHeight = _target.css("height");
-
-        if(initalValue != undefined) {
-          let selectedHtml = '<div class="icon icon-selected"></div>';
-          _dropdownPanel.find(".icon-selected").remove();
-          _dropdownPanel.find("li[value=" + initalValue + "]").append(selectedHtml);
-        }
-        _dropdownPanel.attr("for",_target.attr("id"));
-        _dropdownPanel.css({
-          "left": curOffsetLeft,
-          "top": parseInt(curOffsetTop) + parseInt(curHeight) + "px",
-          "z-index": 5000
-        });
-        if(_target.hasClass("selected")) {
-          _target.removeClass("selected");
-          _dropdownPanel.hide();
-        }
-        else {
-          _target.addClass("selected");
-          _dropdownPanel.show();
+      hideAllFloatMenuList : function () {
+        for(let i = 0; i < $(".float-menu").length; i++) {
+          let curjqueryEle = $($(".float-menu")[i]);
+          curjqueryEle.hide();
+          $("#" + curjqueryEle.attr("for")).removeClass("selected");
         }
       },
-      dropdownColorPicker : function (target,dropdownPanel,initalValue) {
-        let _dropdownPanel = $(dropdownPanel);
-        let _target = $(target);
-        let curOffsetLeft = _target.offset().left;
-        let curOffsetTop = _target.offset().top;
-        let curHeight = _target.css("height");
-
-        if(initalValue != undefined) {
-          let selectedHtml = '<div class="icon icon-selected"></div>';
-          _dropdownPanel.find(".icon-selected").remove();
-          _dropdownPanel.find("li[value=" + initalValue + "]").append(selectedHtml);
+      dropdown : function (arg) {
+        let src,
+            dropdownPanel,
+            initFunction;
+        src = arg.src;
+        dropdownPanel = arg.target;
+        if(arg.hasOwnProperty("initFunction")) {
+          initFunction = arg.initFunction;
         }
-        _dropdownPanel.attr("for",_target.attr("id"));
+
+        let _dropdownPanel = $(dropdownPanel);
+        let _src = $(src);
+        let curOffsetLeft = _src.offset().left;
+        let curOffsetTop = _src.offset().top;
+        let curHeight = _src.css("height");
+
         _dropdownPanel.css({
           "left": curOffsetLeft,
           "top": parseInt(curOffsetTop) + parseInt(curHeight) + "px",
           "z-index": 5000
         });
-        if(_target.hasClass("selected")) {
-          _target.removeClass("selected");
+        if(_src.hasClass("selected")) {
+          _dropdownPanel.attr("for",_src.attr(""));
+          _src.removeClass("selected");
           _dropdownPanel.hide();
         }
         else {
-          _target.addClass("selected");
+          if(_dropdownPanel.css("display") == "block") {
+            $("#" + _dropdownPanel.attr("for")).removeClass("selected");
+          }
+          this.hideAllFloatMenuList();
+          _dropdownPanel.attr("for",_src.attr("id"));
+          _src.addClass("selected");
+          if(initFunction != undefined) {
+            initFunction();
+          }
           _dropdownPanel.show();
         }
       },
