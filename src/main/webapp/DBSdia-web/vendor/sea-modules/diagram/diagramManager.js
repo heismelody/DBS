@@ -437,7 +437,25 @@ define(function(require, exports, module) {
         },
       },
       configManager : {
+        getLineType : function () {
+          let curLineType = $("#bar-linkertype .icon").attr("class").split(" ")[1];
+          curLineType = curLineType.split("-")[1];
 
+          switch (curLineType) {
+            case "normal":
+              curLineType = "basic";
+              break;
+            case "curve":
+              curLineType = "curve";
+              break;
+            case "broken":
+              curLineType = "broken";
+              break;
+            default:
+              curLineType = "basic";
+          }
+          return curLineType;
+        },
       },
       themeManager : {
         addNewTheme : function (theme) {
@@ -567,20 +585,6 @@ define(function(require, exports, module) {
             let newId = newLineObj["id"];
 
             _GlobalDiagramOjects[newId] = newLineObj;
-            // _GlobalLineObject[newId] = {
-            //   "id" : newId,
-            //   "name" : "line",
-            //   "linetype" : "curve",
-            //   "properties": {
-            // 			"startX": start.x,
-            // 			"startY": start.y,
-            // 			"endX" : end.x,
-            // 			"endY" : end.y,
-            //     "width" : width,
-            //     "height" : height,
-            // 		},
-            // };
-
             return newId;
           }
           else {
@@ -678,15 +682,6 @@ define(function(require, exports, module) {
         refTemp = refTemp.toLowerCase();
         if(_GlobalPathRef[refTemp] != undefined) {
           return _GlobalPathRef[refTemp];
-        }
-      },
-      isPointInDiagram : function(diagramId,x,y) {
-        let curshapeName = this.objectManager.getShapeNameById(diagramId);
-        if(curshapeName == "line") {
-          return lineManager.isPointOnLine(diagramId,{"x":x,"y":y});
-        }
-        else {
-
         }
       },
 

@@ -62,11 +62,14 @@ define(function(require, exports, module) {
     diagramUtil.initjQueryMethod();
     var eventHelper = {
       forwardDiagramEvent : function (eventName,
-                                      inPathFunction,
-                                      inBorderAreaFunction,
-                                      notInPathNBorderFunction,
                                       e,
-                                      position) {
+                                      position,
+                                      functionObject) {
+        let inPathFunction = functionObject["inPathFunction"];
+        let inBorderAreaFunction = functionObject["inBorderAreaFunction"];
+        let onLineFunction = functionObject["onLineFunction"];
+        let notOnDiagramFunction = functionObject["notOnDiagramFunction"];
+
         if(e.target.className.indexOf("diagram-object-canvas") != -1) {
           let curId = $(e.target).parent().attr("id");
           let ctx = $(e.target)[0].getContext("2d");
@@ -104,13 +107,41 @@ define(function(require, exports, module) {
             }
           }
         }
+        else if(e.target.className.indexOf("line-object-canvas") != -1) {
+          let curId = $(e.target).parent().attr("id");
+          let ctx = $(e.target)[0].getContext("2d");
+          let curX;
+          let curY;
+          if(position != undefined) {
+            curX = position.x;
+            curY = position.y;
+          }
+          else {
+            curX = e.pageX;
+            curY = e.pageY;
+          }
+          let pos = diagramUtil.getRelativePosOffset(curX,curY,$(".design-canvas"));
+
+          if(lineManager.isPointOnLine(curId,pos)) {
+            onLineFunction(e);
+            for(var i in _mousePosDiagramArray) {
+              $("#" + _mousePosDiagramArray[i]).removeClass("event-none");
+            }
+            _mousePosDiagramArray = [];
+          }
+          else {
+            _mousePosDiagramArray.push(curId);
+            $("#"+curId).addClass("event-none");
+            $(document.elementFromPoint(curX,curY)).trigger(eventName,{x:curX,y:curY});
+          }
+        }
         else {
           if(_mousePosDiagramArray.length != 0) {
             for(var i in _mousePosDiagramArray) {
               $("#" + _mousePosDiagramArray[i]).removeClass("event-none");
             }
             _mousePosDiagramArray = [];
-            notInPathNBorderFunction();
+            notOnDiagramFunction();
           }
         }
       },
@@ -123,6 +154,9 @@ define(function(require, exports, module) {
             $("#designer-contextmenu").hide();
           }
         }).on("mousedown",function (e) {
+          if(stateManager.isInState("drawline")) {
+            eventHelper.MouseDownHandler(e,eventHelper.drawLineMousedownHandler);
+          }
           if($("#shape-textarea-editing").length != 0) {
             let editing = $("#shape-textarea-editing").detach();
             let targetId = editing.attr("target");
@@ -140,25 +174,14 @@ define(function(require, exports, module) {
             let editing = $("#line-textarea-editing").detach();
 
           }
-        });
-        $(".design-layout").on("mousemove",function (e) {
+        }).on("mousemove",function (e) {
           if(e.target.id == "designer-grids" || e.target.className == "canvas-container") {
             $(".canvas-container").css("cursor","default");
           }
-        });
-
-        $(".design-layout").on("mousedown",function(e) {
-          if(stateManager.isInState("drawline")) {
-            eventHelper.MouseDownHandler(e,eventHelper.drawLineMousedownHandler);
+          if(e.target.className.indexOf("diagram-object-canvas") == -1) {
+            $('.anchor-overlay').remove();
           }
-        });
-
-        $("#right-float-page .ico-dock-collapse").on("click",function (e) {
-          $("#right-float-btn-page").removeClass("selected");
-          $("#right-float-page").hide();
-        });
-
-        $( ".design-layout" ).contextmenu(function(e) {
+        }).contextmenu(function(e) {
           if(e.target.id != "designer-grids" && e.target.className != "canvas-container") {
             $("#designer-contextmenu").css({
               left : e.clientX + "px",
@@ -178,63 +201,80 @@ define(function(require, exports, module) {
           return false;
         });
 
+        $("#right-float-page .ico-dock-collapse").on("click",function (e) {
+          $("#right-float-btn-page").removeClass("selected");
+          $("#right-float-page").hide();
+        });
+
         //panel item mouse down
         $(".design-panel").on('mousedown','.panel-item',function(e) {
           eventHelper.MouseDownHandler(e,eventHelper.panelitemMouseDownHandler);
         });
         //diagram mouse down / click
         $(".design-layout").on('mousedown',function(e,position) {
-          eventHelper.forwardDiagramEvent('mousedown',function(e) {
-            if(position != undefined) {
-              e.clientX = position.x;
-              e.clientY = position.y;
-              e.pageX = position.x;
-              e.pageY = position.y;
-              e.button = 0;
-            }
-            eventHelper.MouseDownHandler(e,eventHelper.diagramObjMouseDownHandler);
-          },
-          function () {
-
-          },
-          function(){
-            selectedManager.removeSelected();
-            $("#designer-contextmenu").hide();
-          },
-          e,position);
+          eventHelper.forwardDiagramEvent('mousedown',e,position,
+          {
+            inPathFunction: function(e) {
+              if(position != undefined) {
+                e.clientX = position.x;
+                e.clientY = position.y;
+                e.pageX = position.x;
+                e.pageY = position.y;
+                e.button = 0;
+              }
+              eventHelper.MouseDownHandler(e,eventHelper.diagramObjMouseDownHandler);
+            },
+            inBorderAreaFunction : function () {},
+            onLineFunction : function () {
+              eventHelper.lineObjMouseDownHandler(e);
+            },
+            notOnDiagramFunction : function(){
+              selectedManager.removeSelected();
+              $("#designer-contextmenu").hide();
+            },
+          });
         });
         $(".design-layout").on('dblclick',function(e,position)  {
-          eventHelper.forwardDiagramEvent('dblclick',function(e) {
-            let curId = $(e.target).parent().attr("id");
-            diagramDesigner.addTextarea(curId);
-          },
-          function(){},
-          function(){},
-          e,position);
+          eventHelper.forwardDiagramEvent('dblclick',e,position,
+          {
+            inPathFunction: function(e) {
+              let curId = $(e.target).parent().attr("id");
+              diagramDesigner.addTextarea(curId);
+            },
+            inBorderAreaFunction : function () {},
+            onLineFunction : function () {
+            },
+            notOnDiagramFunction : function(){},
+          });
         });
         $(".design-layout").on('mousemove',function(e,position)  {
-          eventHelper.forwardDiagramEvent('mousemove',function(e) {
-            let curId = $(e.target).parent().attr("id");
-            $(".canvas-container").css("cursor","move");
-            diagramDesigner.addDiagramAnchorOverlay(curId);
-          },
-          function () {
-            let curId = $(e.target).parent().attr("id");
-            $(".canvas-container").css("cursor","crosshair");
-            diagramDesigner.addDiagramAnchorOverlay(curId);
-          },
-          function(){
-            $('.anchor-overlay').remove();
-            $(".canvas-container").css("cursor","default");
-          },
-          e,position);
+          eventHelper.forwardDiagramEvent('mousemove',e,position,
+          {
+            inPathFunction: function(e) {
+              let curId = $(e.target).parent().attr("id");
+              $(".canvas-container").css("cursor","move");
+              diagramDesigner.addDiagramAnchorOverlay(curId);
+            },
+            inBorderAreaFunction : function () {
+              let curId = $(e.target).parent().attr("id");
+              $(".canvas-container").css("cursor","crosshair");
+              diagramDesigner.addDiagramAnchorOverlay(curId);
+            },
+            onLineFunction : function () {
+              $(".canvas-container").css("cursor","pointer");
+            },
+            notOnDiagramFunction : function() {
+              $('.anchor-overlay').remove();
+              $(".canvas-container").css("cursor","default");
+            },
+          });
         });
         //$(".design-layout").on('click','.diagram-object-canvas', eventHelper.diagramObjClickHandler);
         //line mouse down / click
-        $(".design-layout").on('mousedown','.line-object-canvas',function(e) {
-          eventHelper.MouseDownHandler(e,eventHelper.lineObjMouseDownHandler);
-        });
-        $(".design-layout").on('click','.line-object-canvas', eventHelper.lineObjClickHandler);
+        // $(".design-layout").on('mousedown','.line-object-canvas',function(e) {
+        //   eventHelper.MouseDownHandler(e,eventHelper.lineObjMouseDownHandler);
+        // });
+        // $(".design-layout").on('click','.line-object-canvas', eventHelper.lineObjClickHandler);
 
         //control resize
         $(".design-layout").on('mousedown','.control-overlay.nw',function(e) {
@@ -317,6 +357,34 @@ define(function(require, exports, module) {
           $("#" + jqcurEle.parent().attr("for")).removeClass("selected");
           //console.log(jqcurEle.attr("value"));
         });
+        //
+        $("#line-type-list li").on("click",function (e) {
+          let jqcurEle;
+          let curLineType;
+          let curClassName;
+          if(e.target.className.indexOf("icon") != -1) {
+            jqcurEle = $(e.target).parent();
+          }
+          else {
+            jqcurEle = $(e.target);
+          }
+          curLineType = jqcurEle.attr("value");
+          switch (curLineType) {
+            case "step":
+              curClassName = "icon linkertype-broken linkertype";
+              break;
+            case "curve":
+              curClassName = "icon linkertype-curve linkertype";
+              break;
+            case "basic":
+              curClassName = "icon linkertype-normal linkertype";
+              break;
+            default:
+          }
+          $("#line-type-list").hide();
+          $("#bar-linkertype").removeClass("selected");
+          $("#bar-linkertype").find(".linkertype").attr("class",curClassName);
+        });
       },
 
       MouseDownHandler : function(e,actualHandler) {
@@ -358,9 +426,16 @@ define(function(require, exports, module) {
         _shapeName = $(target).parent().attr('shapename');
         diagramDesigner.drawPanelItemDiagram($('#creating-canvas')[0],_shapeName);
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$("#creating-diagram"));
-        $('#creating-canvas').css('left',pos.x - 15 + 'px');
-        $('#creating-canvas').css('top',pos.y - 15  + 'px');
-        diagramDesigner.beforeCreatingDiagram(_shapeName);
+        $('#creating-canvas').css('left',pos.x - 15 + 'px')
+                             .css('top',pos.y - 15  + 'px');
+
+        let curProperties = templateManager.getProperties(_shapeName);
+        let newW = curProperties.w + 20;
+        let newH = curProperties.h + 20;
+        let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="' + newW + '" height = "' + newH + '"></canvas>';
+        $('#creating-designer-diagram').css('width',newW)
+                                       .css('height',newH)
+                                       .append(creatingCanvasHtml);
 
         // tell our code to start moving the element with the mouse
         document.onmousemove = eventHelper.panelitemMouseMoveHandler;
@@ -371,9 +446,12 @@ define(function(require, exports, module) {
         if(e.clientX > 178) {
           //Mouse move in the designer
           let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
-          $('#creating-designer-diagram').show();
+          let curProperties = templateManager.getProperties(_shapeName);
+          $('#creating-designer-diagram').show()
+                                         .css('left',pos.x - curProperties.w/2 - 10 + 'px')
+                                         .css('top',pos.y - curProperties.h/2 - 10 + 'px');
           $('#creating-designer-canvas').show();
-          diagramDesigner.creatingDiagram(pos.x,pos.y,_shapeName);
+          diagramDesigner.drawThemeDiagram($('#creating-designer-canvas')[0],_shapeName);
         }
         else {
           //Mouse move in the left panel
@@ -394,7 +472,16 @@ define(function(require, exports, module) {
             //That is the actual mouse up code.
             if(e.clientX > 178) {
               let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
-              let newId = diagramDesigner.afterCreatingDiagram(pos.x,pos.y,_shapeName);
+              let newId = objectManager.addNewDiagram(_shapeName,pos.x,pos.y);
+              $('#creating-designer-diagram').detach()
+                                             .appendTo(".design-canvas")
+                                             .attr("id",newId)
+                                             .attr("class","diagram-object-container")
+                                             .css('position','absolute');
+              $('#creating-designer-canvas').attr("id","")
+                                            .attr("class","diagram-object-canvas")
+                                            .css('position','absolute');
+              $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
             }
             else {
               $('#creating-designer-diagram').hide();
@@ -604,21 +691,21 @@ define(function(require, exports, module) {
         _dragElement = $(target)[0];
 
         stateManager.resetState();
-        $(".canvas-container").css("cursor","default");
-        let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="0" height = "0"></canvas>';
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+        let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="0" height = "0"></canvas>';
         _shapeName = "line";
         start = {
           x: pos.x,
           y: pos.y,
         };
 
-        $('#creating-designer-diagram').append(creatingCanvasHtml);
-        $("#creating-designer-diagram").show();
-        $("#creating-designer-diagram").css({
-          left: pos.x,
-          top: pos.y,
-        });
+        $(".canvas-container").css("cursor","default");
+        $('#creating-designer-diagram').append(creatingCanvasHtml)
+                                       .show()
+                                       .css({
+                                        "left": pos.x,
+                                        "top": pos.y,
+                                       });
 
         // tell our code to start moving the element with the mouse
         document.onmousemove = eventHelper.drawLineMouseMoveHandler;
@@ -631,23 +718,25 @@ define(function(require, exports, module) {
           y: pos.y,
         };
         let curPosRelative = {};
+        let curJqueryCanvas = $("#creating-designer-canvas");
+        let curJqueryDiagram = $("#creating-designer-diagram");
 
-        $("#creating-designer-canvas").attr({
+        curJqueryCanvas.attr({
           width: Math.abs(end.x - start.x) + 20,
           height: Math.abs(end.y - start.y) + 20,
         });
-        $("#creating-designer-diagram").css({
+        curJqueryDiagram.css({
           left: Math.min(start.x,end.x) - 10,
           top: Math.min(start.y,end.y) - 10,
         });
         curPosRelative = {
           start : {
-            x: start.x - parseFloat($("#creating-designer-diagram").css("left")),
-            y: start.y - parseFloat($("#creating-designer-diagram").css("top")),
+            x: start.x - parseFloat(curJqueryDiagram.css("left")),
+            y: start.y - parseFloat(curJqueryDiagram.css("top")),
           },
           end : {
-            x: end.x - parseFloat($("#creating-designer-diagram").css("left")),
-            y: end.y - parseFloat($("#creating-designer-diagram").css("top")),
+            x: end.x - parseFloat(curJqueryDiagram.css("left")),
+            y: end.y - parseFloat(curJqueryDiagram.css("top")),
           },
         };
         diagramDesigner.drawDiagram($("#creating-designer-canvas")[0],"line",curPosRelative);
@@ -667,33 +756,37 @@ define(function(require, exports, module) {
           };
           let newId = objectManager.addNewDiagram("line",start,end);
           let curPosRelative = {};
-          $("#creating-designer-canvas").attr({
+          let curJqueryCanvas = $("#creating-designer-canvas");
+          let curJqueryDiagram = $("#creating-designer-diagram");
+
+          curJqueryCanvas.attr({
             width: Math.abs(end.x - start.x) + 20,
             height: Math.abs(end.y - start.y) + 20,
           });
-          $("#creating-designer-diagram").css({
+          curJqueryDiagram.css({
             left: Math.min(start.x,end.x) - 10,
             top: Math.min(start.y,end.y) - 10,
           });
           curPosRelative = {
             start : {
-              x: start.x - parseFloat($("#creating-designer-diagram").css("left")),
-              y: start.y - parseFloat($("#creating-designer-diagram").css("top")),
+              x: start.x - parseFloat(curJqueryDiagram.css("left")),
+              y: start.y - parseFloat(curJqueryDiagram.css("top")),
             },
             end : {
-              x: end.x - parseFloat($("#creating-designer-diagram").css("left")),
-              y: end.y - parseFloat($("#creating-designer-diagram").css("top")),
+              x: end.x - parseFloat(curJqueryDiagram.css("left")),
+              y: end.y - parseFloat(curJqueryDiagram.css("top")),
             },
           };
           diagramDesigner.drawDiagram($("#creating-designer-canvas")[0],"line",curPosRelative);
-          let newObject = $('#creating-designer-diagram').detach();
-          $('.design-canvas').append(newObject);
-          $('#creating-designer-diagram').attr("id",newId)
-                                         .attr("class","line-object-container")
-                                         .css('position','absolute');
-          $('#creating-designer-canvas').attr("id","")
-                                        .attr("class","line-object-canvas")
-                                        .css('position','absolute');
+          curJqueryDiagram.detach()
+                          .appendTo('.design-canvas')
+                          .attr("id",newId)
+                          .attr("class","line-object-container")
+                          .css('position','absolute');
+          curJqueryCanvas.attr("id","")
+                         .attr("class","line-object-canvas")
+                         .css('position','absolute');
+          //delete this line if it's too small
           if($('#' + newId).find("canvas").length == 0
              || parseInt($('#' + newId).find("canvas").attr("width")) < 10
              || parseInt($('#' + newId).find("canvas").attr("height")) < 10 ) {
@@ -715,6 +808,12 @@ define(function(require, exports, module) {
         // grab the clicked element's position
         _offsetX = ExtractNumber(_dragElement.style.left);
         _offsetY = ExtractNumber(_dragElement.style.top);
+
+        let curId = $(e.target).parent().attr("id");
+        let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+
+        selectedManager.removeSelected();
+        selectedManager.setSelected(curId);
 
         // tell our code to start moving the element with the mouse
         document.onmousemove = eventHelper.lineObjMouseMoveHandler;
@@ -759,8 +858,7 @@ define(function(require, exports, module) {
         let curId = $(target).parent().attr("id");
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
 
-        if(diagramManager.isPointInDiagram(curId,pos.x,pos.y)) {
-          console.log(2)
+        if(lineManager.isPointOnLine(curId,pos)) {
           diagramDesigner.addDiagramControlOverlay(curId);
         }
       },

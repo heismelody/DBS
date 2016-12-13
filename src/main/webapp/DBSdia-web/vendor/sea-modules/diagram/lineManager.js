@@ -88,7 +88,7 @@ define(function(require, exports, module) {
         return Date.now() + generateUIDNotMoreThan1million();
       },
       addNewLine : function(start,end) {
-        let linetype = "curve";
+        let linetype = "basic";
         let newId =  this.generateDiagramId();
         let width = Math.abs(start.x - end.x);
         let height = Math.abs(start.y - end.y);
@@ -264,7 +264,7 @@ define(function(require, exports, module) {
 
         if((currPoint.x >= Math.min(point1.x,point2.x) && currPoint.x <= Math.max(point1.x,point2.x))
            && (currPoint.y >= Math.min(point1.y,point2.y) && currPoint.y <= Math.max(point1.y,point2.y)) ) {
-          return Math.abs((currPoint.y - point1.y)*(point2.x - point1.x) - (currPoint.x - point1.x)*(point2.y - point1.y)) <= 2000;
+          return Math.abs((currPoint.y - point1.y)*(point2.x - point1.x) - (currPoint.x - point1.x)*(point2.y - point1.y)) <= 2500;
         }
         else {
           return false;

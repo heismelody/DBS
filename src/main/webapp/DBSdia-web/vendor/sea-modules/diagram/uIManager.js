@@ -198,8 +198,34 @@ define(function(require, exports, module) {
               }
               //current selected diagram is ONE diagram
               else if(val.length == 1) {
-                //current selected diagram is diagramObj
+                //current selected diagram is lineObj
                 if(objectManager.isLine(val[0])) {
+                  //this.barthemeDisabled = true,
+                  //this.barundoDisabled = true,
+                  //this.barredoDisabled = true,
+                  this.barbrushDisabled = false,
+                  this.barfontfamilyDisabled = false,
+                  this.barfontsizeDisabled = false,
+                  this.barfontboldDisabled = false,
+                  this.barfontitalicDisabled = false,
+                  this.barfontunderlineDisabled = false,
+                  this.barfontcolorDisabled = false,
+                  this.barfontalignDisabled = false,
+                  this.barfillDisabled = true,
+                  this.barlinecolorDisabled = false,
+                  this.barlinewidthDisabled = false,
+                  this.barlinestyleDisabled = false,
+                  this.barlinkertypeDisabled = false,
+                  this.barbeginarrowDisabled = false,
+                  this.barendarrowDisabled = false,
+                  this.barfrontDisabled = false,
+                  this.barbackDisabled = false,
+                  //this.barlockDisabled = true,
+                  //this.barunlockDisabled = true,
+                  this.barlinkdisabled = true;
+                }
+                //current selected diagram is diagramObj
+                else {
                   //this.barthemeDisabled = true,
                   //this.barundoDisabled = true,
                   //this.barredoDisabled = true,
@@ -223,32 +249,6 @@ define(function(require, exports, module) {
                   //this.barlockDisabled = true,
                   //this.barunlockDisabled = true,
                   this.barlinkdisabled = false;
-                }
-                //current selected diagram is lineObj
-                else {
-                  //this.barthemeDisabled = true,
-                  //this.barundoDisabled = true,
-                  //this.barredoDisabled = true,
-                  this.barbrushDisabled = false,
-                  this.barfontfamilyDisabled = false,
-                  this.barfontsizeDisabled = false,
-                  this.barfontboldDisabled = false,
-                  this.barfontitalicDisabled = false,
-                  this.barfontunderlineDisabled = false,
-                  this.barfontcolorDisabled = false,
-                  this.barfontalignDisabled = false,
-                  this.barfillDisabled = false,
-                  this.barlinecolorDisabled = false,
-                  this.barlinewidthDisabled = false,
-                  this.barlinestyleDisabled = false,
-                  this.barlinkertypeDisabled = false,
-                  this.barbeginarrowDisabled = false,
-                  this.barendarrowDisabled = false,
-                  this.barfrontDisabled = false,
-                  this.barbackDisabled = false,
-                  //this.barlockDisabled = true,
-                  //this.barunlockDisabled = true,
-                  this.barlinkdisabled = true;
 
                   let fontStyle = diagramManager.getAttrById(val[0],{fontStyle:["color"]});
                   let lineStyle = diagramManager.getAttrById(val[0],{lineStyle:["lineColor"]});
@@ -328,13 +328,15 @@ define(function(require, exports, module) {
                 curButton = $(e.target).parent()[0];
               }
 
-              let curId = $(curButton).attr("id");
-              curId = "#" + curId;
-              diagramUtil.dropdown({
-                src          : curButton,
-                target       : this.targetMenuList[curId],
-                initFunction : targetMenuListInitHandler[curId]
-              });
+              if(!$(curButton).hasClass("disabled")) {
+                let curId = $(curButton).attr("id");
+                curId = "#" + curId;
+                diagramUtil.dropdown({
+                  src          : curButton,
+                  target       : this.targetMenuList[curId],
+                  initFunction : targetMenuListInitHandler[curId]
+                });
+              }
             },
 
           }

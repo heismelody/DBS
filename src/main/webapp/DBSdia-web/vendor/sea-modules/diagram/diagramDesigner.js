@@ -30,65 +30,6 @@ define(function(require, exports, module) {
         _w : 0,
         _h : 0,
       },
-
-      beforeCreatingDiagram : function(shapeName){
-        let curProperties = templateManager.getProperties(shapeName);
-        let newW = curProperties.w + 20;
-        let newH = curProperties.h + 20;
-        let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="' + newW + '" height = "' + newH + '"></canvas>';
-        $('#creating-designer-diagram').css('width',newW).css('height',newH);
-        $('#creating-designer-diagram').append(creatingCanvasHtml);
-      },
-      creatingDiagram : function(x,y,shapeName){
-        let curProperties = templateManager.getProperties(shapeName);
-        diagramDesigner.drawThemeDiagram($('#creating-designer-canvas')[0],shapeName);
-        $('#creating-designer-diagram').css('left',x - curProperties.w/2 - 10 + 'px');
-        $('#creating-designer-diagram').css('top',y - curProperties.h/2 - 10 + 'px');
-      },
-      afterCreatingDiagram : function(x,y,shapeName){
-        let newId = objectManager.addNewDiagram(shapeName,x,y);
-        var newObject = $('#creating-designer-diagram').detach();
-        $('.design-canvas').append(newObject);
-        $('#creating-designer-diagram').attr("id",newId)
-                                       .attr("class","diagram-object-container")
-                                       .css('position','absolute');
-        $('#creating-designer-canvas').attr("id","")
-                                      .attr("class","diagram-object-canvas")
-                                      .css('position','absolute');
-        $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
-
-        return newId;
-      },
-
-      beforeCreatingLine : function(){
-        let curProperties = templateManager.getProperties(shapeName);
-        let newW = curProperties.w + 20;
-        let newH = curProperties.h + 20;
-        let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="' + newW + '" height = "' + newH + '"></canvas>';
-        $('#creating-designer-diagram').css('width',newW).css('height',newH);
-        $('#creating-designer-diagram').append(creatingCanvasHtml);
-      },
-      creatingLine : function(x,y){
-        let curProperties = templateManager.getProperties(shapeName);
-        diagramDesigner.drawDiagram($('#creating-designer-canvas')[0],shapeName);
-        $('#creating-designer-diagram').css('left',x - curProperties.w/2 - 10 + 'px');
-        $('#creating-designer-diagram').css('top',y - curProperties.h/2 - 10 + 'px');
-      },
-      afterCreatingLine : function(x,y){
-        let newId = objectManager.addNewDiagram(shapeName,x,y);
-        var newObject = $('#creating-designer-diagram').detach();
-        $('.design-canvas').append(newObject);
-        $('#creating-designer-diagram').attr("id",newId)
-                                       .attr("class","diagram-object-container")
-                                       .css('position','absolute');
-        $('#creating-designer-canvas').attr("id","")
-                                      .attr("class","diagram-object-canvas")
-                                      .css('position','absolute');
-        $('.design-canvas').append('<div id="creating-designer-diagram"></div>');
-
-        return newId;
-      },
-
       drawDiagramAnchors : function(canvas,shapeName) {
         let curDiagramId = $(canvas).parent().attr("id");
         let curAnchors = objectManager.getAnchorsByName(shapeName);
@@ -348,7 +289,12 @@ define(function(require, exports, module) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         let curCanvas = $("#" + diagramId).find('canvas').get(0);
 
-        this.drawDiagramAnchors(curCanvas,curshapeName);
+        if(curshapeName == "line") {
+          
+        }
+        else {
+          this.drawDiagramAnchors(curCanvas,curshapeName);
+        }
       },
 
       drawPanelItemDiagram : function (canvas,shapeName) {
@@ -435,22 +381,8 @@ define(function(require, exports, module) {
         if(shapeName == "line") {
           let curStartRelative = argList["start"];
           let curEndRelative = argList["end"];
-          let curLineType = $("#bar-linkertype .icon").attr("class").split("-")[1];
-
-          switch (curLineType) {
-            case "normal":
-              curLineType = "basic";
-              break;
-            case "curve":
-              curLineType = "curve";
-              break;
-            case "broken":
-              curLineType = "broken";
-              break;
-            default:
-              curLineType = "basic";
-          }
-          lineManager.drawLine(canvas,"curve",curStartRelative,curEndRelative);
+          let curLineTypeConfig = diagramManager.configManager.getLineType();
+          lineManager.drawLine(canvas,curLineTypeConfig,curStartRelative,curEndRelative);
         }
         else {
           if(!ctx.fillStyleDefined || ctx.fillStyleDefined == false) {
