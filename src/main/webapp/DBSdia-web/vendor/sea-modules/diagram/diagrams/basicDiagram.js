@@ -16,7 +16,97 @@ define(function(require, exports, module) {
     ];
 
     var basicDiagram = {
-
+      basicLine : {
+        name: "basicLine",
+        linetype : "basic",
+        //title: "",
+        category: "line",
+        group: "",
+        groupName: null,
+        locked: false,
+        linkStart: "",
+        linkEnd: "",
+        properties: {
+          startX: 0,
+          startY: 0,
+          endX : 120,
+          endY : 80,
+          width : 0,
+          height : 0,
+          zindex: 0,
+        },
+        textArea: {
+          position: {
+            x: "(startX + endX) / 2",
+            y: "(startY + endY) / 2",
+            w: 0,
+            h: 0,
+          },
+          text: ""
+        },
+      },
+      curveLine : {
+        name: "curveLine",
+        linetype : "curve",
+        //title: "",
+        category: "line",
+        group: "",
+        groupName: null,
+        locked: false,
+        linkStart: "",
+        linkEnd: "",
+        properties: {
+          startX: 0,
+          startY: 0,
+          endX : 120,
+          endY : 80,
+          startControlX: 100,
+          startControlY: 100,
+          endControlX: 100,
+          endControlY: 100,
+          width : 0,
+          height : 0,
+          zindex: 0,
+        },
+        textArea: {
+          position: {
+            x: "(startX + endX) / 2",
+            y: "(startY + endY) / 2",
+            w: 0,
+            h: 0,
+          },
+          text: ""
+        },
+      },
+      stepLine : {
+        name: "stepLine",
+        linetype : "step",
+        //title: "",
+        category: "line",
+        group: "",
+        groupName: null,
+        locked: false,
+        linkStart: "",
+        linkEnd: "",
+        properties: {
+          startX: 0,
+          startY: 0,
+          endX : 120,
+          endY : 80,
+          width : 0,
+          height : 0,
+          zindex: 0,
+        },
+        textArea: {
+          position: {
+            x: "(startX + endX) / 2",
+            y: "(startY + endY) / 2",
+            w: 0,
+            h: 0,
+          },
+          text: ""
+        },
+      },
       //define of triangle
       triangle : {
         name: "triangle",

@@ -279,7 +279,11 @@ define(function(require, exports, module) {
       removeControlOverlay : function (diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         if(curshapeName == "line") {
+          let canvas = $("#" + diagramId).find("canvas")[0];
+          let ctx = canvas.getContext("2d");
 
+          lineManager.removeHightlight(canvas);
+          this.drawDiagramById(diagramId);
         }
         else {
           $("#control-overlay-container").remove();
@@ -290,7 +294,7 @@ define(function(require, exports, module) {
         let curCanvas = $("#" + diagramId).find('canvas').get(0);
 
         if(curshapeName == "line") {
-          
+
         }
         else {
           this.drawDiagramAnchors(curCanvas,curshapeName);
@@ -410,7 +414,25 @@ define(function(require, exports, module) {
         let shapeName = objectManager.getShapeNameById(diagramId);
 
         if(shapeName == "line") {
-
+          let linetype = diagramManager.getAttrById(diagramId,{linetype:[]});
+          let curProperties = diagramManager.getAttrById(diagramId,{properties: ["startX","startY","endX","endY"]});
+          let start = {
+            x : curProperties["startX"],
+            y : curProperties["startY"],
+          };
+          let end = {
+            x : curProperties["endX"],
+            y : curProperties["endY"],
+          };
+          start = {
+            x: start.x - parseFloat(jqObj.css("left")),
+            y: start.y - parseFloat(jqObj.css("top")),
+          };
+          end = {
+            x: end.x - parseFloat(jqObj.css("left")),
+            y: end.y - parseFloat(jqObj.css("top")),
+          };
+          lineManager.drawLine(canvas,linetype,start,end);
         }
         else {
           if(jqObj.find("textarea").length != 0) {
@@ -467,8 +489,8 @@ define(function(require, exports, module) {
           (lineStyle.lineWidth != 0) ?
                 ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
                :ctx.strokeStyle = "rgba(255,255,255,0)";
+          this.drawDiagram(canvas,shapeName);
         }
-        this.drawDiagram(canvas,shapeName);
       },
 
       resolvePath : function resolvePath(ctx,shapeName,diagramId) {

@@ -25,15 +25,6 @@ define(function(require, exports, module) {
      		locked: false,
      		linkStart: "",
         linkEnd: "",
-     		attribute: {
-     			container: false,
-     			visible: true,
-     			rotatable: true,
-     			collapsable: false,
-     			collapsed: false,
-     			markerOffset: 5
-     		},
-     		dataAttributes: [],
      		properties: {
      			startX: 0,
      			startY: 0,
@@ -47,34 +38,15 @@ define(function(require, exports, module) {
           height : 0,
      			zindex: 0,
      		},
-     		lineStyle: {
-     			lineWidth: 2,
-     			lineColor: "50,50,50",
-     			lineStyle: "solid"
-     		},
      		textArea: {
      			position: {
-     				x: 10,
-     				y: 0,
-     				w: "w-20",
-     				h: "h"
+     				x: "(startX + endX) / 2",
+     				y: "(startY + endY) / 2",
+     				w: 0,
+     				h: 0,
      			},
      			text: ""
      		},
-         fontStyle: {
-     			fontFamily: "微软雅黑",
-     			size: 13,
-     			color: "50,50,50",
-     			bold: false,
-     			italic: false,
-     			underline: false,
-     			textAlign: "center",
-     			vAlign: "middle",
-     			orientation: "vertical"
-     		},
-        others: {
-
-       },
      	};
     var _GlobalLineObject = {};
     var _bezierObj = {};
@@ -392,17 +364,15 @@ define(function(require, exports, module) {
         }
 
       },
-      drawLineById : function(canvas,id) {
-        let linetype = "";
-        let curProperties = {};
-
-        this.drawLine();
-      },
 
       drawBasicLine : function(start,end) {
         let w = this.canvas.width;
         let h = this.canvas.height;
 
+        if(!this.antialiased || this.antialiased == false) {
+          this.translate(-0.5,-0.5);
+          this.antialiased = true;
+        }
         this.beginPath();
         this.clearRect(0,0,w,h);
         this.moveTo(start.x,start.y);
@@ -544,9 +514,20 @@ define(function(require, exports, module) {
       addLineHightlight : function(canvas) {
         let ctx = canvas.getContext("2d");
 
-        ctx.shadowBlur=10;
-        ctx.shadowColor="#B96A6A";
-        ctx.stroke();
+        if(!ctx.isHighlighted || ctx.isHighlighted == false) {
+          ctx.shadowBlur = 4;
+          ctx.lineJoin = "round";
+          ctx.shadowColor = "#833";
+          ctx.stroke();
+          ctx.isHighlighted = true;
+        }
+      },
+      removeHightlight : function (canvas) {
+        let ctx = canvas.getContext("2d");
+
+        ctx.isHighlighted = false;
+        ctx.shadowBlur = 0;
+        $("#line-overlay-container").remove();
       },
 
     };

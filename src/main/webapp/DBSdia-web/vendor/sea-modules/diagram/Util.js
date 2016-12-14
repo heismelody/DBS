@@ -138,6 +138,29 @@ define(function(require, exports, module) {
           return result;
         }
       },
+      evaluateLineTextAreaPos : function(expression,lineType,arg) {
+        switch (lineType) {
+          case "basic":
+            let result = {};
+            let startX = arg.startX;
+            let startY = arg.startY;
+            let endX = arg.endX;
+            let endY = arg.endY;
+
+            for(let exp in expression) {
+              result.exp = eval(expression.exp);
+            }
+            return result;
+            break;
+          case "curve":
+
+            break;
+          case "step":
+
+            break;
+          default:
+        }
+      },
 
       //http://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
       shadeBlendConvert: function shadeBlendConvert(p, from, to) {

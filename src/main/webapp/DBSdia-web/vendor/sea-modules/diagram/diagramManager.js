@@ -195,6 +195,12 @@ define(function(require, exports, module) {
       },
       UML : {
       },
+      line : {
+
+      },
+    };
+    var categoryNotNeedAddToPanelItem = {
+      line : "",
     };
     var _GlobalPathRef = {};
     var _GlobalConfig = {};
@@ -529,7 +535,9 @@ define(function(require, exports, module) {
         getAllCategory : function() {
           let allCategory = [];
           for(let category in _GlobalDiagramTemplates) {
-            allCategory.push(category);
+            if(!categoryNotNeedAddToPanelItem.hasOwnProperty(category)) {
+              allCategory.push(category);
+            }
           }
           return allCategory;
         },
@@ -695,6 +703,7 @@ define(function(require, exports, module) {
      */
       getAttrByShapeName : function(shapeName,args) {
         let category = this.templateManager.getCategoryByName(shapeName);
+        if(!_GlobalDiagramTemplates.hasOwnProperty(category)) { return "";}
         if(_GlobalDiagramTemplates[category].hasOwnProperty(shapeName)) {
           let result = {};
 

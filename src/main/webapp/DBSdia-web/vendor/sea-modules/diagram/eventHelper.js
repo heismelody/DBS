@@ -803,33 +803,32 @@ define(function(require, exports, module) {
 
       lineObjMouseDownHandler : function(e) {
         // we need to access the element in OnMouseMove
-        _dragElement = $(target).parent()[0];
+        _dragElement = $(e.target).parent()[0];
 
         // grab the clicked element's position
         _offsetX = ExtractNumber(_dragElement.style.left);
         _offsetY = ExtractNumber(_dragElement.style.top);
 
-        let curId = $(e.target).parent().attr("id");
+        curId = $(e.target).parent().attr("id");
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
 
         selectedManager.removeSelected();
         selectedManager.setSelected(curId);
+        $(".line-overlay-point").hide();
+        _startX = e.clientX;
+        _startY = e.clientY;
 
         // tell our code to start moving the element with the mouse
         document.onmousemove = eventHelper.lineObjMouseMoveHandler;
         document.onmouseup = eventHelper.lineObjMouseUpHandler;
       },
       lineObjMouseMoveHandler : function(e) {
-        // // this is the actual "drag code"
-        // $(_dragElement).css({
-        //   left: parseFloat(_offsetX) + e.clientX - _startX,
-        //   top: parseFloat(_offsetY) + e.clientY - _startY
-        // });
-        //
-        // $("#control-overlay-container,.anchor-overlay-container").css({
-        //   left: parseFloat(_offsetX) + e.clientX - _startX,
-        //   top: parseFloat(_offsetY) + e.clientY - _startY
-        // });
+        // this is the actual "drag code"
+        $(".canvas-container").css("cursor","move");
+        $(_dragElement).css({
+          left: parseFloat(_offsetX) + e.clientX - _startX,
+          top: parseFloat(_offsetY) + e.clientY - _startY
+        });
       },
       lineObjMouseUpHandler : function(e) {
         if (_dragElement != null) {
@@ -839,7 +838,19 @@ define(function(require, exports, module) {
             document.onmousemove = null;
             document.onselectstart = null;
             _dragElement.ondragstart = null;
-            target.style.zIndex = 0;
+
+            $(_dragElement).css({
+              left: parseFloat(_offsetX) + e.clientX - _startX,
+              top: parseFloat(_offsetY) + e.clientY - _startY
+            });
+            let linePos = diagramManager.getAttrById(curId,{properties:["startX","startY","endX","endY"]});
+            diagramManager.setAttr(curId,{properties:{
+              startX: linePos.startX + e.clientX - _startX,
+              startY: linePos.startY + e.clientY - _startY,
+              endX: linePos.endX + e.clientX - _startX,
+              endY: linePos.endY + e.clientY - _startY,
+            }});
+            diagramDesigner.addDiagramControlOverlay(curId);
 
             // this is how we know we're not dragging
             _dragElement = null;
