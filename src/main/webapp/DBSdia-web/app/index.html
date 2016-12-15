@@ -735,17 +735,17 @@
               <div id="contextual-properties-controls-tabs">
                 <ul class="nav nav-tabs" style="height:27px;">
                   <li class="properties-tab shape-properties-tab active">
-                    <a class="ico-shape-properties-tab-container" :class="{active:shapeActive}" target="contextual-properties-tab-shape" @click="contextualControlShapeClick">
+                    <a class="ico-shape-properties-tab-container" :class="{active:shapeActive}" :style="{ 'display': shapeShow }" target="contextual-properties-tab-shape" @click="contextualControlShapeClick">
                       <span class="icon ico-shape-properties-tab"></span>
                     </a>
                   </li>
                   <li class="properties-tab line-properties-tab">
-                    <a class="ico-line-properties-tab-container" :class="{active:lineActive}" target="contextual-properties-tab-line" @click="contextualControlLineClick">
+                    <a class="ico-line-properties-tab-container" :class="{active:lineActive}" :style="{ 'display': lineShow }" target="contextual-properties-tab-line" @click="contextualControlLineClick">
                       <span class="icon ico-line-properties-tab"></span>
                     </a>
                   </li>
                   <li class="properties-tab text-properties-tab">
-                    <a class="ico-text-properties-tab-container" :class="{active:textActive}" target="contextual-properties-tab-text" @click="contextualControlShapTexteClick">
+                    <a class="ico-text-properties-tab-container" :class="{active:textActive}" :style="{ 'display': textShow } "target="contextual-properties-tab-text" @click="contextualControlShapTexteClick">
                       <span class="icon ico-text-properties-tab"></span>
                     </a>
                   </li>
@@ -1005,7 +1005,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-line-linkertype-button" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-linkertype-button" @click="lineTypeClick" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon linkertype-normal" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
@@ -1015,7 +1015,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="dropdown shape-cprops-dropdown">
-                         <button id="contextual-properties-line-larrow-button" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-larrow-button" @click="leftArrowClick" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon ico-arrow larrow-none" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
@@ -1025,7 +1025,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-line-rarrow-button" class="btn"  data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-rarrow-button" @click="rightArrowClick" class="btn"  data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon ico-arrow rarrow-none" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
@@ -1037,7 +1037,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-line-linecolor-button" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-linecolor-button" @click="lineColorClick" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon linecolor" style="margin: 0px 7px 0px 0px;"></div>
                            <div style="background-color: rgb(50,50,50)" class="btn-color"></div>
                            <div class="icon ico-dropdown"></div>
@@ -1048,7 +1048,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="dropdown shape-cprops-dropdown">
-                         <button id="contextual-properties-line-linewidth-button" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-linewidth-button" @click="lineWidthClick" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon linewidth" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
@@ -1058,7 +1058,7 @@
                    <li>
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
-                         <button id="contextual-properties-line-linedash-button" class="btn"  data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
+                         <button id="contextual-properties-line-linedash-button" @click="dashStyleClick" class="btn"  data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
                            <div class="icon linedash" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>

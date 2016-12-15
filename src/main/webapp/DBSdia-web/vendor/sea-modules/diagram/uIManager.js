@@ -223,6 +223,12 @@ define(function(require, exports, module) {
                   //this.barlockDisabled = true,
                   //this.barunlockDisabled = true,
                   this.barlinkdisabled = true;
+
+                  let fontStyle = diagramManager.getAttrById(val[0],{fontStyle:["color"]});
+                  let lineStyle = diagramManager.getAttrById(val[0],{lineStyle:["lineColor"]});
+
+                  this.fontColor = "rgb(" + fontStyle.color + ")";
+                  this.lineColor = "rgb(" + lineStyle.lineColor + ")";
                 }
                 //current selected diagram is diagramObj
                 else {
@@ -699,6 +705,10 @@ define(function(require, exports, module) {
             shapeActive : true,
             lineActive : false,
             textActive : false,
+
+            shapeShow : 'block',
+            lineShow : 'block',
+            textShow : 'block',
           },
           watch: {
           },
@@ -1007,9 +1017,90 @@ define(function(require, exports, module) {
         var contextDialogLineTabVM = new Vue({
           el: '#contextual-properties-tab-line',
           data: {
+            //model variable
+            selectedObj : selectedManager.getSelected(),
 
+            lineType : "",
+            beginArrowStyle : "",
+            endArrowStyle : "",
+            lineColor: "",
+            lineWidth: 2,
+            lineStyle: "",
+
+            //view variable
           },
           methods: {
+            lineTypeClick : function (e) {
+              let lineType = diagramManager.getAttrById(this.selectedObj[0],{linetype:[]});
+              this.lineType = lineType["linetype"];
+              lineType = this.lineType;
+              diagramUtil.dropdown({
+                src          : "#contextual-properties-line-linkertype-button",
+                target       : "#line-type-list",
+                initFunction : function () {}
+              });
+            },
+            leftArrowClick : function (e) {
+              // let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineStyle"]});
+              // this.lineStyle = lineStyle["lineStyle"];
+              // lineStyle = this.lineStyle;
+              diagramUtil.dropdown({
+                src          : "#contextual-properties-line-larrow-button",
+                target       : "#beginarrow-list",
+                initFunction : function () {}
+              });
+            },
+            rightArrowClick : function (e) {
+              // let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineStyle"]});
+              // this.lineStyle = lineStyle["lineStyle"];
+              // lineStyle = this.lineStyle;
+              diagramUtil.dropdown({
+                src          : "#contextual-properties-line-rarrow-button",
+                target       : "#endarrow-list",
+                initFunction : function () {}
+              });
+            },
+            lineColorClick : function (e) {
+              let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineColor"]});
+              this.lineColor = lineStyle["lineColor"];
+              $("#color-picker").attr("targetpro","lineStyle-lineColor");
+              let lineColor = this.lineColor;
+              diagramUtil.dropdown({
+                src          : "#contextual-properties-line-linecolor-button",
+                target       : "#color-picker",
+                initFunction : function () {
+                  initColorPicker(lineColor);
+                }
+              });
+            },
+            lineWidthClick : function (e) {
+              let lineWidth = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineWidth"]});
+              this.lineWidth = lineWidth["lineWidth"];
+              lineWidth = this.lineWidth;
+              diagramUtil.dropdown({
+                src          : "#contextual-properties-line-linewidth-button",
+                target       : "#line-width-list",
+                initFunction : function () {
+                    let selectedHtml = '<div class="icon icon-selected"></div>';
+                    $("#line-width-list").find(".icon-selected").remove();
+                    $("#line-width-list").find("li[value=" + lineWidth + "]").append(selectedHtml);
+                }
+              });
+            },
+            dashStyleClick : function (e) {
+              let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineStyle"]});
+              this.lineStyle = lineStyle["lineStyle"];
+              lineStyle = this.lineStyle;
+              diagramUtil.dropdown({
+                src          : "#contextual-properties-line-linedash-button",
+                target       : "#line-style-list",
+                initFunction : function () {
+                    let selectedHtml = '<div class="icon icon-selected"></div>';
+                    $("#line-style-list").find(".icon-selected").remove();
+                    $("#line-style-list").find("li[value=" + lineStyle + "]").append(selectedHtml);
+                }
+              });
+            },
           },
         });
 
@@ -1069,10 +1160,34 @@ define(function(require, exports, module) {
               else if(this.selectedObj.length == 1) {
                 //line
                 if(objectManager.isLine(this.selectedObj[0])) {
+                  contextDialogControlVM.shapeShow = "none";
+                  contextDialogControlVM.lineShow = "block";
 
+                  let diagramFontStyle = diagramManager.getAttrById(this.selectedObj[0],{fontStyle:[]});
+                  contextDialogTextTabVM.bold = diagramFontStyle.bold ? "bold" : "normal";
+                  contextDialogTextTabVM.italic = diagramFontStyle.italic ? "italic" : "normal";
+                  contextDialogTextTabVM.underline = diagramFontStyle.underline ? "underline" : "none";
+                  contextDialogTextTabVM.textalign = diagramFontStyle.textAlign;
+                  contextDialogTextTabVM.fontfamily = diagramFontStyle.fontFamily;
+                  contextDialogTextTabVM.fontsize = diagramFontStyle.size;
+                  contextDialogTextTabVM.fontcolor = "rgb(" + diagramFontStyle.color + ")";
+                  contextDialogTextTabVM.valign = diagramFontStyle.vAlign;
+
+                  let diagramProperties = diagramManager.getAttrById(this.selectedObj[0],{properties:[]});
+                  let diagramLock = diagramManager.getAttrById(this.selectedObj[0],{locked:[]});
+                  let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:[]});
+                  let fillStyle = diagramManager.getAttrById(this.selectedObj[0],{fillStyle:[]});
+                  let fillColor = "255,255,255";
+
+                  if(fillStyle.type == "solid") { fillColor = fillStyle.color;}
+                  contextDialogLineTabVM.x = diagramProperties.x;
+                  contextDialogLineTabVM.y = diagramProperties.y;
                 }
                 //shape
                 else {
+                  contextDialogControlVM.shapeShow = "block";
+                  contextDialogControlVM.lineShow = "none";
+
                   let diagramFontStyle = diagramManager.getAttrById(this.selectedObj[0],{fontStyle:[]});
                   contextDialogTextTabVM.bold = diagramFontStyle.bold ? "bold" : "normal";
                   contextDialogTextTabVM.italic = diagramFontStyle.italic ? "italic" : "normal";
@@ -1111,48 +1226,49 @@ define(function(require, exports, module) {
               let self = this;
 
               $(this.$el).hide();
+              self.initContext();
               $("#page-contextual-properties-dialog").css({
                 "left" : $(this.$el).css("left"),
                 "top" : $(this.$el).css("top"),
               }).show(function () {
-                self.initContext();
+                $(".ico-shape-properties-tab-container")[0].click();
               });
-              $(".shape-properties-tab")[0].click();
             },
             triggerLineClick : function (e) {
               let self = this;
 
               $(this.$el).hide();
+              self.initContext();
               $("#page-contextual-properties-dialog").css({
                 "left" : $(this.$el).css("left"),
                 "top" : $(this.$el).css("top"),
               }).show(function () {
-                self.initContext();
+                  $(".ico-line-properties-tab-container")[0].click();
               });
-              $(".line-properties-tab")[0].click();
             },
             triggerGroupClick : function (e) {
               let self = this;
 
               $(this.$el).hide();
+              self.initContext();
               $("#page-contextual-properties-dialog").css({
                 "left" : $(this.$el).css("left"),
                 "top" : $(this.$el).css("top"),
               }).show(function () {
-                self.initContext();
+
               });
               //$(".group-properties-tab").trigger("click");
             },
             triggerTextClick : function (e) {
               let self = this;
               $(this.$el).hide();
+              self.initContext();
               $("#page-contextual-properties-dialog").css({
                 "left" : $(this.$el).css("left"),
                 "top" : $(this.$el).css("top"),
               }).show(function () {
-                self.initContext();
+                $(".ico-text-properties-tab-container")[0].click();
               });
-              $(".ico-text-properties-tab-container")[0].click();
             },
           },
         });

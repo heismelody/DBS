@@ -432,6 +432,60 @@ define(function(require, exports, module) {
             x: end.x - parseFloat(jqObj.css("left")),
             y: end.y - parseFloat(jqObj.css("top")),
           };
+
+
+          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
+          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
+
+          //set line style here
+          if(lineStyle.lineWidth) {
+            switch (lineStyle.lineStyle) {
+              case "solid":
+                ctx.setLineDash([]);
+                break;
+              case "dashed":
+                ctx.setLineDash([lineStyle.lineWidth * 5 , lineStyle.lineWidth* 2])
+                break;
+              case "dot":
+                ctx.setLineDash([lineStyle.lineWidth, lineStyle.lineWidth * 2])
+                break;
+              case "dashdot":
+                ctx.setLineDash([lineStyle.lineWidth * 5, lineStyle.lineWidth * 2, lineStyle.lineWidth, lineStyle.lineWidth * 2])
+                break;
+              default:
+                throw new Error("Set lineStyle lineStyle error!");
+            }
+          }
+          else {
+            lineStyle.lineWidth = 0;
+          }
+
+          //set fill style here
+          switch (fillStyle.type) {
+            case "none":
+              ctx.fillStyle = "rgba(250, 250, 250, 0)";
+              ctx.fillStyleDefined = true;
+              break;
+            case "solid":
+              ctx.fillStyle = "rgb(" + fillStyle.color + ")";
+              ctx.fillStyleDefined = true;
+              break;
+            case "gradient":
+              ctx.fillStyle = "gradient";
+              ctx.fillStyleDefined = true;
+              break;
+            case "image":
+              break;
+            default:
+              throw new Error("Set fillStyle type error!");
+          }
+          ctx.lineJoin = "round";
+          ctx.lineCap = "round";
+          ctx.lineWidth = lineStyle.lineWidth;
+          (lineStyle.lineWidth != 0) ?
+                ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
+               :ctx.strokeStyle = "rgba(255,255,255,0)";
+
           lineManager.drawLine(canvas,linetype,start,end);
         }
         else {

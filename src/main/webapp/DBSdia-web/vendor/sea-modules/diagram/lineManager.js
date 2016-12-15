@@ -120,19 +120,6 @@ define(function(require, exports, module) {
           default:
 
         }
-        _GlobalLineObject[newId] = {
-          "id" : newId,
-          "name" : "line",
-          "linetype" : linetype,
-          "properties": {
-       			"startX": start.x,
-       			"startY": start.y,
-       			"endX" : end.x,
-       			"endY" : end.y,
-            "width" : width,
-            "height" : height,
-       		},
-        };
 
         return _GlobalLineObject[newId];
       },

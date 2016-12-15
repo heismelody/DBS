@@ -635,8 +635,16 @@ define(function(require, exports, module) {
         getDiagramById : function getDiagramById(diagramId) {
           return _GlobalDiagramOjects[diagramId];
         },
+        //this function not return the real shapename for line object
+        // you should use shapename/"line" & linetype/"basic,curve,step" to determine a line object shapename
         getShapeNameById : function(diagramId) {
-          return _GlobalDiagramOjects.hasOwnProperty(diagramId) ? _GlobalDiagramOjects[diagramId]["name"] : null;
+          if (_GlobalDiagramOjects.hasOwnProperty(diagramId)) {
+            let curshapeName = _GlobalDiagramOjects[diagramId]["name"];
+            return (curshapeName.indexOf("line") != -1) ? "line" : curshapeName;
+          }
+          else {
+            throw new Error("Diagram name undefined in getting shape name!");
+          }
         },
         getProperties : function getProperties(shapeName,diagramId) {
           return diagramManager.getAttrById(diagramId,{properties:[]});
@@ -710,6 +718,7 @@ define(function(require, exports, module) {
           for(let attrName in args) {
             let attrObj = _GlobalDiagramTemplates[category][shapeName][attrName];
 
+            //get all properties
             if(args[attrName].length == 0) {
               if(defaultDiagramTemplate[attrName] instanceof Object) {
                 for(let key in defaultDiagramTemplate[attrName]) {
@@ -733,6 +742,7 @@ define(function(require, exports, module) {
 
               return result;
             }
+            //get small properties
             else {
               for(let i in args[attrName]) {
                 let curKey = args[attrName][i];
@@ -755,9 +765,11 @@ define(function(require, exports, module) {
 
         if(_GlobalDiagramOjects.hasOwnProperty(id)) {
           let shapeName = this.objectManager.getShapeNameById(id);
+          shapeName = (shapeName == "line") ? lineManager.getLineTypeById(id) + "-line" : shapeName;
 
           for(let arg in args) {
             let attrObj = _GlobalDiagramOjects[id][arg];
+            //get all properties
             if(args[arg].length == 0) {
               result = this.getAttrByShapeName(shapeName,args);
               if(attrObj instanceof Object) {
@@ -771,6 +783,7 @@ define(function(require, exports, module) {
 
               return result;
             }
+            //get smal of properties
             else {
               for(let i in args[arg]) {
                 let curKey = args[arg][i];

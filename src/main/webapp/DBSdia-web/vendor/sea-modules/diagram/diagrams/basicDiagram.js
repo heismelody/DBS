@@ -17,7 +17,7 @@ define(function(require, exports, module) {
 
     var basicDiagram = {
       basicLine : {
-        name: "basicLine",
+        name: "basic-line",
         linetype : "basic",
         //title: "",
         category: "line",
@@ -46,7 +46,7 @@ define(function(require, exports, module) {
         },
       },
       curveLine : {
-        name: "curveLine",
+        name: "curve-line",
         linetype : "curve",
         //title: "",
         category: "line",
@@ -79,7 +79,7 @@ define(function(require, exports, module) {
         },
       },
       stepLine : {
-        name: "stepLine",
+        name: "step-line",
         linetype : "step",
         //title: "",
         category: "line",

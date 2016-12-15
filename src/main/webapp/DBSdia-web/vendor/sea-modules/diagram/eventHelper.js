@@ -226,6 +226,13 @@ define(function(require, exports, module) {
             },
             inBorderAreaFunction : function () {},
             onLineFunction : function () {
+              if(position != undefined) {
+                e.clientX = position.x;
+                e.clientY = position.y;
+                e.pageX = position.x;
+                e.pageY = position.y;
+                e.button = 0;
+              }
               eventHelper.lineObjMouseDownHandler(e);
             },
             notOnDiagramFunction : function(){
@@ -814,6 +821,11 @@ define(function(require, exports, module) {
 
         selectedManager.removeSelected();
         selectedManager.setSelected(curId);
+        $("#page-contextual-properties-dialog-trigger").css({
+          "left": $(_dragElement).offset()["left"] + parseInt($(_dragElement).find("canvas").css("width")) + "px",
+          "top" : $(_dragElement).offset()["top"] + 20 + "px",
+        }).show();
+        $("#page-contextual-properties-dialog").hide();
         $(".line-overlay-point").hide();
         _startX = e.clientX;
         _startY = e.clientY;
@@ -824,6 +836,7 @@ define(function(require, exports, module) {
       },
       lineObjMouseMoveHandler : function(e) {
         // this is the actual "drag code"
+        $("#page-contextual-properties-dialog-trigger").hide();
         $(".canvas-container").css("cursor","move");
         $(_dragElement).css({
           left: parseFloat(_offsetX) + e.clientX - _startX,
@@ -839,6 +852,11 @@ define(function(require, exports, module) {
             document.onselectstart = null;
             _dragElement.ondragstart = null;
 
+            $("#page-contextual-properties-dialog-trigger").css({
+              "left": $(_dragElement).offset()["left"] + parseInt($(_dragElement).find("canvas").css("width")) + "px",
+              "top" : $(_dragElement).offset()["top"] + 20 + "px",
+            }).show();
+            $("#page-contextual-properties-dialog").hide();
             $(_dragElement).css({
               left: parseFloat(_offsetX) + e.clientX - _startX,
               top: parseFloat(_offsetY) + e.clientY - _startY
