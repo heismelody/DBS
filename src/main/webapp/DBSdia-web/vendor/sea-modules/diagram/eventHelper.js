@@ -249,7 +249,9 @@ define(function(require, exports, module) {
               diagramDesigner.addTextarea(curId);
             },
             inBorderAreaFunction : function () {},
-            onLineFunction : function () {
+            onLineFunction : function (e) {
+              let curId = $(e.target).parent().attr("id");
+              diagramDesigner.addTextarea(curId);
             },
             notOnDiagramFunction : function(){},
           });
@@ -887,9 +889,9 @@ define(function(require, exports, module) {
         let curId = $(target).parent().attr("id");
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
 
-        if(lineManager.isPointOnLine(curId,pos)) {
-          diagramDesigner.addDiagramControlOverlay(curId);
-        }
+        // if(lineManager.isPointOnLine(curId,pos)) {
+        //   diagramDesigner.addDiagramControlOverlay(curId);
+        // }
       },
 
       //Line object overlay event

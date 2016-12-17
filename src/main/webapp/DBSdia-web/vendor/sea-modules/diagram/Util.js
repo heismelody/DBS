@@ -138,7 +138,7 @@ define(function(require, exports, module) {
           return result;
         }
       },
-      evaluateLineTextAreaPos : function(expression,lineType,arg) {
+      evaluateLineTextArea : function(expression,lineType,arg) {
         switch (lineType) {
           case "basic":
             let result = {};
@@ -148,7 +148,7 @@ define(function(require, exports, module) {
             let endY = arg.endY;
 
             for(let exp in expression) {
-              result.exp = eval(expression.exp);
+              result[exp] = eval(expression[exp]);
             }
             return result;
             break;

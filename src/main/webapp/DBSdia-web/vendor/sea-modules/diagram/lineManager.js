@@ -1,5 +1,8 @@
 define(function(require, exports, module) {
   var bezier = require('Bezier');
+  var DiagramUtil = require('./Util.js');
+
+  var diagramUtil = DiagramUtil.diagramUtil;
 
   var lineManager = (function () {
     /**
@@ -237,10 +240,15 @@ define(function(require, exports, module) {
 
       },
       //when you draw the line, you should change coordinates to relative position of the canvas.
+      //you should notice that after you change the size of canvas, the context change so you have to
+      //reset the lineStyle and other properties.
       drawCanvasAndLine : function(lineId,start,end,argList) {
         let curEndRelative;
         let curStartRelative;
         let curLineType = this.getLineTypeById(lineId);
+        let curJqueryEle = $("#" + lineId);
+        let curJqueryCanvas = curJqueryEle.find("canvas");
+        let ctx = curJqueryCanvas[0].getContext("2d");
 
         if(curLineType == "curve") {
           if(!argList.hasOwnProperty("startControl") && !argList.hasOwnProperty("endControl")) {
@@ -273,52 +281,54 @@ define(function(require, exports, module) {
                                  argList.endControl.x,argList.endControl.y,
                                  end.x,end.y);
 
-          $("#" + lineId).find("canvas").attr({
+          curJqueryCanvas.attr({
             width: _bezierObj.bbox().x.size + 20,
             height: _bezierObj.bbox().y.size + 20,
           });
-          $("#" + lineId).css({
+          curJqueryEle.css({
             left: _bezierObj.bbox().x.min - 10,
             top: _bezierObj.bbox().y.min - 10,
           });
           curStartRelative = {
-            x: start.x - parseFloat($("#" + lineId).css("left")),
-            y: start.y - parseFloat($("#" + lineId).css("top")),
+            x: start.x - parseFloat(curJqueryEle.css("left")),
+            y: start.y - parseFloat(curJqueryEle.css("top")),
           };
           curEndRelative = {
-            x: end.x - parseFloat($("#" + lineId).css("left")),
-            y: end.y - parseFloat($("#" + lineId).css("top")),
+            x: end.x - parseFloat(curJqueryEle.css("left")),
+            y: end.y - parseFloat(curJqueryEle.css("top")),
           };
           let RelativeStartControl = {
-            x: argList.startControl.x - parseFloat($("#" + lineId).css("left")),
-            y: argList.startControl.y - parseFloat($("#" + lineId).css("top")),
+            x: argList.startControl.x - parseFloat(curJqueryEle.css("left")),
+            y: argList.startControl.y - parseFloat(curJqueryEle.css("top")),
           };
           let RelativeEndControl = {
-            x: argList.endControl.x - parseFloat($("#" + lineId).css("left")),
-            y: argList.endControl.y - parseFloat($("#" + lineId).css("top")),
+            x: argList.endControl.x - parseFloat(curJqueryEle.css("left")),
+            y: argList.endControl.y - parseFloat(curJqueryEle.css("top")),
           };
           argList.startControl = RelativeStartControl;
           argList.endControl = RelativeEndControl;
-          this.drawLine($("#" + lineId).find("canvas")[0],curLineType,curStartRelative,curEndRelative,argList);
+          this.drawLine(curJqueryCanvas[0],curLineType,curStartRelative,curEndRelative,argList);
         }
         else {
-          $("#" + lineId).find("canvas").attr({
+          curJqueryCanvas.attr({
             width: Math.abs(end.x - start.x) + 20,
             height: Math.abs(end.y - start.y) + 20,
           });
-          $("#" + lineId).css({
+          curJqueryEle.css({
             left: Math.min(start.x,end.x) - 10,
             top: Math.min(start.y,end.y) - 10,
           });
           curStartRelative = {
-            x: start.x - parseFloat($("#" + lineId).css("left")),
-            y: start.y - parseFloat($("#" + lineId).css("top")),
+            x: start.x - parseFloat(curJqueryEle.css("left")),
+            y: start.y - parseFloat(curJqueryEle.css("top")),
           };
           curEndRelative = {
-            x: end.x - parseFloat($("#" + lineId).css("left")),
-            y: end.y - parseFloat($("#" + lineId).css("top")),
+            x: end.x - parseFloat(curJqueryEle.css("left")),
+            y: end.y - parseFloat(curJqueryEle.css("top")),
           };
-          this.drawLine($("#" + lineId).find("canvas")[0],curLineType,curStartRelative,curEndRelative,argList);
+
+          this.resolveStyle(ctx,argList);
+          this.drawLine(curJqueryCanvas[0],curLineType,curStartRelative,curEndRelative,argList);
         }
       },
       drawLine : function(canvas,linetype,start,end,argList) {
@@ -359,6 +369,13 @@ define(function(require, exports, module) {
         if(!this.antialiased || this.antialiased == false) {
           this.translate(-0.5,-0.5);
           this.antialiased = true;
+        }
+        if(this.isHighlight == true) {
+          this.shadowBlur = 4;
+          this.shadowColor = "#833";
+        }
+        else {
+          this.shadowBlur = 0;
         }
         this.beginPath();
         this.clearRect(0,0,w,h);
@@ -501,20 +518,81 @@ define(function(require, exports, module) {
       addLineHightlight : function(canvas) {
         let ctx = canvas.getContext("2d");
 
-        if(!ctx.isHighlighted || ctx.isHighlighted == false) {
-          ctx.shadowBlur = 4;
-          ctx.lineJoin = "round";
-          ctx.shadowColor = "#833";
-          ctx.stroke();
-          ctx.isHighlighted = true;
-        }
+        ctx.isHighlight = true;
       },
       removeHightlight : function (canvas) {
         let ctx = canvas.getContext("2d");
 
-        ctx.isHighlighted = false;
-        ctx.shadowBlur = 0;
+        ctx.isHighlight = false;
         $("#line-overlay-container").remove();
+      },
+      addLineTextArea : function (diagramId,argList) {
+        let diagramEle = $("#" + diagramId);
+        let canvas = diagramEle.find("canvas")[0];
+        let textAreaHtml = "<textarea id='shape-textarea-editing' target='" + diagramId + "'></textarea>";
+        let fontStyle = argList.fontStyle;
+        let textAreaPos = argList.textArea;
+        let w = 50;
+        //let h = 0;
+        let text;
+        let textAreaStyle = {
+          "width"          : w + "px",
+          "z-index"        : "50",
+          "line-height"    : Math.round(fontStyle.size * 1.25) + "px",
+          "font-size"      : fontStyle.size + "px",
+          "font-family"    : fontStyle.fontFamily,
+          "font-weight"    : fontStyle.bold ? "bold" : "normal",
+          "font-style"     : fontStyle.italic ? "italic" : "normal",
+          "color"          : "rgb(" + fontStyle.color + ")",
+          "text-decoration": fontStyle.underline ? "underline" : "none"
+        }
+        text = diagramEle.find("textarea").val();
+        text = (text == undefined) ? "" : text ;
+        diagramEle.find("textarea").remove();
+
+        $(textAreaHtml).appendTo($(".design-canvas"))
+                        .css({
+                          "left": textAreaPos.x - 26,
+                          "top": textAreaPos.y - 17,
+                        })
+                       .css(textAreaStyle)
+                       .val(text)
+                       .select();
+      },
+      resolveStyle : function (ctx,argList) {
+        if(argList.hasOwnProperty("lineStyle")) {
+          let lineStyle = argList.lineStyle;
+
+          //set line style here
+          if(lineStyle.lineWidth) {
+            switch (lineStyle.lineStyle) {
+              case "solid":
+                ctx.setLineDash([]);
+                break;
+              case "dashed":
+                ctx.setLineDash([lineStyle.lineWidth * 5 , lineStyle.lineWidth* 2])
+                break;
+              case "dot":
+                ctx.setLineDash([lineStyle.lineWidth, lineStyle.lineWidth * 2])
+                break;
+              case "dashdot":
+                ctx.setLineDash([lineStyle.lineWidth * 5, lineStyle.lineWidth * 2, lineStyle.lineWidth, lineStyle.lineWidth * 2])
+                break;
+              default:
+                throw new Error("Set lineStyle lineStyle error!");
+            }
+          }
+          else {
+            lineStyle.lineWidth = 0;
+          }
+
+          ctx.lineJoin = "round";
+          ctx.lineCap = "round";
+          ctx.lineWidth = lineStyle.lineWidth;
+          (lineStyle.lineWidth != 0) ?
+                ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
+               :ctx.strokeStyle = "rgba(255,255,255,0)";
+        }
       },
 
     };

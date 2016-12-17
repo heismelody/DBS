@@ -131,71 +131,91 @@ define(function(require, exports, module) {
           return;
         }
         let curId = jqObj.attr("target");
-        let diagramEle = $("#" + curId);
-        let diagramTextArea = diagramManager.getAttrById(curId,{textArea:[]});
-        let diagramFontStyle = diagramManager.getAttrById(curId,{fontStyle:[]});
-        let textAlignTB = diagramFontStyle["vAlign"];
-        let textAlignLMR = diagramFontStyle["textAlign"];
-        let w = jqObj.siblings("canvas")[0].width;
-        let h = jqObj.siblings("canvas")[0].height;
-        let text;
-        let textAreaStyle = {
-          "width"          : w - 40 + "px",
-          "z-index"        : "50",
-          "line-height"    : Math.round(diagramFontStyle.size * 1.25) + "px",
-          "font-size"      : diagramFontStyle.size + "px",
-          "font-family"    : diagramFontStyle.fontFamily,
-          "font-weight"    : diagramFontStyle.bold ? "bold" : "normal",
-          "font-style"     : diagramFontStyle.italic ? "italic" : "normal",
-          "text-align"     : textAlignLMR,
-          "color"          : "rgb(" + diagramFontStyle.color + ")",
-          "text-decoration": diagramFontStyle.underline ? "underline" : "none"
+        let curshapeName = objectManager.getShapeNameById(diagramId);
+        if(curshapeName == "line") {
+          lineManager.drawTextArea(curId);
         }
-        text = jqObj.val();
-        text = (text == undefined) ? "" : text ;
-        switch (textAlignTB) {
-          case "top":
-            anchor = templateManager.getDefaultAnchor("n");
-            curanchorXY = diagramUtil.evaluate(anchor,w,h);
-            $(jqObj).css({
-                      "left": curanchorXY.x - w/2 + 20,
-                      "top": curanchorXY.y,
-                    })
-                   .css(textAreaStyle)
-                   .val(text);
-            break;
-          case "bottom":
-            anchor = templateManager.getDefaultAnchor("s");
-            curanchorXY = diagramUtil.evaluate(anchor,w,h);
-            $(jqObj).css({
-                     "left": curanchorXY.x - w/2 + 20,
-                     "top": curanchorXY.y - parseInt(textAreaStyle["line-height"])*2,
-                    })
-                   .css(textAreaStyle)
-                   .val(text);
-            break;
-          case "middle":
-            $(jqObj).css({
-                       "left": 20,
-                       "top": h/2 - parseInt(textAreaStyle["line-height"])/2,
-                     })
+        else {
+          let diagramEle = $("#" + curId);
+          let diagramTextArea = diagramManager.getAttrById(curId,{textArea:[]});
+          let diagramFontStyle = diagramManager.getAttrById(curId,{fontStyle:[]});
+          let textAlignTB = diagramFontStyle["vAlign"];
+          let textAlignLMR = diagramFontStyle["textAlign"];
+          let w = jqObj.siblings("canvas")[0].width;
+          let h = jqObj.siblings("canvas")[0].height;
+          let text;
+          let textAreaStyle = {
+            "width"          : w - 40 + "px",
+            "z-index"        : "50",
+            "line-height"    : Math.round(diagramFontStyle.size * 1.25) + "px",
+            "font-size"      : diagramFontStyle.size + "px",
+            "font-family"    : diagramFontStyle.fontFamily,
+            "font-weight"    : diagramFontStyle.bold ? "bold" : "normal",
+            "font-style"     : diagramFontStyle.italic ? "italic" : "normal",
+            "text-align"     : textAlignLMR,
+            "color"          : "rgb(" + diagramFontStyle.color + ")",
+            "text-decoration": diagramFontStyle.underline ? "underline" : "none"
+          }
+          text = jqObj.val();
+          text = (text == undefined) ? "" : text ;
+          switch (textAlignTB) {
+            case "top":
+              anchor = templateManager.getDefaultAnchor("n");
+              curanchorXY = diagramUtil.evaluate(anchor,w,h);
+              $(jqObj).css({
+                        "left": curanchorXY.x - w/2 + 20,
+                        "top": curanchorXY.y,
+                      })
                      .css(textAreaStyle)
                      .val(text);
-            break;
-          default:
+              break;
+            case "bottom":
+              anchor = templateManager.getDefaultAnchor("s");
+              curanchorXY = diagramUtil.evaluate(anchor,w,h);
+              $(jqObj).css({
+                       "left": curanchorXY.x - w/2 + 20,
+                       "top": curanchorXY.y - parseInt(textAreaStyle["line-height"])*2,
+                      })
+                     .css(textAreaStyle)
+                     .val(text);
+              break;
+            case "middle":
+              $(jqObj).css({
+                         "left": 20,
+                         "top": h/2 - parseInt(textAreaStyle["line-height"])/2,
+                       })
+                       .css(textAreaStyle)
+                       .val(text);
+              break;
+            default:
+          }
         }
       },
       addTextarea : function (diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         if(curshapeName == "line") {
-          this.addLineTextArea(diagramId);
+          let textArea = diagramManager.getAttrById(diagramId,{textArea:["position"]});
+          let fontStyle = diagramManager.getAttrById(diagramId,{fontStyle:[]});
+          let pos = diagramManager.getAttrById(diagramId,{properties:[]});
+          let lineType = lineManager.getLineTypeById(diagramId);
+          let argList = {};
+
+          textArea = diagramUtil.evaluateLineTextArea(textArea["position"],lineType,{
+            startX: pos.startX,
+            startY: pos.startY,
+            endX: pos.endX,
+            endY: pos.endY,
+          });
+          argList = {
+            "fontStyle" : fontStyle,
+            "textArea" : textArea,
+          };
+
+          lineManager.addLineTextArea(diagramId,argList);
         }
         else {
           this.addDiagramTextArea(diagramId);
         }
-      },
-      addLineTextArea : function (diagramId) {
-        let textAreaHtml = "<textarea id='line-textarea-editing'></textarea>";
       },
       addDiagramTextArea: function (diagramId) {
         let diagramEle = $("#" + diagramId);
@@ -269,6 +289,7 @@ define(function(require, exports, module) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         if(curshapeName == "line") {
           lineManager.addLineOverlay(diagramId);
+          this.drawDiagramById(diagramId);
         }
         else {
           let curCanvas = $("#" + diagramId).find('canvas').get(0);
@@ -328,54 +349,11 @@ define(function(require, exports, module) {
           let fillStyle = curThemeConfig.fillStyle;
           let lineStyle = curThemeConfig.lineStyle;
 
-          //set line style here
-          if(lineStyle.lineWidth) {
-            switch (lineStyle.lineStyle) {
-              case "solid":
-                ctx.setLineDash([]);
-                break;
-              case "dashed":
-                ctx.setLineDash([lineStyle.lineWidth * 5 , lineStyle.lineWidth* 2])
-                break;
-              case "dot":
-                ctx.setLineDash([lineStyle.lineWidth, lineStyle.lineWidth * 2])
-                break;
-              case "dashdot":
-                ctx.setLineDash([lineStyle.lineWidth * 5, lineStyle.lineWidth * 2, lineStyle.lineWidth, lineStyle.lineWidth * 2])
-                break;
-              default:
-                throw new Error("Set lineStyle lineStyle error!");
-            }
-          }
-          else {
-            lineStyle.lineWidth = 0;
-          }
+          this.resolveStyle(ctx,{
+            "fillStyle" : fillStyle,
+            "lineStyle" : lineStyle,
+          });
 
-          //set fill style here
-          switch (fillStyle.type) {
-            case "none":
-              ctx.fillStyle = "rgba(250, 250, 250, 0)";
-              ctx.fillStyleDefined = true;
-              break;
-            case "solid":
-              ctx.fillStyle = "rgb(" + fillStyle.color + ")";
-              ctx.fillStyleDefined = true;
-              break;
-            case "gradient":
-              ctx.fillStyle = "gradient";
-              ctx.fillStyleDefined = true;
-              break;
-            case "image":
-              break;
-            default:
-              throw new Error("Set fillStyle type error!");
-          }
-          ctx.lineJoin = "round";
-          ctx.lineCap = "round";
-          ctx.lineWidth = lineStyle.lineWidth;
-          (lineStyle.lineWidth != 0) ?
-                ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
-               :ctx.strokeStyle = "rgba(255,255,255,0)";
           this.drawDiagram(canvas,shapeName);
         }
       },
@@ -397,14 +375,22 @@ define(function(require, exports, module) {
           this.resolvePath(ctx,shapeName);
         }
       },
-      drawCanvasAndDiagram : function (id,argList) {
-        let shapeName = objectManager.getShapeNameById(id);
+      //you should notice that after you change the size of canvas, the context change so you have to
+      //reset the lineStyle and other properties.
+      drawCanvasAndDiagram : function (diagramId,argList) {
+        let shapeName = objectManager.getShapeNameById(diagramId);
 
         if(shapeName == "line") {
           let start = argList["start"],
               end = argList["end"];
+          let ctx = $("#" + diagramId).find("canvas")[0].getContext("2d");
+          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
+          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
 
-          lineManager.drawCanvasAndLine(id,start,end,argList);
+          argList.fillStyle = fillStyle;
+          argList.lineStyle = lineStyle;
+
+          lineManager.drawCanvasAndLine(diagramId,start,end,argList);
         }
       },
       drawDiagramById : function (diagramId) {
@@ -437,54 +423,13 @@ define(function(require, exports, module) {
           let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
           let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
 
-          //set line style here
-          if(lineStyle.lineWidth) {
-            switch (lineStyle.lineStyle) {
-              case "solid":
-                ctx.setLineDash([]);
-                break;
-              case "dashed":
-                ctx.setLineDash([lineStyle.lineWidth * 5 , lineStyle.lineWidth* 2])
-                break;
-              case "dot":
-                ctx.setLineDash([lineStyle.lineWidth, lineStyle.lineWidth * 2])
-                break;
-              case "dashdot":
-                ctx.setLineDash([lineStyle.lineWidth * 5, lineStyle.lineWidth * 2, lineStyle.lineWidth, lineStyle.lineWidth * 2])
-                break;
-              default:
-                throw new Error("Set lineStyle lineStyle error!");
-            }
+          this.resolveStyle(ctx,{
+            "fillStyle" : fillStyle,
+            "lineStyle" : lineStyle,
+          });
+          if(jqObj.find("textarea").length != 0) {
+            this.drawTextArea(jqObj.find("textarea"));
           }
-          else {
-            lineStyle.lineWidth = 0;
-          }
-
-          //set fill style here
-          switch (fillStyle.type) {
-            case "none":
-              ctx.fillStyle = "rgba(250, 250, 250, 0)";
-              ctx.fillStyleDefined = true;
-              break;
-            case "solid":
-              ctx.fillStyle = "rgb(" + fillStyle.color + ")";
-              ctx.fillStyleDefined = true;
-              break;
-            case "gradient":
-              ctx.fillStyle = "gradient";
-              ctx.fillStyleDefined = true;
-              break;
-            case "image":
-              break;
-            default:
-              throw new Error("Set fillStyle type error!");
-          }
-          ctx.lineJoin = "round";
-          ctx.lineCap = "round";
-          ctx.lineWidth = lineStyle.lineWidth;
-          (lineStyle.lineWidth != 0) ?
-                ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
-               :ctx.strokeStyle = "rgba(255,255,255,0)";
 
           lineManager.drawLine(canvas,linetype,start,end);
         }
@@ -495,6 +440,42 @@ define(function(require, exports, module) {
           let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
           let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
 
+          this.resolveStyle(ctx,{
+            "fillStyle" : fillStyle,
+            "lineStyle" : lineStyle,
+          });
+
+          this.drawDiagram(canvas,shapeName);
+        }
+      },
+
+      resolveStyle : function (ctx,argList) {
+        if(argList.hasOwnProperty("fillStyle")) {
+          let fillStyle = argList.fillStyle;
+
+          //set fill style here
+          switch (fillStyle.type) {
+            case "none":
+              ctx.fillStyle = "rgba(250, 250, 250, 0)";
+              ctx.fillStyleDefined = true;
+              break;
+            case "solid":
+              ctx.fillStyle = "rgb(" + fillStyle.color + ")";
+              ctx.fillStyleDefined = true;
+              break;
+            case "gradient":
+              ctx.fillStyle = "gradient";
+              ctx.fillStyleDefined = true;
+              break;
+            case "image":
+              break;
+            default:
+              throw new Error("Set fillStyle type error!");
+          }
+        }
+        if(argList.hasOwnProperty("lineStyle")) {
+          let lineStyle = argList.lineStyle;
+
           //set line style here
           if(lineStyle.lineWidth) {
             switch (lineStyle.lineStyle) {
@@ -518,35 +499,14 @@ define(function(require, exports, module) {
             lineStyle.lineWidth = 0;
           }
 
-          //set fill style here
-          switch (fillStyle.type) {
-            case "none":
-              ctx.fillStyle = "rgba(250, 250, 250, 0)";
-              ctx.fillStyleDefined = true;
-              break;
-            case "solid":
-              ctx.fillStyle = "rgb(" + fillStyle.color + ")";
-              ctx.fillStyleDefined = true;
-              break;
-            case "gradient":
-              ctx.fillStyle = "gradient";
-              ctx.fillStyleDefined = true;
-              break;
-            case "image":
-              break;
-            default:
-              throw new Error("Set fillStyle type error!");
-          }
           ctx.lineJoin = "round";
           ctx.lineCap = "round";
           ctx.lineWidth = lineStyle.lineWidth;
           (lineStyle.lineWidth != 0) ?
                 ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
                :ctx.strokeStyle = "rgba(255,255,255,0)";
-          this.drawDiagram(canvas,shapeName);
         }
       },
-
       resolvePath : function resolvePath(ctx,shapeName,diagramId) {
         //draw template diagram
         if(arguments.length == 2) {
