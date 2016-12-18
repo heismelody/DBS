@@ -114,11 +114,11 @@
               <div class="icon ico-dropdown"></div>
             </div>
             <div id="bar-beginarrow" title="Line beginning" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barbeginarrowDisabled }" @click.select="toolbarButtonClickHandler">
-              <div class="icon ico-arrow larrow-none"></div>
+              <div class="icon ico-arrow" v-bind:class="beginArrowStyle"></div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div id="bar-endarrow" title="Line ending" class="toolbar-button drop-button" v-bind:class="{ 'disabled': barendarrowDisabled }" @click.select="toolbarButtonClickHandler">
-              <div class="icon ico-arrow rarrow-none"></div>
+              <div class="icon ico-arrow" v-bind:class="endArrowStyle"></div>
               <div class="icon ico-dropdown"></div>
             </div>
             <div class="toolbar-devider"></div>
@@ -316,18 +316,18 @@
 
         <ul id="beginarrow-list" class="menu list menu-icon float-menu" style="top: 78px; left: 670px; display: none;">
           <li value="none"><div class="icon icon-arrow larrow-none"></div></li>
-          <li value="solidArrow"><div class="icon icon-selected"></div></li>
+          <li value="solidArrow"><div class="icon ico-arrow larrow-solidarrow"></div></li>
           <li value="dashedArrow"><div class="icon icon-arrow larrow-dashedarrow"></div></li>
           <li value="normal"><div class="icon icon-arrow larrow-normal"></div></li>
           <li value="solidDiamond"><div class="icon icon-arrow larrow-soliddiamond"></div></li>
           <li value="dashedDiamond"><div class="icon icon-arrow larrow-dasheddiamond"></div></li>
           <li value="solidCircle"><div class="icon icon-arrow larrow-solidcircle"></div></li>
           <li value="dashedCircle"><div class="icon icon-arrow larrow-dashedcircle"></div></li>
-          <li value="cross"><div class="icon icon-arrow larrow-cross"></div></li>
+          <!-- <li value="cross"><div class="icon icon-arrow larrow-cross"></div></li> -->
         </ul>
 
         <ul id="endarrow-list" class="menu list menu-icon float-menu" style="top: 78px; left: 715px; display: none;">
-          <li value="none"><div class="icon icon-selected"></div></li>
+          <li value="none"><div class="icon ico-arrow rarrow-none"></div></li>
           <li value="solidArrow"><div class="icon icon-arrow rarrow-solidarrow"></div></li>
           <li value="dashedArrow"><div class="icon icon-arrow rarrow-dashedarrow"></div></li>
           <li value="normal"><div class="icon icon-arrow rarrow-normal"></div></li>
@@ -335,7 +335,7 @@
           <li value="dashedDiamond"><div class="icon icon-arrow rarrow-dasheddiamond"></div></li>
           <li value="solidCircle"><div class="icon icon-arrow rarrow-solidcircle"></div></li>
           <li value="dashedCircle"><div class="icon icon-arrow rarrow-dashedcircle"></div></li>
-          <li value="cross"><div class="icon icon-arrow rarrow-cross"></div></li>
+          <!-- <li value="cross"><div class="icon icon-arrow rarrow-cross"></div></li> -->
         </ul>
 
         <div id="color-picker" targetpro="none" class="menu color-picker float-menu" style="top: 78px; left: 381px; display: none;">

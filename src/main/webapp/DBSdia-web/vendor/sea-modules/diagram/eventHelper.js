@@ -394,6 +394,38 @@ define(function(require, exports, module) {
           $("#bar-linkertype").removeClass("selected");
           $("#bar-linkertype").find(".linkertype").attr("class",curClassName);
         });
+        //begin arrow style
+        $("#beginarrow-list li").on("click",function (e) {
+          let jqcurEle;
+          if(e.target.className.indexOf("icon") != -1) {
+            jqcurEle = $(e.target).parent();
+          }
+          else {
+            jqcurEle = $(e.target);
+          }
+          let curId = selectedManager.getSelected()[0];
+          diagramManager.setAttr(curId,{lineStyle:{"beginArrow":jqcurEle.attr("value")}});
+          diagramDesigner.drawDiagramById(curId);
+          $("#beginarrow-list").hide();
+          $("#" + jqcurEle.parent().attr("for")).removeClass("selected")
+                                                .find(".ico-arrow").attr("class","icon ico-arrow larrow-" + jqcurEle.attr("value").toLowerCase());
+        });
+        //end arrow style
+        $("#endarrow-list li").on("click",function (e) {
+          let jqcurEle;
+          if(e.target.className.indexOf("icon") != -1) {
+            jqcurEle = $(e.target).parent();
+          }
+          else {
+            jqcurEle = $(e.target);
+          }
+          let curId = selectedManager.getSelected()[0];
+          diagramManager.setAttr(curId,{lineStyle:{"endArrow":jqcurEle.attr("value")}});
+          diagramDesigner.drawDiagramById(curId);
+          $("#endarrow-list").hide();
+          $("#" + jqcurEle.parent().attr("for")).removeClass("selected")
+                                                .find(".ico-arrow").attr("class","icon ico-arrow rarrow-" + jqcurEle.attr("value").toLowerCase());
+        });
       },
 
       MouseDownHandler : function(e,actualHandler) {

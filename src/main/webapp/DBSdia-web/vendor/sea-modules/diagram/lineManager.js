@@ -337,6 +337,13 @@ define(function(require, exports, module) {
         switch (linetype) {
           case "basic":
             this.drawBasicLine.call(ctx,start,end);
+            if(argList && argList.hasOwnProperty("beginArrow") && argList.hasOwnProperty("endArrow")) {
+              let arrowStyle = {
+                beginArrow: argList.beginArrow,
+                endArrow: argList.endArrow,
+              };
+              this.drawArrow(ctx,start.x,start.y,end.x,end.y,arrowStyle);
+            }
             break;
           case "step":
             this.drawStepLine.call(ctx,start,end);
@@ -594,6 +601,114 @@ define(function(require, exports, module) {
                :ctx.strokeStyle = "rgba(255,255,255,0)";
         }
       },
+      //http://www.dbp-consulting.com/tutorials/canvas/CanvasArrow.html
+      //(x1,y1) is start point , (x2,y2) is end point
+      drawArrow : function(ctx,x1,y1,x2,y2,style,angle,d) {
+        'use strict';
+        // Ceason pointed to a problem when x1 or y1 were a string, and concatenation
+        // would happen instead of addition
+        if(typeof(x1)=='string') x1=parseInt(x1);
+        if(typeof(y1)=='string') y1=parseInt(y1);
+        if(typeof(x2)=='string') x2=parseInt(x2);
+        if(typeof(y2)=='string') y2=parseInt(y2);
+        let newD = 10 + ctx.lineWidth / 2 ;
+        let beginArrowStyle = style.hasOwnProperty("beginArrow") ? style.beginArrow : undefined;
+        let endArrowStyle = style.hasOwnProperty("endArrow") ? style.endArrow : undefined;
+        style = typeof(style)!='undefined'? style: "none";
+        angle = typeof(angle)!='undefined'? angle : Math.PI/8;
+        d     = typeof(d)    !='undefined'? d : newD;
+
+        // calculate the angle of the line
+        let lineangle = Math.atan2(y2-y1,x2-x1);
+        // h is the line length of a side of the arrow head
+        let h = Math.abs(d/Math.cos(angle));
+
+        if(endArrowStyle){	// handle end arrow head
+          let angle1 = lineangle+Math.PI+angle;
+          let topx = x2+Math.cos(angle1)*h;
+          let topy = y2+Math.sin(angle1)*h;
+          let angle2 = lineangle+Math.PI-angle;
+          let botx = x2+Math.cos(angle2)*h;
+          let boty = y2+Math.sin(angle2)*h;
+          this.drawHead(ctx,topx,topy,x2,y2,botx,boty,endArrowStyle);
+        }
+        if(beginArrowStyle){ // handle start arrow head
+          let angle1 = lineangle+angle;
+          let topx = x1+Math.cos(angle1)*h;
+          let topy = y1+Math.sin(angle1)*h;
+          let angle2 = lineangle-angle;
+          let botx = x1+Math.cos(angle2)*h;
+          let boty = y1+Math.sin(angle2)*h;
+          this.drawHead(ctx,topx,topy,x1,y1,botx,boty,beginArrowStyle);
+        }
+      },
+      drawHead : function(ctx,x0,y0,x1,y1,x2,y2,style) {
+        let r = 0;
+        switch(style){
+          case "none":
+            break;
+          case "solidArrow" :
+            ctx.save();
+            ctx.beginPath();
+            ctx.fillStyle = ctx.strokeStyle;
+            ctx.moveTo(x0,y0);
+            ctx.lineTo(x1,y1);
+            ctx.lineTo(x2,y2);
+            ctx.lineTo(x0,y0);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fill();
+            ctx.restore();
+            break;
+          case "dashedArrow":
+            ctx.save();
+            ctx.beginPath();
+            ctx.fillStyle = "#FFFFFF"
+            ctx.moveTo(x0,y0);
+            ctx.lineTo(x1,y1);
+            ctx.lineTo(x2,y2);
+            ctx.lineTo(x0,y0);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fill();
+            ctx.restore();
+            break;
+          case "normal":
+            ctx.beginPath();
+            ctx.moveTo(x0,y0);
+            ctx.lineTo(x1,y1);
+            ctx.lineTo(x2,y2);
+            ctx.stroke();
+            break;
+          // case "solidDiamond" :
+          //   break;
+          // case "dashedDiamond":
+          //   break;
+          case "solidCircle" :
+            ctx.save();
+            r = ctx.lineWidth / 5 + 3;
+            ctx.beginPath();
+            ctx.arc(x1, y1, r, 0, Math.PI * 2, false);
+            ctx.closePath();
+            ctx.fillStyle = ctx.strokeStyle;
+            ctx.stroke();
+            ctx.fill();
+            ctx.restore();
+            break;
+          case "dashedCircle":
+            ctx.save();
+            r = ctx.lineWidth / 5 + 3;
+            ctx.beginPath();
+            ctx.arc(x1, y1, r, 0, Math.PI * 2, false);
+            ctx.closePath();
+            ctx.fillStyle = "#FFFFFF";
+            ctx.stroke();
+            ctx.fill();
+            ctx.restore();
+            break;
+        }
+      },
+
 
     };
 

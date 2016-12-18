@@ -107,10 +107,18 @@ define(function(require, exports, module) {
 
        },
        "#bar-beginarrow" : function () {
-
+         let curDiagramId = selectedManager.getSelected()[0];
+         let lineStyle = diagramManager.getAttrById(curDiagramId,{lineStyle:["beginArrow"]});
+         let curBeginArrow = lineStyle["beginArrow"];
+         $(targetMenu["#bar-beginarrow"]).find(".icon-selected").remove();
+         $(targetMenu["#bar-beginarrow"] + " li[value=" + curBeginArrow + "]").append('<div class="icon icon-selected"></div>');
        },
        "#bar-endarrow" : function () {
-
+         let curDiagramId = selectedManager.getSelected()[0];
+         let lineStyle = diagramManager.getAttrById(curDiagramId,{lineStyle:["endArrow"]});
+         let curEndArrow = lineStyle["endArrow"];
+         $(targetMenu["#bar-endarrow"]).find(".icon-selected").remove();
+         $(targetMenu["#bar-endarrow"] + " li[value=" + curEndArrow + "]").append('<div class="icon icon-selected"></div>');
        },
      };
     var uIManager = {
@@ -124,6 +132,8 @@ define(function(require, exports, module) {
             fontColor: "rgb(50,50,50)",
             fillColor: "rgb(50,50,50)",
             lineColor: "rgb(50,50,50)",
+            beginArrow: "none",
+            endArrow: "none",
 
             //view var
             Uncollapsed:false,
@@ -155,6 +165,14 @@ define(function(require, exports, module) {
 
             //other var
             targetMenuList:targetMenu,
+          },
+          computed : {
+            beginArrowStyle: function () {
+              return 'larrow-' + this.beginArrow.toLowerCase();
+            },
+            endArrowStyle: function () {
+              return 'rarrow-' + this.endArrow.toLowerCase();
+            },
           },
           watch : {
             Uncollapsed: function (val) {
@@ -225,8 +243,10 @@ define(function(require, exports, module) {
                   this.barlinkdisabled = true;
 
                   let fontStyle = diagramManager.getAttrById(val[0],{fontStyle:["color"]});
-                  let lineStyle = diagramManager.getAttrById(val[0],{lineStyle:["lineColor"]});
+                  let lineStyle = diagramManager.getAttrById(val[0],{lineStyle:[]});
 
+                  this.beginArrow = (lineStyle.beginArrow == undefined) ? "none" : lineStyle.beginArrow;
+                  this.endArrow = (lineStyle.endArrow == undefined) ? "none" : lineStyle.endArrow;
                   this.fontColor = "rgb(" + fontStyle.color + ")";
                   this.lineColor = "rgb(" + lineStyle.lineColor + ")";
                 }
@@ -1021,8 +1041,8 @@ define(function(require, exports, module) {
             selectedObj : selectedManager.getSelected(),
 
             lineType : "",
-            beginArrowStyle : "",
-            endArrowStyle : "",
+            beginArrow : "",
+            endArrow : "",
             lineColor: "",
             lineWidth: 2,
             lineStyle: "",
@@ -1041,23 +1061,31 @@ define(function(require, exports, module) {
               });
             },
             leftArrowClick : function (e) {
-              // let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineStyle"]});
-              // this.lineStyle = lineStyle["lineStyle"];
-              // lineStyle = this.lineStyle;
+              let beginArrow = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["beginArrow"]});
+              this.beginArrow = beginArrow["beginArrow"];
+              beginArrow = this.beginArrow;
               diagramUtil.dropdown({
                 src          : "#contextual-properties-line-larrow-button",
                 target       : "#beginarrow-list",
-                initFunction : function () {}
+                initFunction : function () {
+                  let selectedHtml = '<div class="icon icon-selected"></div>';
+                  $("#beginarrow-list").find(".icon-selected").remove();
+                  $("#beginarrow-list").find("li[value=" + beginArrow + "]").append(selectedHtml);
+                }
               });
             },
             rightArrowClick : function (e) {
-              // let lineStyle = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["lineStyle"]});
-              // this.lineStyle = lineStyle["lineStyle"];
-              // lineStyle = this.lineStyle;
+              let endArrow = diagramManager.getAttrById(this.selectedObj[0],{lineStyle:["endArrow"]});
+              this.endArrow = endArrow["endArrow"];
+              endArrow = this.endArrow;
               diagramUtil.dropdown({
                 src          : "#contextual-properties-line-rarrow-button",
                 target       : "#endarrow-list",
-                initFunction : function () {}
+                initFunction : function () {
+                  let selectedHtml = '<div class="icon icon-selected"></div>';
+                  $("#endarrow-list").find(".icon-selected").remove();
+                  $("#endarrow-list").find("li[value=" + endArrow + "]").append(selectedHtml);
+                }
               });
             },
             lineColorClick : function (e) {

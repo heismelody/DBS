@@ -389,6 +389,8 @@ define(function(require, exports, module) {
 
           argList.fillStyle = fillStyle;
           argList.lineStyle = lineStyle;
+          argList.beginArrow = lineStyle.beginArrow;
+          argList.endArrow = lineStyle.endArrow;
 
           lineManager.drawCanvasAndLine(diagramId,start,end,argList);
         }
@@ -401,6 +403,7 @@ define(function(require, exports, module) {
 
         if(shapeName == "line") {
           let linetype = diagramManager.getAttrById(diagramId,{linetype:[]});
+          linetype = linetype.linetype;
           let curProperties = diagramManager.getAttrById(diagramId,{properties: ["startX","startY","endX","endY"]});
           let start = {
             x : curProperties["startX"],
@@ -422,6 +425,10 @@ define(function(require, exports, module) {
 
           let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
           let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
+          let arrowStyle = {
+            beginArrow: lineStyle.beginArrow,
+            endArrow: lineStyle.endArrow,
+          };
 
           this.resolveStyle(ctx,{
             "fillStyle" : fillStyle,
@@ -431,7 +438,7 @@ define(function(require, exports, module) {
             this.drawTextArea(jqObj.find("textarea"));
           }
 
-          lineManager.drawLine(canvas,linetype,start,end);
+          lineManager.drawLine(canvas,linetype,start,end,arrowStyle);
         }
         else {
           if(jqObj.find("textarea").length != 0) {

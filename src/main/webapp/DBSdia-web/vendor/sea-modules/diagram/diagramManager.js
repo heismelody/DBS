@@ -106,7 +106,9 @@ define(function(require, exports, module) {
     		lineStyle: {
     			lineWidth: 2,
     			lineColor: "0,0,0",
-    			lineStyle: "solid" //dashed/solid/dot/dashdot
+    			lineStyle: "solid", //dashed/solid/dot/dashdot
+          beginArrow: "none",
+          endArrow: "none",
     		},
     		fillStyle: {
     			type: "solid",   //gradient/solid/none/image
