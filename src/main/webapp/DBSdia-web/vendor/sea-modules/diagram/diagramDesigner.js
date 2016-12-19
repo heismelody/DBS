@@ -30,110 +30,240 @@ define(function(require, exports, module) {
         _w : 0,
         _h : 0,
       },
-      drawDiagramAnchors : function(canvas,shapeName) {
-        let curDiagramId = $(canvas).parent().attr("id");
-        let curAnchors = objectManager.getAnchorsByName(shapeName);
-        let anchorsHtml = "<div class='anchor-overlay-container' targetid='" + curDiagramId + "'></div>";
-        let ctx = canvas.getContext('2d');
-        this._tempVar._w = canvas.width;
-        this._tempVar._h = canvas.height;
+      drawPanelItemDiagram : function (canvas,shapeName) {
+        let ctx = canvas.getContext("2d");
+        ctx.clearRect(0,0,30,30);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.lineWidth = 2;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
 
-        if($(".anchor-overlay-container").length != 0) {
-          $(".anchor-overlay-container").remove();
-        }
-        $(".design-canvas").append(anchorsHtml);
+        this.drawDiagram(canvas,shapeName);
+      },
+      //this function used for creating diagram from the left panel item.
+      //when you drag the left panel item to the right canvas,once the mouse
+      //moved into the right canvas, you can use this function to draw new diagram.
+      drawThemeDiagram : function (canvas,shapeName,argList) {
+        let curTheme = themeManager.getCurrentThemeObj();
+        let curThemeConfig;
+        for(let i in curTheme) {curThemeConfig = curTheme[i];}
+
+        let ctx = canvas.getContext("2d");
         ctx.shapeName = shapeName;
-        ctx.diagramId = curDiagramId;
+        if(shapeName == "line") {
 
-        for(var i in curAnchors) {
-          this.drawDiagramAnchor.call(ctx,ctx,curAnchors[i]);
         }
-      },
-      drawDiagramAnchor : function(ctx,curAnchor) {
-        let anchorHtml = '<div class="anchor-overlay"></div>';
-        let curCanvas = $("#" + this.diagramId);
-        let curCanvasLeft = parseFloat(curCanvas.css("left"));
-        let curCanvasTop = parseFloat(curCanvas.css("top"));
-        let w = diagramDesigner._tempVar._w;
-        let h = diagramDesigner._tempVar._h;
-        let curXY = {};
+        else {
+          let fillStyle = curThemeConfig.fillStyle;
+          let lineStyle = curThemeConfig.lineStyle;
 
-        curXY = diagramUtil.evaluate(curAnchor,w,h);
-        $(".anchor-overlay-container").css({
-          left: curCanvasLeft,
-          top: curCanvasTop,
-          width : "0px",
-          height : "0px"
-        });
-        $(anchorHtml).appendTo(".anchor-overlay-container").css({
-          left: curXY.x - 4 + "px",
-          top:  curXY.y - 4 + "px"
-        });
-      },
-
-      drawDiagramControls : function(canvas) {
-        let ctx = canvas.getContext('2d');
-        let curCanvasParent = $(canvas).parent();
-        let curCanvasLeft = parseFloat(curCanvasParent.css("left"));
-        let curCanvasTop = parseFloat(curCanvasParent.css("top"));
-        let curCanvasWidth = parseFloat(curCanvasParent.css("width"));
-        let curCanvasHeight = parseFloat(curCanvasParent.css("height"));
-        let controlsHtml = "<div id='control-overlay-container' targetid='" + curCanvasParent.attr("id") + "'></div>";
-        let boundaryHtml = "<canvas id='control-boundary' width=" + canvas.width + " height=" + canvas.height + ">";
-        this._tempVar._w = canvas.width;
-        this._tempVar._h = canvas.height;
-
-        if($("#control-overlay-container").length != 0) {
-          $("#control-overlay-container").remove();
-        }
-        $(controlsHtml).appendTo(".design-canvas").css({
-          left: curCanvasLeft,
-          top: curCanvasTop,
-          width : "0px",
-          height : "0px"
-        });
-        this.drawDiagramControl(ctx);
-
-        $(boundaryHtml).appendTo("#control-overlay-container");
-        let boundaryCtx = $("#control-boundary")[0].getContext('2d');
-        boundaryCtx.shapeName = canvas.shapeName;
-        this.drawDiagramCanvasBorder.call(boundaryCtx,boundaryCtx);
-      },
-      drawDiagramControl : function(ctx) {
-        let controlDir = templateManager.getcontrolDir();
-        for(var curDirection in controlDir) {
-          let curControlHtml = '<div class="control-overlay ' + curDirection + '"></div>';
-          let w = diagramDesigner._tempVar._w;
-          let h = diagramDesigner._tempVar._h;
-
-          curXY = diagramUtil.evaluate(controlDir[curDirection],w,h);
-          $(curControlHtml).appendTo("#control-overlay-container").css({
-            left: curXY.x - 4 + "px",
-            top:  curXY.y - 4 + "px"
+          this._resolveStyle(ctx,{
+            "fillStyle" : fillStyle,
+            "lineStyle" : lineStyle,
           });
+
+          this.drawDiagram(canvas,shapeName);
         }
       },
-      drawDiagramCanvasBorder : function(ctx) {
-        let w = ctx.canvas.width;
-        let h = ctx.canvas.height;
-
-        this.lineWidth = 1;
-        this.beginPath();
-        this.translate(-0.5,-0.5);
-        this.strokeStyle = "#C49999";
-        this.strokeRect(10,10,w-20,h-20);
-        this.stroke();
-        this.closePath();
+      drawDiagram : function drawDiagram(canvas,shapeName,argList) {
+        let ctx = canvas.getContext("2d");
+        ctx.shapeName = shapeName;
+        if(shapeName == "line") {
+          let curStartRelative = argList["start"];
+          let curEndRelative = argList["end"];
+          let curLineTypeConfig = diagramManager.configManager.getLineType();
+          lineManager.drawLine(canvas,curLineTypeConfig,curStartRelative,curEndRelative);
+        }
+        else {
+          if(!ctx.fillStyleDefined || ctx.fillStyleDefined == false) {
+            ctx.fillStyle = "#FFFFFF";
+          }
+          this._tempVar._w = canvas.width;
+          this._tempVar._h = canvas.height;
+          this._resolvePath(ctx,shapeName);
+        }
       },
+      //you should notice that after you change the size of canvas, the context change so you have to
+      //reset the lineStyle and other properties.
+      drawCanvasAndDiagram : function (diagramId,argList) {
+        let shapeName = objectManager.getShapeNameById(diagramId);
 
-      drawTextArea : function (jqObj) {
+        if(shapeName == "line") {
+          let start = argList["start"],
+              end = argList["end"];
+          let ctx = $("#" + diagramId).find("canvas")[0].getContext("2d");
+          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
+          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
+
+          argList.fillStyle = fillStyle;
+          argList.lineStyle = lineStyle;
+          argList.beginArrow = lineStyle.beginArrow;
+          argList.endArrow = lineStyle.endArrow;
+
+          this.drawTextArea($("#" + diagramId).find("textarea"),argList);
+          lineManager.drawCanvasAndLine(diagramId,start,end,argList);
+        }
+      },
+      drawDiagramById : function (diagramId) {
+        let jqObj = $("#" + diagramId);
+        let canvas = jqObj.find("canvas")[0];
+        let ctx = canvas.getContext("2d");
+        let shapeName = objectManager.getShapeNameById(diagramId);
+
+        if(shapeName == "line") {
+          let linetype = diagramManager.getAttrById(diagramId,{linetype:[]});
+          linetype = linetype.linetype;
+          let curProperties = diagramManager.getAttrById(diagramId,{properties: ["startX","startY","endX","endY"]});
+          let start = {
+            x : curProperties["startX"],
+            y : curProperties["startY"],
+          };
+          let end = {
+            x : curProperties["endX"],
+            y : curProperties["endY"],
+          };
+          start = {
+            x: start.x - parseFloat(jqObj.css("left")),
+            y: start.y - parseFloat(jqObj.css("top")),
+          };
+          end = {
+            x: end.x - parseFloat(jqObj.css("left")),
+            y: end.y - parseFloat(jqObj.css("top")),
+          };
+
+
+          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
+          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
+          let arrowStyle = {
+            beginArrow: lineStyle.beginArrow,
+            endArrow: lineStyle.endArrow,
+          };
+
+          this._resolveStyle(ctx,{
+            "fillStyle" : fillStyle,
+            "lineStyle" : lineStyle,
+          });
+          if(jqObj.find("textarea").length != 0) {
+            this.drawTextArea(jqObj.find("textarea"));
+          }
+
+          lineManager.drawLine(canvas,linetype,start,end,arrowStyle);
+        }
+        else {
+          if(jqObj.find("textarea").length != 0) {
+            this.drawTextArea(jqObj.find("textarea"));
+          }
+          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
+          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
+
+          this._resolveStyle(ctx,{
+            "fillStyle" : fillStyle,
+            "lineStyle" : lineStyle,
+          });
+
+          this.drawDiagram(canvas,shapeName);
+        }
+      },
+      drawPageAndGrid : function(canvas){
+        let ctx = canvas.getContext('2d');
+        let w = pageManager.get("width");
+        let h = pageManager.get("height");
+        let padding = pageManager.get("padding");
+        let gridSize = pageManager.get("gridSize");
+        if(pageManager.get("orientation") == "landscape") {
+          let temp = w;
+          w = h;
+          h = temp;
+        }
+        let curW = w - padding * 2;
+        let curH = h - padding * 2;
+        let backgroundColor =
+              (pageManager.get("backgroundColor") == "transparent")
+              ?  "rgb(255,255,255)" : pageManager.get("backgroundColor");
+        let darkerColor = diagramUtil.shadeBlendConvert(-0.05,backgroundColor);
+        let darkererColor = diagramUtil.shadeBlendConvert(-0.05,darkerColor);
+
+        (gridSize <= 10) ? gridSize = 10 : "";
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = backgroundColor;
+        ctx.beginPath();
+        ctx.rect(padding, padding, curW, curH);
+        ctx.fill();
+        if(pageManager.get("showGrid")) {
+          ctx.translate(padding,padding);
+          ctx.lineWidth = 1;
+          ctx.save();
+          //http://stackoverflow.com/questions/4172246/grid-drawn-using-a-canvas-element-looking-stretched
+          //this i should be 0.5
+          let count = 0;    //use for count darken line
+          for(let i = 0.5; i <=  curH + 1; i+= pageManager.get("gridSize")) {
+            ctx.restore();
+            (count % 4 == 0) ? ctx.strokeStyle = darkererColor: ctx.strokeStyle = darkerColor;
+            ctx.beginPath();
+            ctx.moveTo(0, i);
+            ctx.lineTo(curW, i);
+            ctx.stroke();
+
+            count++;
+          }
+          count = 0;
+          for(let i = 0.5; i <=  curW + 1; i+= pageManager.get("gridSize")) {
+            ctx.restore();
+            (count % 4 == 0) ? ctx.strokeStyle = darkererColor : ctx.strokeStyle = darkerColor;
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, curH);
+            ctx.stroke();
+
+            count++;
+          }
+        }
+      },
+      drawTextArea : function (jqObj,argList) {
         if(jqObj.length == 0) {
           return;
         }
         let curId = jqObj.attr("target");
-        let curshapeName = objectManager.getShapeNameById(diagramId);
+        let curshapeName = objectManager.getShapeNameById(curId);
         if(curshapeName == "line") {
-          lineManager.drawTextArea(curId);
+          if(argList && argList.hasOwnProperty("start")) {
+            let textArea = diagramManager.getAttrById(curId,{textArea:["position"]});
+            let fontStyle = diagramManager.getAttrById(curId,{fontStyle:[]});
+            let pos = diagramManager.getAttrById(curId,{properties:[]});
+            let lineType = lineManager.getLineTypeById(curId);
+
+            textArea = diagramUtil.evaluateLineTextArea(textArea["position"],lineType,{
+              startX: argList.start.x,
+              startY: argList.start.y,
+              endX: argList.end.x,
+              endY: argList.end.y,
+            });
+            argList.fontStyle = fontStyle;
+            argList.textArea = textArea;
+
+            lineManager.drawTextArea(curId,argList);
+          }
+          else {
+            let textArea = diagramManager.getAttrById(curId,{textArea:["position"]});
+            let fontStyle = diagramManager.getAttrById(curId,{fontStyle:[]});
+            let pos = diagramManager.getAttrById(curId,{properties:[]});
+            let lineType = lineManager.getLineTypeById(curId);
+            let argList = {};
+
+            textArea = diagramUtil.evaluateLineTextArea(textArea["position"],lineType,{
+              startX: pos.startX,
+              startY: pos.startY,
+              endX: pos.endX,
+              endY: pos.endY,
+            });
+            argList = {
+              "fontStyle" : fontStyle,
+              "textArea" : textArea,
+            };
+
+            lineManager.drawTextArea(curId,argList);
+          }
         }
         else {
           let diagramEle = $("#" + curId);
@@ -191,6 +321,7 @@ define(function(require, exports, module) {
           }
         }
       },
+
       addTextarea : function (diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         if(curshapeName == "line") {
@@ -214,10 +345,10 @@ define(function(require, exports, module) {
           lineManager.addLineTextArea(diagramId,argList);
         }
         else {
-          this.addDiagramTextArea(diagramId);
+          this._addDiagramTextArea(diagramId);
         }
       },
-      addDiagramTextArea: function (diagramId) {
+      _addDiagramTextArea: function (diagramId) {
         let diagramEle = $("#" + diagramId);
         let canvas = diagramEle.find("canvas")[0];
         let textAreaHtml = "<textarea id='shape-textarea-editing' target='" + diagramId + "'></textarea>";
@@ -285,6 +416,9 @@ define(function(require, exports, module) {
         }
 
       },
+
+      //this four functions used for create overlay after select the diagram
+      //including resize control overlay and canvas border overlay.
       addDiagramControlOverlay : function(diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         if(curshapeName == "line") {
@@ -294,7 +428,7 @@ define(function(require, exports, module) {
         else {
           let curCanvas = $("#" + diagramId).find('canvas').get(0);
 
-          this.drawDiagramControls(curCanvas);
+          this._drawDiagramControls(curCanvas);
         }
       },
       removeControlOverlay : function (diagramId) {
@@ -310,6 +444,63 @@ define(function(require, exports, module) {
           $("#control-overlay-container").remove();
         }
       },
+      _drawDiagramControls : function(canvas) {
+        let ctx = canvas.getContext('2d');
+        let curCanvasParent = $(canvas).parent();
+        let curCanvasLeft = parseFloat(curCanvasParent.css("left"));
+        let curCanvasTop = parseFloat(curCanvasParent.css("top"));
+        let curCanvasWidth = parseFloat(curCanvasParent.css("width"));
+        let curCanvasHeight = parseFloat(curCanvasParent.css("height"));
+        let controlsHtml = "<div id='control-overlay-container' targetid='" + curCanvasParent.attr("id") + "'></div>";
+        let boundaryHtml = "<canvas id='control-boundary' width=" + canvas.width + " height=" + canvas.height + ">";
+        this._tempVar._w = canvas.width;
+        this._tempVar._h = canvas.height;
+
+        if($("#control-overlay-container").length != 0) {
+          $("#control-overlay-container").remove();
+        }
+        $(controlsHtml).appendTo(".design-canvas").css({
+          left: curCanvasLeft,
+          top: curCanvasTop,
+          width : "0px",
+          height : "0px"
+        });
+        this._drawDiagramControl(ctx);
+
+        $(boundaryHtml).appendTo("#control-overlay-container");
+        let boundaryCtx = $("#control-boundary")[0].getContext('2d');
+        boundaryCtx.shapeName = canvas.shapeName;
+        this._drawDiagramCanvasBorder.call(boundaryCtx,boundaryCtx);
+      },
+      _drawDiagramControl : function(ctx) {
+        let controlDir = templateManager.getcontrolDir();
+        for(var curDirection in controlDir) {
+          let curControlHtml = '<div class="control-overlay ' + curDirection + '"></div>';
+          let w = diagramDesigner._tempVar._w;
+          let h = diagramDesigner._tempVar._h;
+
+          curXY = diagramUtil.evaluate(controlDir[curDirection],w,h);
+          $(curControlHtml).appendTo("#control-overlay-container").css({
+            left: curXY.x - 4 + "px",
+            top:  curXY.y - 4 + "px"
+          });
+        }
+      },
+      _drawDiagramCanvasBorder : function(ctx) {
+        let w = ctx.canvas.width;
+        let h = ctx.canvas.height;
+
+        this.lineWidth = 1;
+        this.beginPath();
+        this.translate(-0.5,-0.5);
+        this.strokeStyle = "#C49999";
+        this.strokeRect(10,10,w-20,h-20);
+        this.stroke();
+        this.closePath();
+      },
+
+      //this three functions used for create overlay after mouse moved over diagram
+      //add anchor overlay
       addDiagramAnchorOverlay : function(diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         let curCanvas = $("#" + diagramId).find('canvas').get(0);
@@ -318,145 +509,51 @@ define(function(require, exports, module) {
 
         }
         else {
-          this.drawDiagramAnchors(curCanvas,curshapeName);
+          this._drawDiagramAnchors(curCanvas,curshapeName);
         }
       },
+      _drawDiagramAnchors : function(canvas,shapeName) {
+        let curDiagramId = $(canvas).parent().attr("id");
+        let curAnchors = objectManager.getAnchorsByName(shapeName);
+        let anchorsHtml = "<div class='anchor-overlay-container' targetid='" + curDiagramId + "'></div>";
+        let ctx = canvas.getContext('2d');
+        this._tempVar._w = canvas.width;
+        this._tempVar._h = canvas.height;
 
-      drawPanelItemDiagram : function (canvas,shapeName) {
-        let ctx = canvas.getContext("2d");
-        ctx.clearRect(0,0,30,30);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.lineWidth = 2;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-
-        this.drawDiagram(canvas,shapeName);
-      },
-      //this function used for creating diagram from the left panel item.
-      //when you drag the left panel item to the right canvas,once the mouse
-      //moved into the right canvas, you can use this function to draw new diagram.
-      drawThemeDiagram : function (canvas,shapeName,argList) {
-        let curTheme = themeManager.getCurrentThemeObj();
-        let curThemeConfig;
-        for(let i in curTheme) {curThemeConfig = curTheme[i];}
-
-        let ctx = canvas.getContext("2d");
+        if($(".anchor-overlay-container").length != 0) {
+          $(".anchor-overlay-container").remove();
+        }
+        $(".design-canvas").append(anchorsHtml);
         ctx.shapeName = shapeName;
-        if(shapeName == "line") {
+        ctx.diagramId = curDiagramId;
 
-        }
-        else {
-          let fillStyle = curThemeConfig.fillStyle;
-          let lineStyle = curThemeConfig.lineStyle;
-
-          this.resolveStyle(ctx,{
-            "fillStyle" : fillStyle,
-            "lineStyle" : lineStyle,
-          });
-
-          this.drawDiagram(canvas,shapeName);
+        for(var i in curAnchors) {
+          this._drawDiagramAnchor.call(ctx,ctx,curAnchors[i]);
         }
       },
-      drawDiagram : function drawDiagram(canvas,shapeName,argList) {
-        let ctx = canvas.getContext("2d");
-        ctx.shapeName = shapeName;
-        if(shapeName == "line") {
-          let curStartRelative = argList["start"];
-          let curEndRelative = argList["end"];
-          let curLineTypeConfig = diagramManager.configManager.getLineType();
-          lineManager.drawLine(canvas,curLineTypeConfig,curStartRelative,curEndRelative);
-        }
-        else {
-          if(!ctx.fillStyleDefined || ctx.fillStyleDefined == false) {
-            ctx.fillStyle = "#FFFFFF";
-          }
-          this._tempVar._w = canvas.width;
-          this._tempVar._h = canvas.height;
-          this.resolvePath(ctx,shapeName);
-        }
-      },
-      //you should notice that after you change the size of canvas, the context change so you have to
-      //reset the lineStyle and other properties.
-      drawCanvasAndDiagram : function (diagramId,argList) {
-        let shapeName = objectManager.getShapeNameById(diagramId);
+      _drawDiagramAnchor : function(ctx,curAnchor) {
+        let anchorHtml = '<div class="anchor-overlay"></div>';
+        let curCanvas = $("#" + this.diagramId);
+        let curCanvasLeft = parseFloat(curCanvas.css("left"));
+        let curCanvasTop = parseFloat(curCanvas.css("top"));
+        let w = diagramDesigner._tempVar._w;
+        let h = diagramDesigner._tempVar._h;
+        let curXY = {};
 
-        if(shapeName == "line") {
-          let start = argList["start"],
-              end = argList["end"];
-          let ctx = $("#" + diagramId).find("canvas")[0].getContext("2d");
-          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
-          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
-
-          argList.fillStyle = fillStyle;
-          argList.lineStyle = lineStyle;
-          argList.beginArrow = lineStyle.beginArrow;
-          argList.endArrow = lineStyle.endArrow;
-
-          lineManager.drawCanvasAndLine(diagramId,start,end,argList);
-        }
-      },
-      drawDiagramById : function (diagramId) {
-        let jqObj = $("#" + diagramId);
-        let canvas = jqObj.find("canvas")[0];
-        let ctx = canvas.getContext("2d");
-        let shapeName = objectManager.getShapeNameById(diagramId);
-
-        if(shapeName == "line") {
-          let linetype = diagramManager.getAttrById(diagramId,{linetype:[]});
-          linetype = linetype.linetype;
-          let curProperties = diagramManager.getAttrById(diagramId,{properties: ["startX","startY","endX","endY"]});
-          let start = {
-            x : curProperties["startX"],
-            y : curProperties["startY"],
-          };
-          let end = {
-            x : curProperties["endX"],
-            y : curProperties["endY"],
-          };
-          start = {
-            x: start.x - parseFloat(jqObj.css("left")),
-            y: start.y - parseFloat(jqObj.css("top")),
-          };
-          end = {
-            x: end.x - parseFloat(jqObj.css("left")),
-            y: end.y - parseFloat(jqObj.css("top")),
-          };
-
-
-          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
-          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
-          let arrowStyle = {
-            beginArrow: lineStyle.beginArrow,
-            endArrow: lineStyle.endArrow,
-          };
-
-          this.resolveStyle(ctx,{
-            "fillStyle" : fillStyle,
-            "lineStyle" : lineStyle,
-          });
-          if(jqObj.find("textarea").length != 0) {
-            this.drawTextArea(jqObj.find("textarea"));
-          }
-
-          lineManager.drawLine(canvas,linetype,start,end,arrowStyle);
-        }
-        else {
-          if(jqObj.find("textarea").length != 0) {
-            this.drawTextArea(jqObj.find("textarea"));
-          }
-          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
-          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
-
-          this.resolveStyle(ctx,{
-            "fillStyle" : fillStyle,
-            "lineStyle" : lineStyle,
-          });
-
-          this.drawDiagram(canvas,shapeName);
-        }
+        curXY = diagramUtil.evaluate(curAnchor,w,h);
+        $(".anchor-overlay-container").css({
+          left: curCanvasLeft,
+          top: curCanvasTop,
+          width : "0px",
+          height : "0px"
+        });
+        $(anchorHtml).appendTo(".anchor-overlay-container").css({
+          left: curXY.x - 4 + "px",
+          top:  curXY.y - 4 + "px"
+        });
       },
 
-      resolveStyle : function (ctx,argList) {
+      _resolveStyle : function (ctx,argList) {
         if(argList.hasOwnProperty("fillStyle")) {
           let fillStyle = argList.fillStyle;
 
@@ -514,7 +611,7 @@ define(function(require, exports, module) {
                :ctx.strokeStyle = "rgba(255,255,255,0)";
         }
       },
-      resolvePath : function resolvePath(ctx,shapeName,diagramId) {
+      _resolvePath : function (ctx,shapeName,diagramId) {
         //draw template diagram
         if(arguments.length == 2) {
           let curActions = templateManager.getActionsByName(shapeName);
@@ -577,63 +674,6 @@ define(function(require, exports, module) {
           this.stroke();
           this.closePath();
   			},
-      },
-
-      drawPageAndGrid : function(canvas){
-        let ctx = canvas.getContext('2d');
-        let w = pageManager.get("width");
-        let h = pageManager.get("height");
-        let padding = pageManager.get("padding");
-        let gridSize = pageManager.get("gridSize");
-        if(pageManager.get("orientation") == "landscape") {
-          let temp = w;
-          w = h;
-          h = temp;
-        }
-        let curW = w - padding * 2;
-        let curH = h - padding * 2;
-        let backgroundColor =
-              (pageManager.get("backgroundColor") == "transparent")
-              ?  "rgb(255,255,255)" : pageManager.get("backgroundColor");
-        let darkerColor = diagramUtil.shadeBlendConvert(-0.05,backgroundColor);
-        let darkererColor = diagramUtil.shadeBlendConvert(-0.05,darkerColor);
-
-        (gridSize <= 10) ? gridSize = 10 : "";
-
-        ctx.clearRect(0, 0, w, h);
-        ctx.fillStyle = backgroundColor;
-        ctx.beginPath();
-        ctx.rect(padding, padding, curW, curH);
-        ctx.fill();
-        if(pageManager.get("showGrid")) {
-          ctx.translate(padding,padding);
-          ctx.lineWidth = 1;
-          ctx.save();
-          //http://stackoverflow.com/questions/4172246/grid-drawn-using-a-canvas-element-looking-stretched
-          //this i should be 0.5
-          let count = 0;    //use for count darken line
-          for(let i = 0.5; i <=  curH + 1; i+= pageManager.get("gridSize")) {
-            ctx.restore();
-            (count % 4 == 0) ? ctx.strokeStyle = darkererColor: ctx.strokeStyle = darkerColor;
-            ctx.beginPath();
-            ctx.moveTo(0, i);
-            ctx.lineTo(curW, i);
-            ctx.stroke();
-
-            count++;
-          }
-          count = 0;
-          for(let i = 0.5; i <=  curW + 1; i+= pageManager.get("gridSize")) {
-            ctx.restore();
-            (count % 4 == 0) ? ctx.strokeStyle = darkererColor : ctx.strokeStyle = darkerColor;
-            ctx.beginPath();
-            ctx.moveTo(i, 0);
-            ctx.lineTo(i, curH);
-            ctx.stroke();
-
-            count++;
-          }
-        }
       },
 
       /**

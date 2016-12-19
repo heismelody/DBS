@@ -132,10 +132,12 @@ define(function(require, exports, module) {
             fontColor: "rgb(50,50,50)",
             fillColor: "rgb(50,50,50)",
             lineColor: "rgb(50,50,50)",
-            beginArrow: "none",
-            endArrow: "none",
+            beginArrow: "",
+            endArrow: "",
 
             //view var
+            beginArrowStyle: "larrow-none",
+            endArrowStyle: "rarrow-none",
             Uncollapsed:false,
             collapsed:true,
 
@@ -166,15 +168,13 @@ define(function(require, exports, module) {
             //other var
             targetMenuList:targetMenu,
           },
-          computed : {
-            beginArrowStyle: function () {
-              return 'larrow-' + this.beginArrow.toLowerCase();
-            },
-            endArrowStyle: function () {
-              return 'rarrow-' + this.endArrow.toLowerCase();
-            },
-          },
           watch : {
+            beginArrow : function (val) {
+              this.beginArrowStyle = "larrow-" + this.beginArrow.toLowerCase();
+            },
+            endArrow : function (val) {
+              this.endArrowStyle = "rarrow-" + this.endArrow.toLowerCase();
+            },
             Uncollapsed: function (val) {
               for(let src in this.targetMenuList) {
                 $(this.targetMenuList[src]).css("top","32px");
@@ -367,6 +367,112 @@ define(function(require, exports, module) {
 
           }
         })
+
+        //here we init float menu event
+        //diagram themes float menu
+        $("#diagram-themes .theme-box").on("click",function (e) {
+          $("#diagram-themes").find(".theme-selected")
+                              .removeClass("theme-selected");
+          $(e.target).addClass("theme-selected");
+          let curThemeName = $(e.target).attr("id");
+          themeManager.setCurrentTheme(curThemeName.substring(0,curThemeName.length-6));
+          for(let curId in objectManager.getAllDiagram()) {
+            diagramDesigner.drawDiagramById(curId);
+          }
+        });
+        //line width float menu list
+        $("#line-width-list li").on("click",function (e) {
+          let jqcurEle;
+          if(e.target.className.indexOf("icon") != -1) {
+            jqcurEle = $(e.target).parent();
+          }
+          else {
+            jqcurEle = $(e.target);
+          }
+          let curId = selectedManager.getSelected()[0];
+          diagramManager.setAttr(curId,{lineStyle:{"lineWidth":parseInt(jqcurEle.attr("value")),}});
+          diagramDesigner.drawDiagramById(curId);
+          $("#line-width-list").hide();
+          $("#" + jqcurEle.parent().attr("for")).removeClass("selected");
+          //console.log(jqcurEle.attr("value"));
+        });
+        //line style float menu list
+        $("#line-style-list li").on("click",function (e) {
+          let jqcurEle;
+          if(e.target.className.indexOf("icon") != -1) {
+            jqcurEle = $(e.target).parent();
+          }
+          else {
+            jqcurEle = $(e.target);
+          }
+          let curId = selectedManager.getSelected()[0];
+          diagramManager.setAttr(curId,{lineStyle:{"lineStyle":jqcurEle.attr("value")}});
+          diagramDesigner.drawDiagramById(curId);
+          $("#line-style-list").hide();
+          $("#" + jqcurEle.parent().attr("for")).removeClass("selected");
+        });
+        //
+        $("#line-type-list li").on("click",function (e) {
+          let jqcurEle;
+          let curLineType;
+          let curClassName;
+          if(e.target.className.indexOf("icon") != -1) {
+            jqcurEle = $(e.target).parent();
+          }
+          else {
+            jqcurEle = $(e.target);
+          }
+          curLineType = jqcurEle.attr("value");
+          switch (curLineType) {
+            case "step":
+              curClassName = "icon linkertype-broken linkertype";
+              break;
+            case "curve":
+              curClassName = "icon linkertype-curve linkertype";
+              break;
+            case "basic":
+              curClassName = "icon linkertype-normal linkertype";
+              break;
+            default:
+          }
+          $("#line-type-list").hide();
+          $("#bar-linkertype").removeClass("selected");
+          $("#bar-linkertype").find(".linkertype").attr("class",curClassName);
+        });
+        //begin arrow style
+        $("#beginarrow-list li").on("click",function (e) {
+          let jqcurEle;
+          if(e.target.className.indexOf("icon") != -1) {
+            jqcurEle = $(e.target).parent();
+          }
+          else {
+            jqcurEle = $(e.target);
+          }
+          let curId = selectedManager.getSelected()[0];
+          diagramManager.setAttr(curId,{lineStyle:{"beginArrow":jqcurEle.attr("value")}});
+          uIManager.UIupdateMenu(["lineStyle","beginArrow"],jqcurEle.attr("value"));
+          diagramDesigner.drawDiagramById(curId);
+          $("#beginarrow-list").hide();
+          $("#" + jqcurEle.parent().attr("for")).removeClass("selected");
+          toolbarVM.beginArrow = jqcurEle.attr("value");
+        });
+        //end arrow style
+        $("#endarrow-list li").on("click",function (e) {
+          let jqcurEle;
+          if(e.target.className.indexOf("icon") != -1) {
+            jqcurEle = $(e.target).parent();
+          }
+          else {
+            jqcurEle = $(e.target);
+          }
+          let curId = selectedManager.getSelected()[0];
+          diagramManager.setAttr(curId,{lineStyle:{"endArrow":jqcurEle.attr("value")}});
+          uIManager.UIupdateMenu(["lineStyle","endArrow"],jqcurEle.attr("value"));
+          diagramDesigner.drawDiagramById(curId);
+          $("#endarrow-list").hide();
+          $("#" + jqcurEle.parent().attr("for")).removeClass("selected");
+          toolbarVM.endArrow = jqcurEle.attr("value");
+        });
       },
 
       contextMenu : function () {
@@ -1041,13 +1147,21 @@ define(function(require, exports, module) {
             selectedObj : selectedManager.getSelected(),
 
             lineType : "",
-            beginArrow : "",
-            endArrow : "",
+            beginArrow : "none",
+            endArrow : "none",
             lineColor: "",
             lineWidth: 2,
             lineStyle: "",
 
             //view variable
+          },
+          computed: {
+            beginArrowStyle: function () {
+              return 'larrow-' + this.beginArrow.toLowerCase();
+            },
+            endArrowStyle: function () {
+              return 'rarrow-' + this.endArrow.toLowerCase();
+            },
           },
           methods: {
             lineTypeClick : function (e) {
@@ -1210,6 +1324,8 @@ define(function(require, exports, module) {
                   if(fillStyle.type == "solid") { fillColor = fillStyle.color;}
                   contextDialogLineTabVM.x = diagramProperties.x;
                   contextDialogLineTabVM.y = diagramProperties.y;
+                  contextDialogLineTabVM.beginArrow = lineStyle.beginArrow ? lineStyle.beginArrow : "none";
+                  contextDialogLineTabVM.endArrow = lineStyle.endArrow ? lineStyle.endArrow : "none";
                 }
                 //shape
                 else {
@@ -1314,27 +1430,6 @@ define(function(require, exports, module) {
 
             },
             methods: {
-              UIupdateMenucolor : function (property,curRGBColor) {
-                let propertyParent = property[0];
-                let propertySon = property[1];
-
-                switch (propertyParent) {
-                  case "lineStyle":
-                    $("#bar-line-color .btn-color").css("background-color","rgb(" + curRGBColor + ")");
-                    $("#contextual-properties-bordercolor-button .btn-color").css("background-color","rgb(" + curRGBColor + ")");
-                    $("#contextual-properties-line-linecolor-button .btn-color").css("background-color","rgb(" + curRGBColor + ")");
-                    break;
-                  case "fillStyle":
-                    $("#bar-fill .btn-color").css("background-color","rgb(" + curRGBColor + ")");
-                    $("#contextual-properties-fill-button .btn-color").css("background-color","rgb(" + curRGBColor + ")");
-                    break;
-                  case "fontStyle":
-                    $("#bar-font-color .btn-color").css("background-color","rgb(" + curRGBColor + ")");
-                    $("#contextual-properties-text-fontcolor-button .btn-color").css("background-color","rgb(" + curRGBColor + ")");
-                    break;
-                  default:
-                }
-              },
               colorPickMouseMove :function (e) {
                 this.curColor = diagramUtil.RGBtoHEX($(e.target).attr("col"));
               },
@@ -1355,10 +1450,42 @@ define(function(require, exports, module) {
                 attr[propertyParent] = attrValue;
                 diagramManager.setAttr(this.selectedObj[0],attr);
                 diagramDesigner.drawDiagramById(this.selectedObj[0]);
-                this.UIupdateMenucolor(targetProperty,curRGBColor);
+                uIManager.UIupdateMenu(targetProperty,curRGBColor);
               },
             },
         });
+      },
+      UIupdateMenu : function (property,curValue) {
+        let propertyParent = property[0];
+        let propertySon = property[1];
+
+        switch (propertyParent) {
+          case "lineStyle":
+            $("#bar-line-color .btn-color").css("background-color","rgb(" + curValue + ")");
+            $("#contextual-properties-bordercolor-button .btn-color").css("background-color","rgb(" + curValue + ")");
+            $("#contextual-properties-line-linecolor-button .btn-color").css("background-color","rgb(" + curValue + ")");
+            break;
+          case "fillStyle":
+            $("#bar-fill .btn-color").css("background-color","rgb(" + curValue + ")");
+            $("#contextual-properties-fill-button .btn-color").css("background-color","rgb(" + curValue + ")");
+            break;
+          case "fontStyle":
+            $("#bar-font-color .btn-color").css("background-color","rgb(" + curValue + ")");
+            $("#contextual-properties-text-fontcolor-button .btn-color").css("background-color","rgb(" + curValue + ")");
+            break;
+          default:
+        }
+        switch (propertySon) {
+          case "beginArrow":
+            $("#bar-beginarrow .ico-arrow").attr("class","icon ico-arrow larrow-" + curValue.toLowerCase());
+            $("#contextual-properties-line-larrow-button .ico-arrow").attr("class","icon ico-arrow larrow-" + curValue.toLowerCase());
+            break;
+          case "endArrow":
+            $("#bar-endarrow .ico-arrow").attr("class","icon ico-arrow rarrow-" + curValue.toLowerCase());
+            $("#contextual-properties-line-rarrow-button .ico-arrow").attr("class","icon ico-arrow rarrow-" + curValue.toLowerCase());
+            break;
+          default:
+        }
       },
 
     }

@@ -1016,7 +1016,7 @@
                      <ul class="button-group">
                        <li class="dropdown shape-cprops-dropdown">
                          <button id="contextual-properties-line-larrow-button" @click="leftArrowClick" class="btn"  data-original-title="" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
-                           <div class="icon ico-arrow larrow-none" style="margin: 0px 7px 0px 0px;"></div>
+                           <div class="icon ico-arrow" v-bind:class="beginArrowStyle" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
                        </li>
@@ -1026,7 +1026,7 @@
                      <ul class="button-group">
                        <li class="shape-cprops-dropdown">
                          <button id="contextual-properties-line-rarrow-button" @click="rightArrowClick" class="btn"  data-original-title="Shape Opacity" style="display: inline-block;border-top-left-radius: 3px;border-bottom-left-radius: 3px;">
-                           <div class="icon ico-arrow rarrow-none" style="margin: 0px 7px 0px 0px;"></div>
+                           <div class="icon ico-arrow" v-bind:class="endArrowStyle" style="margin: 0px 7px 0px 0px;"></div>
                            <div class="icon ico-dropdown"></div>
                          </button>
                        </li>

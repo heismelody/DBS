@@ -4,6 +4,7 @@ define(function(require, exports, module) {
   var DiagramManager = require('./diagramManager.js');
   var LineManager = require('./lineManager.js');
   var SelectedManager = require('./selectedManager.js');
+  var UIManager = require('./uIManager.js');
 
   var diagramDesigner = DiagramDesigner.diagramDesigner;
   var diagramUtil = DiagramUtil.diagramUtil;
@@ -14,6 +15,7 @@ define(function(require, exports, module) {
   var lineManager = LineManager.lineManager;
   var selectedManager = SelectedManager.selectedManager;
   var themeManager = diagramManager.themeManager;
+  var uIManager = UIManager.uIManager;
 
   var eventHelper = (function () {
     /**
@@ -146,17 +148,21 @@ define(function(require, exports, module) {
         }
       },
       initEvent : function() {
-        eventHelper.initFloatMenuEvent();
-
         $(".design-layout").on('click',function(e) {
           if(e.target.id == "designer-grids" || e.target.className == "canvas-container") {
             selectedManager.removeSelected();
             $("#designer-contextmenu").hide();
           }
         }).on("mousedown",function (e) {
+          //draw line after click right click contextmenu button: draw line
           if(stateManager.isInState("drawline")) {
             eventHelper.MouseDownHandler(e,eventHelper.drawLineMousedownHandler);
           }
+          //begin draw line starting from diagram border(anchor)
+          if($(".canvas-container").css("cursor") == "crosshair") {
+            eventHelper.MouseDownHandler(e,eventHelper.drawLineFromDiagramMousedownHandler);
+          }
+          //textarea editing state finished
           if($("#shape-textarea-editing").length != 0) {
             let editing = $("#shape-textarea-editing").detach();
             let targetId = editing.attr("target");
@@ -176,7 +182,9 @@ define(function(require, exports, module) {
           }
         }).on("mousemove",function (e) {
           if(e.target.id == "designer-grids" || e.target.className == "canvas-container") {
-            $(".canvas-container").css("cursor","default");
+            if(!stateManager.isInState("drawline")) {
+              $(".canvas-container").css("cursor","default");
+            }
           }
           if(e.target.className.indexOf("diagram-object-canvas") == -1) {
             $('.anchor-overlay').remove();
@@ -278,12 +286,6 @@ define(function(require, exports, module) {
             },
           });
         });
-        //$(".design-layout").on('click','.diagram-object-canvas', eventHelper.diagramObjClickHandler);
-        //line mouse down / click
-        // $(".design-layout").on('mousedown','.line-object-canvas',function(e) {
-        //   eventHelper.MouseDownHandler(e,eventHelper.lineObjMouseDownHandler);
-        // });
-        // $(".design-layout").on('click','.line-object-canvas', eventHelper.lineObjClickHandler);
 
         //control resize
         $(".design-layout").on('mousedown','.control-overlay.nw',function(e) {
@@ -320,111 +322,6 @@ define(function(require, exports, module) {
 
         $(".design-layout").on('mousedown','.line-overlay-controlpoint',function(e) {
           eventHelper.MouseDownHandler(e,eventHelper.lineControlOverlayMouseDownHandle);
-        });
-      },
-      initFloatMenuEvent : function () {
-        //diagram themes float menu
-        $("#diagram-themes .theme-box").on("click",function (e) {
-          $("#diagram-themes").find(".theme-selected")
-                              .removeClass("theme-selected");
-          $(e.target).addClass("theme-selected");
-          let curThemeName = $(e.target).attr("id");
-          themeManager.setCurrentTheme(curThemeName.substring(0,curThemeName.length-6));
-          for(let curId in objectManager.getAllDiagram()) {
-            diagramDesigner.drawDiagramById(curId);
-          }
-        });
-        //line width float menu list
-        $("#line-width-list li").on("click",function (e) {
-          let jqcurEle;
-          if(e.target.className.indexOf("icon") != -1) {
-            jqcurEle = $(e.target).parent();
-          }
-          else {
-            jqcurEle = $(e.target);
-          }
-          let curId = selectedManager.getSelected()[0];
-          diagramManager.setAttr(curId,{lineStyle:{"lineWidth":parseInt(jqcurEle.attr("value")),}});
-          diagramDesigner.drawDiagramById(curId);
-          $("#line-width-list").hide();
-          $("#" + jqcurEle.parent().attr("for")).removeClass("selected");
-          //console.log(jqcurEle.attr("value"));
-        });
-        //line style float menu list
-        $("#line-style-list li").on("click",function (e) {
-          let jqcurEle;
-          if(e.target.className.indexOf("icon") != -1) {
-            jqcurEle = $(e.target).parent();
-          }
-          else {
-            jqcurEle = $(e.target);
-          }
-          let curId = selectedManager.getSelected()[0];
-          diagramManager.setAttr(curId,{lineStyle:{"lineStyle":jqcurEle.attr("value")}});
-          diagramDesigner.drawDiagramById(curId);
-          $("#line-style-list").hide();
-          $("#" + jqcurEle.parent().attr("for")).removeClass("selected");
-          //console.log(jqcurEle.attr("value"));
-        });
-        //
-        $("#line-type-list li").on("click",function (e) {
-          let jqcurEle;
-          let curLineType;
-          let curClassName;
-          if(e.target.className.indexOf("icon") != -1) {
-            jqcurEle = $(e.target).parent();
-          }
-          else {
-            jqcurEle = $(e.target);
-          }
-          curLineType = jqcurEle.attr("value");
-          switch (curLineType) {
-            case "step":
-              curClassName = "icon linkertype-broken linkertype";
-              break;
-            case "curve":
-              curClassName = "icon linkertype-curve linkertype";
-              break;
-            case "basic":
-              curClassName = "icon linkertype-normal linkertype";
-              break;
-            default:
-          }
-          $("#line-type-list").hide();
-          $("#bar-linkertype").removeClass("selected");
-          $("#bar-linkertype").find(".linkertype").attr("class",curClassName);
-        });
-        //begin arrow style
-        $("#beginarrow-list li").on("click",function (e) {
-          let jqcurEle;
-          if(e.target.className.indexOf("icon") != -1) {
-            jqcurEle = $(e.target).parent();
-          }
-          else {
-            jqcurEle = $(e.target);
-          }
-          let curId = selectedManager.getSelected()[0];
-          diagramManager.setAttr(curId,{lineStyle:{"beginArrow":jqcurEle.attr("value")}});
-          diagramDesigner.drawDiagramById(curId);
-          $("#beginarrow-list").hide();
-          $("#" + jqcurEle.parent().attr("for")).removeClass("selected")
-                                                .find(".ico-arrow").attr("class","icon ico-arrow larrow-" + jqcurEle.attr("value").toLowerCase());
-        });
-        //end arrow style
-        $("#endarrow-list li").on("click",function (e) {
-          let jqcurEle;
-          if(e.target.className.indexOf("icon") != -1) {
-            jqcurEle = $(e.target).parent();
-          }
-          else {
-            jqcurEle = $(e.target);
-          }
-          let curId = selectedManager.getSelected()[0];
-          diagramManager.setAttr(curId,{lineStyle:{"endArrow":jqcurEle.attr("value")}});
-          diagramDesigner.drawDiagramById(curId);
-          $("#endarrow-list").hide();
-          $("#" + jqcurEle.parent().attr("for")).removeClass("selected")
-                                                .find(".ico-arrow").attr("class","icon ico-arrow rarrow-" + jqcurEle.attr("value").toLowerCase());
         });
       },
 
@@ -752,6 +649,32 @@ define(function(require, exports, module) {
         document.onmousemove = eventHelper.drawLineMouseMoveHandler;
         document.onmouseup = eventHelper.drawLineMouseUpHandler;
       },
+      //mousedown function : begin draw line starting from diagram border(anchor)
+      drawLineFromDiagramMousedownHandler : function(e) {
+        // we need to access the element in onMouseMove
+        _dragElement = $(target)[0];
+
+        stateManager.resetState();
+        let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+        let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="0" height = "0"></canvas>';
+        _shapeName = "line";
+        start = {
+          x: pos.x,
+          y: pos.y,
+        };
+
+        $(".canvas-container").css("cursor","default");
+        $('#creating-designer-diagram').append(creatingCanvasHtml)
+                                       .show()
+                                       .css({
+                                        "left": pos.x,
+                                        "top": pos.y,
+                                       });
+
+        // tell our code to start moving the element with the mouse
+        document.onmousemove = eventHelper.drawLineMouseMoveHandler;
+        document.onmouseup = eventHelper.drawLineMouseUpHandler;
+      },
       drawLineMouseMoveHandler : function(e) {
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
         let end = {
@@ -767,9 +690,11 @@ define(function(require, exports, module) {
           height: Math.abs(end.y - start.y) + 20,
         });
         curJqueryDiagram.css({
-          left: Math.min(start.x,end.x) - 10,
-          top: Math.min(start.y,end.y) - 10,
-        });
+                              left: Math.min(start.x,end.x) - 10,
+                              top: Math.min(start.y,end.y) - 10,
+                              width: Math.abs(end.x - start.x) + 20,
+                              height: Math.abs(end.y - start.y) + 20,
+                            })
         curPosRelative = {
           start : {
             x: start.x - parseFloat(curJqueryDiagram.css("left")),
@@ -807,6 +732,8 @@ define(function(require, exports, module) {
           curJqueryDiagram.css({
             left: Math.min(start.x,end.x) - 10,
             top: Math.min(start.y,end.y) - 10,
+            width: Math.abs(end.x - start.x) + 20,
+            height: Math.abs(end.y - start.y) + 20,
           });
           curPosRelative = {
             start : {

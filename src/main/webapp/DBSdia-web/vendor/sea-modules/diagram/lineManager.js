@@ -288,6 +288,8 @@ define(function(require, exports, module) {
           curJqueryEle.css({
             left: _bezierObj.bbox().x.min - 10,
             top: _bezierObj.bbox().y.min - 10,
+            width: _bezierObj.bbox().x.size + 20,
+            height: _bezierObj.bbox().y.size + 20,
           });
           curStartRelative = {
             x: start.x - parseFloat(curJqueryEle.css("left")),
@@ -317,6 +319,8 @@ define(function(require, exports, module) {
           curJqueryEle.css({
             left: Math.min(start.x,end.x) - 10,
             top: Math.min(start.y,end.y) - 10,
+            width: Math.abs(end.x - start.x) + 20,
+            height: Math.abs(end.y - start.y) + 20,
           });
           curStartRelative = {
             x: start.x - parseFloat(curJqueryEle.css("left")),
@@ -532,6 +536,36 @@ define(function(require, exports, module) {
 
         ctx.isHighlight = false;
         $("#line-overlay-container").remove();
+      },
+      drawTextArea : function (diagramId,argList) {
+        let diagramEle = $("#" + diagramId);
+        let canvas = diagramEle.find("canvas")[0];
+        let jquerytextArea = diagramEle.find("textarea");
+        let fontStyle = argList.fontStyle;
+        let textAreaPos = argList.textArea;
+        let w = 50;
+        //let h = 0;
+        let text;
+        let textAreaStyle = {
+          "width"          : w + "px",
+          "z-index"        : "50",
+          "line-height"    : Math.round(fontStyle.size * 1.25) + "px",
+          "font-size"      : fontStyle.size + "px",
+          "font-family"    : fontStyle.fontFamily,
+          "font-weight"    : fontStyle.bold ? "bold" : "normal",
+          "font-style"     : fontStyle.italic ? "italic" : "normal",
+          "color"          : "rgb(" + fontStyle.color + ")",
+          "text-decoration": fontStyle.underline ? "underline" : "none"
+        }
+        text = diagramEle.find("textarea").val();
+        text = (text == undefined) ? "" : text ;
+
+        $(jquerytextArea).css({
+                          "left": textAreaPos.x - 26 - parseInt(diagramEle.css("left")),
+                          "top": textAreaPos.y - 17 - parseInt(diagramEle.css("top")),
+                          })
+                         .css(textAreaStyle)
+                         .val(text);
       },
       addLineTextArea : function (diagramId,argList) {
         let diagramEle = $("#" + diagramId);
