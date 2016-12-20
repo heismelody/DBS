@@ -62,7 +62,7 @@ define(function(require, exports, module) {
         }
         return Date.now() + generateUIDNotMoreThan1million();
       },
-      addNewLine : function(start,end) {
+      addNewLine : function(start,end,argList) {
         let linetype = "basic";
         let newId =  this.generateDiagramId();
         let width = Math.abs(start.x - end.x);
@@ -103,19 +103,38 @@ define(function(require, exports, module) {
             };
             break;
           case "basic":
-            _GlobalLineObject[newId] = {
-              "id" : newId,
-              "name" : "line",
-              "linetype" : linetype,
-              "properties": {
-                "startX": start.x,
-                "startY": start.y,
-                "endX" : end.x,
-                "endY" : end.y,
-                "width" : width,
-                "height" : height,
-              },
-            };
+            if(argList) {
+              _GlobalLineObject[newId] = {
+                "id" : newId,
+                "name" : "line",
+                "linetype" : linetype,
+                "fromId": argList.hasOwnProperty("fromId") ? argList.fromId : null,
+                "toId": argList.hasOwnProperty("toId") ? argList.toId : null,
+                "properties": {
+                  "startX": start.x,
+                  "startY": start.y,
+                  "endX" : end.x,
+                  "endY" : end.y,
+                  "width" : width,
+                  "height" : height,
+                },
+              };
+            }
+            else {
+              _GlobalLineObject[newId] = {
+                "id" : newId,
+                "name" : "line",
+                "linetype" : linetype,
+                "properties": {
+                  "startX": start.x,
+                  "startY": start.y,
+                  "endX" : end.x,
+                  "endY" : end.y,
+                  "width" : width,
+                  "height" : height,
+                },
+              };
+            }
             break;
           case "step":
 
@@ -346,7 +365,7 @@ define(function(require, exports, module) {
                 beginArrow: argList.beginArrow,
                 endArrow: argList.endArrow,
               };
-              this.drawArrow(ctx,start.x,start.y,end.x,end.y,arrowStyle);
+              this._drawArrow(ctx,start.x,start.y,end.x,end.y,arrowStyle);
             }
             break;
           case "step":
@@ -637,7 +656,7 @@ define(function(require, exports, module) {
       },
       //http://www.dbp-consulting.com/tutorials/canvas/CanvasArrow.html
       //(x1,y1) is start point , (x2,y2) is end point
-      drawArrow : function(ctx,x1,y1,x2,y2,style,angle,d) {
+      _drawArrow : function(ctx,x1,y1,x2,y2,style,angle,d) {
         'use strict';
         // Ceason pointed to a problem when x1 or y1 were a string, and concatenation
         // would happen instead of addition
@@ -664,7 +683,7 @@ define(function(require, exports, module) {
           let angle2 = lineangle+Math.PI-angle;
           let botx = x2+Math.cos(angle2)*h;
           let boty = y2+Math.sin(angle2)*h;
-          this.drawHead(ctx,topx,topy,x2,y2,botx,boty,endArrowStyle);
+          this._drawHead(ctx,topx,topy,x2,y2,botx,boty,endArrowStyle);
         }
         if(beginArrowStyle){ // handle start arrow head
           let angle1 = lineangle+angle;
@@ -673,10 +692,10 @@ define(function(require, exports, module) {
           let angle2 = lineangle-angle;
           let botx = x1+Math.cos(angle2)*h;
           let boty = y1+Math.sin(angle2)*h;
-          this.drawHead(ctx,topx,topy,x1,y1,botx,boty,beginArrowStyle);
+          this._drawHead(ctx,topx,topy,x1,y1,botx,boty,beginArrowStyle);
         }
       },
-      drawHead : function(ctx,x0,y0,x1,y1,x2,y2,style) {
+      _drawHead : function(ctx,x0,y0,x1,y1,x2,y2,style) {
         let r = 0;
         switch(style){
           case "none":
@@ -743,7 +762,19 @@ define(function(require, exports, module) {
         }
       },
 
+      //The line need to be stored in three place if necessary
+      //1. if a line connect two diagram, it should be stored in
+      //lineObj's {fromId,toId}: the fromId, toId is the diagram's Id
+      //it from and to.It also should be stored in these two connected diagrams.
+      //linkerList["xxx",] xxx is line's id.
+      //2.if a line only connect one diagram,
+      //lineObj {fromId,toId}: only store the id it connected
+      //diagramObj linkerList: store line's id
+      //3.not connect diagram.
+      //lineObj {fromId,toId}: fromId = null, toId = null
+      f : function () {
 
+      },
     };
 
     return lineManager;

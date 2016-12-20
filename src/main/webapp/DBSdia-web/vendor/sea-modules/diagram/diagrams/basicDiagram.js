@@ -24,8 +24,8 @@ define(function(require, exports, module) {
         group: "",
         groupName: null,
         locked: false,
-        linkStart: "",
-        linkEnd: "",
+        fromId: null,
+        toId: null,
         properties: {
           startX: 0,
           startY: 0,
@@ -53,8 +53,8 @@ define(function(require, exports, module) {
         group: "",
         groupName: null,
         locked: false,
-        linkStart: "",
-        linkEnd: "",
+        fromId: null,
+        toId: null,
         properties: {
           startX: 0,
           startY: 0,
@@ -86,8 +86,8 @@ define(function(require, exports, module) {
         group: "",
         groupName: null,
         locked: false,
-        linkStart: "",
-        linkEnd: "",
+        fromId: null,
+        toId: null,
         properties: {
           startX: 0,
           startY: 0,

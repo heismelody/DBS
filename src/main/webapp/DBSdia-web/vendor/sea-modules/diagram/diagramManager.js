@@ -91,6 +91,7 @@ define(function(require, exports, module) {
     			collapsed: false,
     			markerOffset: 5
     		},
+        linkerList : [],
     		dataAttributes: [],
     		properties: {
     			x: 0,
@@ -588,10 +589,11 @@ define(function(require, exports, module) {
         /**
        * @param {string} x,y - Relative position.The center of the canvas.(NOT LINE)
        * @param {string} x,y - Relative position.X={start.x,start.y};Y={end.x,end.y}.(LINE)
+       * @param {object} argList - other creating arguments(LINE)
        */
-        addNewDiagram : function addNewDiagram(shapeName,x,y) {
+        addNewDiagram : function addNewDiagram(shapeName,x,y,argList) {
           if(shapeName == "line") {
-            let newLineObj = lineManager.addNewLine(x,y);
+            let newLineObj = lineManager.addNewLine(x,y,argList);
             let newId = newLineObj["id"];
 
             _GlobalDiagramOjects[newId] = newLineObj;
@@ -819,7 +821,7 @@ define(function(require, exports, module) {
           for(let arg in args) {
             if(args[arg] instanceof Object) {
               for(let key in args[arg]) {
-                if(_GlobalDiagramOjects[diagramId][arg] == undefined) {
+                if(!_GlobalDiagramOjects[diagramId].hasOwnProperty(arg) || !_GlobalDiagramOjects[diagramId][arg]) {
                   _GlobalDiagramOjects[diagramId][arg] = {};
                 }
                 _GlobalDiagramOjects[diagramId][arg][key] = args[arg][key];

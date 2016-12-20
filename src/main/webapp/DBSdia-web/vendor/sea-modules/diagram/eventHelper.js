@@ -53,6 +53,7 @@ define(function(require, exports, module) {
      var start;         //store the position of start point
      var end;
      var isStart;
+     var argList = {};       //used to store arguments in draw line
 
      var _mousePosDiagramArray = new Array();
 
@@ -95,7 +96,7 @@ define(function(require, exports, module) {
             _mousePosDiagramArray = [];
           }
           else {
-            if(diagramDesigner.isPointWithinBorderArea.call(ctx,pos.x,pos.y,7)) {
+            if(diagramDesigner.isPointWithinBorderArea.call(ctx,pos.x,pos.y,9)) {
               inBorderAreaFunction(e);
               for(var i in _mousePosDiagramArray) {
                 $("#" + _mousePosDiagramArray[i]).removeClass("event-none");
@@ -157,10 +158,6 @@ define(function(require, exports, module) {
           //draw line after click right click contextmenu button: draw line
           if(stateManager.isInState("drawline")) {
             eventHelper.MouseDownHandler(e,eventHelper.drawLineMousedownHandler);
-          }
-          //begin draw line starting from diagram border(anchor)
-          if($(".canvas-container").css("cursor") == "crosshair") {
-            eventHelper.MouseDownHandler(e,eventHelper.drawLineFromDiagramMousedownHandler);
           }
           //textarea editing state finished
           if($("#shape-textarea-editing").length != 0) {
@@ -232,7 +229,17 @@ define(function(require, exports, module) {
               }
               eventHelper.MouseDownHandler(e,eventHelper.diagramObjMouseDownHandler);
             },
-            inBorderAreaFunction : function () {},
+            inBorderAreaFunction : function (e) {
+              //begin draw line starting from diagram border(anchor)
+              if(position != undefined) {
+                e.clientX = position.x;
+                e.clientY = position.y;
+                e.pageX = position.x;
+                e.pageY = position.y;
+                e.button = 0;
+              }
+              eventHelper.MouseDownHandler(e,eventHelper.drawLineFromDiagramMousedownHandler);
+            },
             onLineFunction : function () {
               if(position != undefined) {
                 e.clientX = position.x;
@@ -662,6 +669,12 @@ define(function(require, exports, module) {
           x: pos.x,
           y: pos.y,
         };
+        let closestAnchor = diagramDesigner.getClosestAnchor(start.x,start.y,$(e.target).parent().attr("id"));
+        start.x = closestAnchor.x;
+        start.y = closestAnchor.y;
+
+        argList = {};
+        argList["fromId"] = $(e.target).parent().attr("id");
 
         $(".canvas-container").css("cursor","default");
         $('#creating-designer-diagram').append(creatingCanvasHtml)
@@ -720,7 +733,7 @@ define(function(require, exports, module) {
             x: pos.x,
             y: pos.y,
           };
-          let newId = objectManager.addNewDiagram("line",start,end);
+          let newId = objectManager.addNewDiagram("line",start,end,argList);
           let curPosRelative = {};
           let curJqueryCanvas = $("#creating-designer-canvas");
           let curJqueryDiagram = $("#creating-designer-diagram");

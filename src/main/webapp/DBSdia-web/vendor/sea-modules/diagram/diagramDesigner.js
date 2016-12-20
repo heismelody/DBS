@@ -720,7 +720,6 @@ define(function(require, exports, module) {
      * in this diagramObj/canvas.
      */
       getAnchorPosByCurPos : function (x,y,d) {
-        let curAnchor;
         let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
         let pointsInDiagram = [];
 
@@ -729,11 +728,12 @@ define(function(require, exports, module) {
             pointsInDiagram.push(circlePoints[i]);
           }
         }
+
         let farthestPointIndiagram = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)];
         let record;
         for(let lamda = 0.0; lamda <= 1.0; lamda += 0.1) {
-          let curX = lambda * x + (1 - lambda) * farthestPointIndiagram.x;
-          let curY = lambda * y + (1 - lambda) * farthestPointIndiagram.y;
+          let curX = lamda * x + (1 - lamda) * farthestPointIndiagram.x;
+          let curY = lamda * y + (1 - lamda) * farthestPointIndiagram.y;
           let iscurPointInPath = this.isPointInPath(curX,curY);
 
           if(lamda == 0.0) {
@@ -746,6 +746,58 @@ define(function(require, exports, module) {
             }
           }
         }
+      },
+      /**
+      * Given a point in the diagramObj, return the closest default anchor position
+      * in this diagramObj
+      */
+      getClosestAnchor : function (x,y,diagramId) {
+        let jqueryEle = $("#" + diagramId);
+        let ctx = jqueryEle.find("canvas")[0].getContext("2d");
+        let closestAnchor = this.getClosestDefaultAnchor(x,y,diagramId);
+        if(closestAnchor) {
+          return closestAnchor;
+        }
+        else {
+          let relativePos = {
+            x : x - parseFloat(jqueryEle.css("left")),
+            y : y - parseFloat(jqueryEle.css("top")),
+          }
+          closestAnchor = this.getAnchorPosByCurPos.call(ctx,relativePos.x,relativePos.y,11);
+          closestAnchor.x = parseFloat(jqueryEle.css("left")) + closestAnchor.x;
+          closestAnchor.y = parseFloat(jqueryEle.css("top")) + closestAnchor.y;
+          return closestAnchor;
+        }
+      },
+      getClosestDefaultAnchor : function (x,y,diagramId) {
+        let jqueryEle = $("#" + diagramId);
+        let canvas = jqueryEle.find("canvas")[0];
+        let shapeName = objectManager.getShapeNameById(diagramId);
+        let curAnchors = objectManager.getAnchorsByName(shapeName);
+        let w = canvas.width;
+        let h = canvas.height;
+
+        for(let i in curAnchors) {
+          let curAnchorXY = {};
+
+          let relativePos = {
+            x: x - parseFloat(jqueryEle.css("left")),
+            y: y - parseFloat(jqueryEle.css("top")),
+          }
+          curAnchorXY = diagramUtil.evaluate(curAnchors[i],w,h);
+          if( (Math.abs(relativePos.x - curAnchorXY.x) <= 8)
+           && (Math.abs(relativePos.y - curAnchorXY.y) <= 8)) {
+             curAnchorXY.x = parseFloat(jqueryEle.css("left")) + curAnchorXY.x;
+             curAnchorXY.y = parseFloat(jqueryEle.css("top")) + curAnchorXY.y;
+
+             return curAnchorXY;
+          }
+        }
+      },
+      //when draw line, if a vertex is within the area of one diagramObj's anchor.
+      //Draw hightlight circle to notice.
+      drawPointWithInAnchorHighlight : function () {
+
       },
 
 
