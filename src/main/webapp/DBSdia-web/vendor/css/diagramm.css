@@ -1971,3 +1971,6 @@ button:focus {
 .design-canvas {
   background-color: rgb(242, 242, 242);
 }
+#line-diagram-circle {
+  position: absolute;
+}

@@ -748,7 +748,7 @@ define(function(require, exports, module) {
         }
       },
       /**
-      * Given a point in the diagramObj, return the closest default anchor position
+      * Given a point in the diagramObj border area, return the closest default anchor position
       * in this diagramObj
       */
       getClosestAnchor : function (x,y,diagramId) {
@@ -796,7 +796,90 @@ define(function(require, exports, module) {
       },
       //when draw line, if a vertex is within the area of one diagramObj's anchor.
       //Draw hightlight circle to notice.
-      drawPointWithInAnchorHighlight : function () {
+      //reference the arguments function resolvePointInContainedDiagram return
+      drawWithInAnchorAreaPointCircle : function (x,y,diagramId,posInfoposition) {
+        diagramDesigner.addDiagramAnchorOverlay(diagramId);
+        if(posInfoposition == "border" || posInfoposition == "anchor") {
+          let jqueryEle = $("#" + diagramId);
+          if($("#line-diagram-circle").length != 0) {
+            $("#line-diagram-circle").css({
+                                        "opacity" : 0.3,
+                                        "background-color": "#833",
+                                        "border-color": "#833",
+                                        "border-radius": 16,
+                                        "border": "solid 1px #772E2E",
+                                        "width": 32,
+                                        "height": 32,
+                                        "left": x - 16,
+                                        "top": y - 16,
+                                      })
+                                      .show();
+          }
+          else {
+            let circleHtml = "<canvas id='line-diagram-circle' width='32' height='32'></canvas>";
+            $(circleHtml).appendTo(".design-canvas")
+                         .css({
+                           "opacity" : 0.3,
+                           "background-color": "#833",
+                           "border-color": "#833",
+                           "border-radius": 16,
+                           "border": "solid 1px #772E2E",
+                           "width": 32,
+                           "height": 32,
+                           "left": x - 16,
+                           "top": y - 16,
+                         })
+                         .show();
+          }
+        }
+        else {
+          $("#line-diagram-circle").hide();
+        }
+      },
+      resolvePointInContainedDiagram : function (x,y) {
+        let INdiagrams = diagramUtil.getElesAt(x,y);
+
+        if(INdiagrams.length == 0) { return; }
+        for(let i = 0; i < INdiagrams.length; i++) {
+          let curJqueryEle = $(INdiagrams[i]);
+          let curId = curJqueryEle.attr("id");
+          let ctx = curJqueryEle.find("canvas")[0].getContext("2d");
+          let pos = {
+            x : x - parseFloat(curJqueryEle.css("left")),
+            y : y - parseFloat(curJqueryEle.css("top")),
+          }
+
+          if(ctx.isPointInPath(pos.x,pos.y)) {
+            return {
+              id: curId,
+              position: "inpath",
+              x: x,
+              y: y,
+            }
+          }
+          else if(diagramDesigner.isPointWithinBorderArea.call(ctx,pos.x,pos.y,9)) {
+            let closestAnchor = diagramDesigner.getClosestDefaultAnchor(x,y,curId);
+            if(closestAnchor) {
+              return {
+                id: curId,
+                position: "anchor",
+                x: closestAnchor.x,
+                y: closestAnchor.y,
+              }
+            }
+            else {
+              closestAnchor = this.getAnchorPosByCurPos.call(ctx,pos.x,pos.y,11);
+              closestAnchor.x = parseFloat(curJqueryEle.css("left")) + closestAnchor.x;
+              closestAnchor.y = parseFloat(curJqueryEle.css("top")) + closestAnchor.y;
+              return {
+                id: curId,
+                position: "border",
+                x: closestAnchor.x,
+                y: closestAnchor.y,
+              }
+            }
+          }
+        }
 
       },
 

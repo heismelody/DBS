@@ -193,6 +193,36 @@ define(function(require, exports, module) {
         return hexColor;
       },
 
+      isPointInCanvas : function (x,y,diagramId) {
+        let jqueryEle = $("#" + diagramId);
+        let width = parseFloat(jqueryEle.css("width")),
+            height = parseFloat(jqueryEle.css("height")),
+            left = parseFloat(jqueryEle.css("left")),
+            top = parseFloat(jqueryEle.css("top"));
+
+        return (x >= top) && (x <= (top + height))
+            && (y >= left) && (y <= (left + width));
+      },
+      //given the position of mouse return all diagrams(except line!) at this position
+      getElesAt : function (x, y){
+          return $(".design-canvas")
+                     .find(".diagram-object-container")
+                     .filter(function() {
+                       let width = parseFloat($(this).css("width")),
+                           height = parseFloat($(this).css("height")),
+                           left = parseFloat($(this).css("left")),
+                           top = parseFloat($(this).css("top"));
+                          //  console.log("width:" + width + "height:" + height);
+                          //  console.log("left:" + left + "top:" + top);
+                          //  console.log(x >= top);
+                          //  console.log(x <= (top + height));
+                          //  console.log(y >= left);
+                          //  console.log(y <= (left + width));
+                           return (y >= top) && (y <= (top + height))
+                               && (x >= left) && (x <= (left + width));
+                     });
+      },
+
     };
 
     return diagramUtil;

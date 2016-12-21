@@ -698,6 +698,16 @@ define(function(require, exports, module) {
         let curJqueryCanvas = $("#creating-designer-canvas");
         let curJqueryDiagram = $("#creating-designer-diagram");
 
+        let posInfoOfDiagram = diagramDesigner.resolvePointInContainedDiagram(pos.x,pos.y);
+        $(".canvas-container").css("cursor","default");
+        $("#line-diagram-circle").hide();
+        $("#anchor-overlay-container").hide();
+        if(posInfoOfDiagram) {
+          diagramDesigner.drawWithInAnchorAreaPointCircle(posInfoOfDiagram.x,posInfoOfDiagram.y,posInfoOfDiagram.id,posInfoOfDiagram.position);
+          end.x = posInfoOfDiagram.x;
+          end.y = posInfoOfDiagram.y;
+        }
+
         curJqueryCanvas.attr({
           width: Math.abs(end.x - start.x) + 20,
           height: Math.abs(end.y - start.y) + 20,
