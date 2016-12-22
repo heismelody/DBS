@@ -663,7 +663,29 @@ define(function(require, exports, module) {
             lineManager.updateLinePosition(id,argList,pos);
           }
         },
-        //Remove later
+        setLinkLine : function (diagramId,lineId) {
+          if(!_GlobalDiagramOjects[diagramId].hasOwnProperty("linkerList")) {
+            _GlobalDiagramOjects[diagramId]["linkerList"] = [];
+          }
+          _GlobalDiagramOjects[diagramId]["linkerList"].push(lineId);
+        },
+        removeLinkLine : function (diagramId,lineId) {
+          for(let i in _GlobalDiagramOjects[diagramId]["linkerList"]) {
+            if(_GlobalDiagramOjects[diagramId]["linkerList"][i] == lineId) {
+              _GlobalDiagramOjects[diagramId]["linkerList"].splice(i, 1);
+              break;
+            }
+          }
+        },
+        isLineLinkingDiagram : function (lineId) {
+          if((_GlobalDiagramOjects[lineId].hasOwnProperty("fromId")) && (_GlobalDiagramOjects[lineId]["fromId"])
+             || (_GlobalDiagramOjects[lineId].hasOwnProperty("toId")) && (_GlobalDiagramOjects[lineId]["toId"]) ) {
+            return true;
+          }
+          else {
+            return false;
+          }
+        },
         isLine : function(id) {
           return this.getShapeNameById(id) == "line" ? true : false;
         },

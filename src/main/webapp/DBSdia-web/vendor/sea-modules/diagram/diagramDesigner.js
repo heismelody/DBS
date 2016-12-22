@@ -882,6 +882,48 @@ define(function(require, exports, module) {
         }
 
       },
+      updateDiagramAllLinkLine : function (diagramId,action,argList) {
+        switch (action) {
+          case "move":
+            let originX = argList.originX,
+                originY = argList.originY,
+                currentX = argList.currentX,
+                currentY = argList.currentY;
+
+
+            break;
+          case "resize":
+
+            break;
+          case "rotate":
+
+            break;
+          default:
+
+        }
+      },
+      drawDiagramAllLinkLine : function (diagramId,action,argList) {
+        let allLinkLineIdArray = diagramManager.getDiagramLinkLine(diagramId,{linkerList:[]});
+
+        switch (action) {
+          case "move":
+            let originX = argList.originX,
+                originY = argList.originY,
+                currentX = argList.currentX,
+                currentY = argList.currentY;
+
+
+            break;
+          case "resize":
+
+            break;
+          case "rotate":
+
+            break;
+          default:
+
+        }
+      },
 
 
     };

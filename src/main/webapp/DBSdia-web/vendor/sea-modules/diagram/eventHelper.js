@@ -643,6 +643,7 @@ define(function(require, exports, module) {
           x: pos.x,
           y: pos.y,
         };
+        argList = {};
 
         $(".canvas-container").css("cursor","default");
         $('#creating-designer-diagram').append(creatingCanvasHtml)
@@ -743,10 +744,28 @@ define(function(require, exports, module) {
             x: pos.x,
             y: pos.y,
           };
-          let newId = objectManager.addNewDiagram("line",start,end,argList);
+          let newId;
           let curPosRelative = {};
           let curJqueryCanvas = $("#creating-designer-canvas");
           let curJqueryDiagram = $("#creating-designer-diagram");
+
+          let posInfoOfDiagram = diagramDesigner.resolvePointInContainedDiagram(pos.x,pos.y);
+          $(".canvas-container").css("cursor","default");
+          $("#line-diagram-circle").hide();
+          $("#anchor-overlay-container").hide();
+          argList["toId"] = null;
+          if(posInfoOfDiagram) {
+            end.x = posInfoOfDiagram.x;
+            end.y = posInfoOfDiagram.y;
+            argList["toId"] = posInfoOfDiagram.id;
+          }
+          newId = objectManager.addNewDiagram("line",start,end,argList);
+          if(argList && argList.hasOwnProperty("fromId") && argList.fromId) {
+            objectManager.setLinkLine(argList.fromId,newId);
+          }
+          if(argList && argList.hasOwnProperty("toId") && argList.toId) {
+            objectManager.setLinkLine(argList.toId,newId);
+          }
 
           curJqueryCanvas.attr({
             width: Math.abs(end.x - start.x) + 20,
@@ -815,8 +834,14 @@ define(function(require, exports, module) {
         _startY = e.clientY;
 
         // tell our code to start moving the element with the mouse
-        document.onmousemove = eventHelper.lineObjMouseMoveHandler;
-        document.onmouseup = eventHelper.lineObjMouseUpHandler;
+        if(objectManager.isLineLinkingDiagram(curId)) {
+          diagramDesigner.addDiagramControlOverlay(curId);
+          _dragElement = null;
+        }
+        else {
+          document.onmousemove = eventHelper.lineObjMouseMoveHandler;
+          document.onmouseup = eventHelper.lineObjMouseUpHandler;
+        }
       },
       lineObjMouseMoveHandler : function(e) {
         // this is the actual "drag code"
