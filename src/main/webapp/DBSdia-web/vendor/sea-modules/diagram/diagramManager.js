@@ -656,16 +656,15 @@ define(function(require, exports, module) {
         getAnchorsByName : function(shapeName) {
           return diagramManager.getAttrByShapeName(shapeName,{"anchors":[]});
         },
-        updateDiagramPos : function (id,pos,argList) {
-          let shapeName = this.getShapeNameById(id);
-
-          if(shapeName == "line") {
-            lineManager.updateLinePosition(id,argList,pos);
-          }
-        },
         setLinkLine : function (diagramId,lineId) {
           if(!_GlobalDiagramOjects[diagramId].hasOwnProperty("linkerList")) {
             _GlobalDiagramOjects[diagramId]["linkerList"] = [];
+          }
+          for(let i in _GlobalDiagramOjects[diagramId]["linkerList"]) {
+            if(_GlobalDiagramOjects[diagramId]["linkerList"][i] == lineId) {
+              _GlobalDiagramOjects[diagramId]["linkerList"].splice(i, 1);
+              break;
+            }
           }
           _GlobalDiagramOjects[diagramId]["linkerList"].push(lineId);
         },

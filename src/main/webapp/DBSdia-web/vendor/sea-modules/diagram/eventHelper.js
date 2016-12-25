@@ -44,6 +44,8 @@ define(function(require, exports, module) {
      var curId;
      var curdiagramHeight;
      var curdiagramWidth;
+     var curdiagramLeft;
+     var curdiagramTop;
      var hasN;  //-1 Not 0 Have
      var hasS;
      var hasW;
@@ -449,7 +451,7 @@ define(function(require, exports, module) {
         _offsetX = ExtractNumber(_dragElement.style.left);
         _offsetY = ExtractNumber(_dragElement.style.top);
 
-        let curId = $(target).parent().attr("id");
+        curId = $(target).parent().attr("id");
 
         selectedManager.removeSelected();
         selectedManager.setSelected(curId);
@@ -474,6 +476,12 @@ define(function(require, exports, module) {
       },
       diagramObjMouseMoveHandler : function(e) {
         // this is the actual "drag code"
+        diagramDesigner.drawDiagramAllLinkLine(curId,"move",{
+          originX: _startX,
+          originY: _startY,
+          currentX: e.clientX,
+          currentY: e.clientY,
+        });
         $("#page-contextual-properties-dialog-trigger").hide();
         $(_dragElement).css({
           left: parseFloat(_offsetX) + e.clientX - _startX,
@@ -491,11 +499,23 @@ define(function(require, exports, module) {
             $($(".diagram-object-container")[i]).removeClass("event-none");
           }
           let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
-          let curId = $(_dragElement).attr("id");
+
+          //update diagram obj properties
           diagramManager.setAttr(curId,{properties:{
             x: pos.x,
             y: pos.y,
           }});
+
+          //update all linked line
+          diagramDesigner.updateDiagramAllLinkLine(curId,"move",{
+            originX: _startX,
+            originY: _startY,
+            currentX: e.pageX,
+            currentY: e.pageY,
+          });
+          diagramDesigner.drawDiagramAllLinkLine(curId,"default");
+
+          //
           $("#page-contextual-properties-dialog-trigger").css({
             "left": $(_dragElement).offset()["left"] + parseInt($(_dragElement).css("width")) + "px",
             "top" : $(_dragElement).offset()["top"] + 20 + "px",
@@ -506,6 +526,7 @@ define(function(require, exports, module) {
           document.onmousemove = null;
           document.onselectstart = null;
           _dragElement.ondragstart = null;
+          curId = null;
 
           // this is how we know we're not dragging
           _dragElement = null;
@@ -534,6 +555,8 @@ define(function(require, exports, module) {
         curId = $('#control-overlay-container').attr("targetid");
         curdiagramHeight = parseFloat($("#" + curId).height());
         curdiagramWidth = parseFloat($("#" + curId).width());
+        curdiagramTop = parseFloat($("#" + curId).css("top"));
+        curdiagramLeft = parseFloat($("#" + curId).css("left"));
         _shapeName = objectManager.getShapeNameById(curId);
 
         hasN = curElement.indexOf("n");  //-1 Not Have
@@ -594,10 +617,17 @@ define(function(require, exports, module) {
           }
         }
 
-        diagramDesigner.drawDiagram($("#" + curId + " .diagram-object-canvas")[0],_shapeName);
+        diagramDesigner.drawDiagramById(curId);
         diagramDesigner.addDiagramControlOverlay(curId);
         diagramDesigner.addDiagramAnchorOverlay(curId);
-
+        diagramDesigner.drawDiagramAllLinkLine(curId,"resize",{
+          "originW" : curdiagramWidth,
+          "originH" : curdiagramHeight,
+          "currentW" : parseFloat($("#" + curId).css("width")),
+          "currentH" : parseFloat($("#" + curId).css("height")),
+          "originLeft" : curdiagramLeft,
+          "originTop" : curdiagramTop,
+        });
       },
       resizeMouseUpHandler : function(e) {
         if (_dragElement != null) {
@@ -619,6 +649,18 @@ define(function(require, exports, module) {
               $("#contextual-properties-shape-trigger")[0].click();
             }
             diagramDesigner.drawTextArea($("#" + curId).find("textarea"));
+
+            //update all linked line
+            diagramDesigner.updateDiagramAllLinkLine(curId,"resize",{
+              "originW" : curdiagramWidth,
+              "originH" : curdiagramHeight,
+              "currentW" : w,
+              "currentH" : h,
+              "originLeft" : curdiagramLeft,
+              "originTop" : curdiagramTop,
+            });
+            diagramDesigner.drawDiagramAllLinkLine(curId,"default");
+
             // we're done with these events until the next OnMouseDown
             document.onmousemove = null;
             document.onselectstart = null;
@@ -968,7 +1010,12 @@ define(function(require, exports, module) {
           //real handler
           let targetid = $(target).parent().attr("targetid");
           let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
-          objectManager.updateDiagramPos(targetid,pos,isStart);
+          diagramManager.setAttr(targetid,{properties:{
+            "startX": start.x,
+            "startY": start.y,
+            "endX" : end.x,
+            "endY" : end.y,
+          }});
           diagramDesigner.drawCanvasAndDiagram(targetid,{"start":start,"end":end});
 
           // this is how we know we're not dragging

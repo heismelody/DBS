@@ -152,16 +152,16 @@ define(function(require, exports, module) {
       getLineTypeById : function(lineId) {
         return _GlobalLineObject[lineId]["linetype"];
       },
-      updateLinePosition: function(lineId,isStart,pos) {
-        if(isStart) {
-          _GlobalLineObject[lineId]["properties"]["startX"] = pos.x;
-          _GlobalLineObject[lineId]["properties"]["startY"] = pos.y;
-        }
-        else {
-          _GlobalLineObject[lineId]["properties"]["endX"] = pos.x;
-          _GlobalLineObject[lineId]["properties"]["endY"] = pos.y;
-        }
-      },
+      // updateLinePosition: function(lineId,isStart,pos) {
+      //   if(isStart) {
+      //     _GlobalLineObject[lineId]["properties"]["startX"] = pos.x;
+      //     _GlobalLineObject[lineId]["properties"]["startY"] = pos.y;
+      //   }
+      //   else {
+      //     _GlobalLineObject[lineId]["properties"]["endX"] = pos.x;
+      //     _GlobalLineObject[lineId]["properties"]["endY"] = pos.y;
+      //   }
+      // },
       updateCurveControlPosition : function (lineId,isStart,pos) {
         if(isStart) {
           _GlobalLineObject[lineId]["properties"]["startControlX"] = pos.x;
