@@ -93,6 +93,9 @@ define(function(require, exports, module) {
     		},
         linkerList : [],
     		dataAttributes: [],
+        //you should store the control-overlay border's width and height
+        // the x and y is the start point's relative position to $(".design-canvas")
+        //The start point is the nw point in control-overlay
     		properties: {
     			x: 0,
     			y: 0,
@@ -669,11 +672,40 @@ define(function(require, exports, module) {
           _GlobalDiagramOjects[diagramId]["linkerList"].push(lineId);
         },
         removeLinkLine : function (diagramId,lineId) {
-          for(let i in _GlobalDiagramOjects[diagramId]["linkerList"]) {
-            if(_GlobalDiagramOjects[diagramId]["linkerList"][i] == lineId) {
-              _GlobalDiagramOjects[diagramId]["linkerList"].splice(i, 1);
-              break;
+          if(lineId && diagramId && (diagramId != "") && (lineId != "")) {
+            for(let i in _GlobalDiagramOjects[diagramId]["linkerList"]) {
+              if(_GlobalDiagramOjects[diagramId]["linkerList"][i] == lineId) {
+                _GlobalDiagramOjects[diagramId]["linkerList"].splice(i, 1);
+                break;
+              }
             }
+          }
+        },
+        removeLinkedDiagram : function (lineId,isStartOrEnd) {
+          let fromId = diagramManager.getAttrById(lineId,{fromId:[]}),
+              toId = diagramManager.getAttrById(lineId,{toId:[]});
+              fromId = fromId["fromId"];
+              toId = toId["toId"];
+          switch (isStartOrEnd) {
+            case "start":
+              if(fromId && (fromId != "")) {
+                //this situaction, a line link start from a diagram and end to this diagram too.
+                if(fromId != toId) {
+                  diagramManager.objectManager.removeLinkLine(fromId,lineId);
+                }
+                diagramManager.setAttr(lineId,{fromId:null});
+              }
+              break;
+            case "end":
+              if(toId && (toId != "")) {
+                if(fromId != toId) {
+                  diagramManager.objectManager.removeLinkLine(toId,lineId);
+                }
+                diagramManager.setAttr(lineId,{toId:null});
+              }
+              break;
+            default:
+              throw new Error("removeLinkedDiagram() function 'isStartOrEnd' argument error!");
           }
         },
         isLineLinkingDiagram : function (lineId) {

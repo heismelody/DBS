@@ -644,42 +644,42 @@ define(function(require, exports, module) {
           },
           methods: {
             rightMenuNavClickHandler : function (e) {
-              if($(e.target).parent().hasClass("selected")) {
-                $(e.target).parent().removeClass("selected");
+              if($(e.target).hasClass("selected")) {
+                $(e.target).removeClass("selected");
                 //$("#" + this.targetMenuList[curId]).hide();
               }
               else {
-                $(e.target).parent().addClass("selected");
+                $(e.target).addClass("selected");
                 //$("#" + this.targetMenuList[curId]).hide();
               }
             },
             rightMenuPageClickHandler : function (e) {
-              if($(e.target).parent().hasClass("selected")) {
-                $(e.target).parent().removeClass("selected");
+              if($(e.target).hasClass("selected")) {
+                $(e.target).removeClass("selected");
                 $("#right-float-page").hide();
               }
               else {
-                $(e.target).parent().addClass("selected");
+                $(e.target).addClass("selected");
                 $("#right-float-page").show();
               }
             },
             rightMenuHistoryClickHandler : function (e) {
-              if($(e.target).parent().hasClass("selected")) {
-                $(e.target).parent().removeClass("selected");
+              if($(e.target).hasClass("selected")) {
+                $(e.target).removeClass("selected");
                 //$("#" + this.targetMenuList[curId]).hide();
               }
               else {
-                $(e.target).parent().addClass("selected");
+                $(e.target).addClass("selected");
                 //$("#" + this.targetMenuList[curId]).hide();
               }
             },
             rightMenuCommentClickHandler : function (e) {
-              if($(e.target).parent().hasClass("selected")) {
-                $(e.target).parent().removeClass("selected");
+              if($(e.target).hasClass("selected")) {
+                $(e.target).removeClass("selected");
                 //$("#" + this.targetMenuList[curId]).hide();
               }
               else {
-                $(e.target).parent().addClass("selected");
+                $(e.target).addClass("selected");
                 //$("#" + this.targetMenuList[curId]).hide();
               }
             },

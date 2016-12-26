@@ -208,11 +208,6 @@ define(function(require, exports, module) {
           return false;
         });
 
-        $("#right-float-page .ico-dock-collapse").on("click",function (e) {
-          $("#right-float-btn-page").removeClass("selected");
-          $("#right-float-page").hide();
-        });
-
         //panel item mouse down
         $(".design-panel").on('mousedown','.panel-item',function(e) {
           eventHelper.MouseDownHandler(e,eventHelper.panelitemMouseDownHandler);
@@ -418,8 +413,11 @@ define(function(require, exports, module) {
 
             //That is the actual mouse up code.
             if(e.clientX > 178) {
+              let curProperties = templateManager.getProperties(_shapeName);
               let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
-              let newId = objectManager.addNewDiagram(_shapeName,pos.x,pos.y);
+              let diagramX = pos.x - curProperties.w/2 - 10,
+                  diagramY = pos.y - curProperties.h/2 - 10;
+              let newId = objectManager.addNewDiagram(_shapeName,diagramX,diagramY);
               $('#creating-designer-diagram').detach()
                                              .appendTo(".design-canvas")
                                              .attr("id",newId)
@@ -484,14 +482,15 @@ define(function(require, exports, module) {
         });
         $("#page-contextual-properties-dialog-trigger").hide();
         $(_dragElement).css({
-          left: parseFloat(_offsetX) + e.clientX - _startX,
-          top: parseFloat(_offsetY) + e.clientY - _startY
+          left: parseInt(_offsetX) + e.clientX - _startX,
+          top: parseInt(_offsetY) + e.clientY - _startY
         });
 
         $("#control-overlay-container,.anchor-overlay-container").css({
-          left: parseFloat(_offsetX) + e.clientX - _startX,
-          top: parseFloat(_offsetY) + e.clientY - _startY
+          left: parseInt(_offsetX) + e.clientX - _startX,
+          top: parseInt(_offsetY) + e.clientY - _startY
         });
+        diagramDesigner.drawPositionFloat(curId);
       },
       diagramObjMouseUpHandler : function(e) {
         if (_dragElement != null) {
@@ -501,9 +500,10 @@ define(function(require, exports, module) {
           let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
 
           //update diagram obj properties
+
           diagramManager.setAttr(curId,{properties:{
-            x: pos.x,
-            y: pos.y,
+            x : parseInt(_offsetX) + e.pageX - _startX + 10,
+            y : parseInt(_offsetY) + e.pageY - _startY + 10,
           }});
 
           //update all linked line
@@ -521,6 +521,7 @@ define(function(require, exports, module) {
             "top" : $(_dragElement).offset()["top"] + 20 + "px",
           }).show();
           $("#page-contextual-properties-dialog").hide();
+          diagramDesigner.hidePositionFloat();
 
           // we're done with these events until the next OnMouseDown
           document.onmousemove = null;
@@ -635,13 +636,13 @@ define(function(require, exports, module) {
 
             let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
             curId = $('#control-overlay-container').attr("targetid");
-            let x = parseInt($("#" + curId).css("left"));
-            let y = parseInt($("#" + curId).css("top"));
-            let w = parseInt($("#" + curId).css("width"));
-            let h = parseInt($("#" + curId).css("height"));
+            let x = parseInt($("#" + curId).css("left")),
+                y = parseInt($("#" + curId).css("top")),
+                w = parseInt($("#" + curId).css("width")),
+                h = parseInt($("#" + curId).css("height"));
             diagramManager.setAttr(curId,{properties:{
-              "x": parseInt(x + w/2),
-              "y": parseInt(y + h/2),
+              "x": parseInt(x) + 10,
+              "y": parseInt(y) + 10,
               "w": w - 20,
               "h": h - 20,
             }});
@@ -741,6 +742,7 @@ define(function(require, exports, module) {
         let curJqueryCanvas = $("#creating-designer-canvas");
         let curJqueryDiagram = $("#creating-designer-diagram");
 
+        //show hightlight circle when touch diagram
         let posInfoOfDiagram = diagramDesigner.resolvePointInContainedDiagram(pos.x,pos.y);
         $(".canvas-container").css("cursor","default");
         $("#line-diagram-circle").hide();
@@ -791,6 +793,7 @@ define(function(require, exports, module) {
           let curJqueryCanvas = $("#creating-designer-canvas");
           let curJqueryDiagram = $("#creating-designer-diagram");
 
+          //move point to diagram border when touch diagram
           let posInfoOfDiagram = diagramDesigner.resolvePointInContainedDiagram(pos.x,pos.y);
           $(".canvas-container").css("cursor","default");
           $("#line-diagram-circle").hide();
@@ -974,11 +977,21 @@ define(function(require, exports, module) {
       lineOverlayMouseMoveHandler : function(e) {
         let targetid = $(target).parent().attr("targetid");
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+        let posInfoOfDiagram = diagramDesigner.resolvePointInContainedDiagram(pos.x,pos.y);
+
+        $(".canvas-container").css("cursor","default");
+        $("#line-diagram-circle").hide();
+        $("#anchor-overlay-container").hide();
         if(isStart) {
           start = {
             x: pos.x,
             y: pos.y,
           };
+          if(posInfoOfDiagram) {
+            diagramDesigner.drawWithInAnchorAreaPointCircle(posInfoOfDiagram.x,posInfoOfDiagram.y,posInfoOfDiagram.id,posInfoOfDiagram.position);
+            start.x = posInfoOfDiagram.x;
+            start.y = posInfoOfDiagram.y;
+          }
           $(target).css({
             left: start.x - 6,
             top: start.y - 6,
@@ -989,6 +1002,11 @@ define(function(require, exports, module) {
             x: pos.x,
             y: pos.y,
           };
+          if(posInfoOfDiagram) {
+            diagramDesigner.drawWithInAnchorAreaPointCircle(posInfoOfDiagram.x,posInfoOfDiagram.y,posInfoOfDiagram.id,posInfoOfDiagram.position);
+            end.x = posInfoOfDiagram.x;
+            end.y = posInfoOfDiagram.y;
+          }
           $(target).css({
             left: end.x - 6,
             top: end.y - 6,
@@ -1010,6 +1028,47 @@ define(function(require, exports, module) {
           //real handler
           let targetid = $(target).parent().attr("targetid");
           let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+
+          //move point to diagram border when touch diagram
+          let posInfoOfDiagram = diagramDesigner.resolvePointInContainedDiagram(pos.x,pos.y);
+          if(isStart) {
+            start = {
+              x: pos.x,
+              y: pos.y,
+            };
+            objectManager.removeLinkedDiagram(targetid,"start");
+            if(posInfoOfDiagram) {
+              start.x = posInfoOfDiagram.x;
+              start.y = posInfoOfDiagram.y;
+              diagramManager.setAttr(targetid,{fromId:posInfoOfDiagram.id});
+              objectManager.setLinkLine(posInfoOfDiagram.id,targetid);
+            }
+            $(target).css({
+              left: start.x - 6,
+              top: start.y - 6,
+            });
+          }
+          else {
+            end = {
+              x: pos.x,
+              y: pos.y,
+            };
+            objectManager.removeLinkedDiagram(targetid,"end");
+            if(posInfoOfDiagram) {
+              end.x = posInfoOfDiagram.x;
+              end.y = posInfoOfDiagram.y;
+              diagramManager.setAttr(targetid,{toId:posInfoOfDiagram.id});
+              objectManager.setLinkLine(posInfoOfDiagram.id,targetid);
+            }
+            $(target).css({
+              left: end.x - 6,
+              top: end.y - 6,
+            });
+          }
+          $(".canvas-container").css("cursor","default");
+          $("#line-diagram-circle").hide();
+          $("#anchor-overlay-container").hide();
+
           diagramManager.setAttr(targetid,{properties:{
             "startX": start.x,
             "startY": start.y,

@@ -1261,6 +1261,41 @@ define(function(require, exports, module) {
 
         }
       },
+      drawPositionFloat : function(diagramId) {
+        let positionFloatEle = $("#position-float");
+        let jqueryEle = $("#" + diagramId);
+        let top = parseInt(jqueryEle.css("top")),
+            left = parseInt(jqueryEle.css("left")),
+            w = parseInt(jqueryEle.css("width")),
+            h = parseInt(jqueryEle.css("height")) - 10;
+
+        if(positionFloatEle.length == 0) {
+          let positionFloatHtml = "<div id='position-float'></div>";
+          $(positionFloatHtml).appendTo(".design-canvas")
+        }
+        positionFloatEle.css({
+                          top: top + h + 5,
+                          left: left + w / 2 - parseInt(positionFloatEle.outerWidth()) / 2,
+                         })
+                        .html("X:" + (left + 10) + " Y:" + (top + 10))
+                        .show();
+      },
+      hidePositionFloat: function() {
+        $("#position-float").fadeOut(10);
+      },
+      _drawX : function (x,y) {
+        this.beginPath();
+        this.strokeStyle = "#777";
+        this.lineWidth = 1;
+        
+        this.moveTo(x - 20, y - 20);
+        this.lineTo(x + 20, y + 20);
+        this.stroke();
+
+        this.moveTo(x + 20, y - 20);
+        this.lineTo(x - 20, y + 20);
+        this.stroke();
+      },
 
 
     };

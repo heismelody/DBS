@@ -850,6 +850,12 @@ input, textarea, div {
 #right-float-color:hover{
   border: 2px solid #A9A9A9;
 }
+#right-float-menu .ico-dock-nav,
+#right-float-menu .ico-dock-page,
+#right-float-menu .ico-history,
+#right-float-menu .ico-comment {
+  pointer-events: none;
+}
 /*header end*/
 
 /* color picker start */
@@ -1957,6 +1963,16 @@ button:focus {
   background-image: url(../images/diagram/themes/colorbluebold.png);
 }
     /*#diagram-themes end*/
+#position-float {
+  position: absolute;
+	border: 1px solid #D1D1D1;
+	background: #f2f2f2;
+	padding: 5px 10px;
+	border-radius: 3px;
+	display: none;
+	color: #444;
+	text-align: center;
+}
 /*UI container end*/
   /*this used for hide the upper layer when click diagram*/
 .event-none{
