@@ -158,7 +158,7 @@ define(function(require, exports, module) {
           }
         }).on("mousedown",function (e) {
           //draw line after click right click contextmenu button: draw line
-          if(stateManager.isInState("drawline")) {
+          if(stateManager.isInState("drawline") && (e.button == 0)) {
             eventHelper.MouseDownHandler(e,eventHelper.drawLineMousedownHandler);
           }
           //textarea editing state finished
@@ -228,14 +228,16 @@ define(function(require, exports, module) {
             },
             inBorderAreaFunction : function (e) {
               //begin draw line starting from diagram border(anchor)
-              if(position != undefined) {
-                e.clientX = position.x;
-                e.clientY = position.y;
-                e.pageX = position.x;
-                e.pageY = position.y;
-                e.button = 0;
+              if(e.button == 0) {
+                if(position != undefined) {
+                  e.clientX = position.x;
+                  e.clientY = position.y;
+                  e.pageX = position.x;
+                  e.pageY = position.y;
+                  e.button = 0;
+                }
+                eventHelper.MouseDownHandler(e,eventHelper.drawLineFromDiagramMousedownHandler);
               }
-              eventHelper.MouseDownHandler(e,eventHelper.drawLineFromDiagramMousedownHandler);
             },
             onLineFunction : function () {
               if(position != undefined) {
@@ -442,20 +444,22 @@ define(function(require, exports, module) {
       },
 
       diagramObjMouseDownHandler : function(e) {
-        // we need to access the element in OnMouseMove
-        _dragElement = $(target).parent()[0];
-
-        // grab the clicked element's position
-        _offsetX = ExtractNumber(_dragElement.style.left);
-        _offsetY = ExtractNumber(_dragElement.style.top);
-
         curId = $(target).parent().attr("id");
 
         selectedManager.removeSelected();
         selectedManager.setSelected(curId);
+        let locked = diagramManager.getAttrById(curId,{locked:[]});
+        locked = locked.locked ? locked.locked : false;
 
         // tell our code to start moving the element with the mouse
-        if(e.button == 0) {
+        if(e.button == 0 && !locked) {
+          // we need to access the element in OnMouseMove
+          _dragElement = $(target).parent()[0];
+
+          // grab the clicked element's position
+          _offsetX = ExtractNumber(_dragElement.style.left);
+          _offsetY = ExtractNumber(_dragElement.style.top);
+
           $("#designer-contextmenu").hide();
           let curId = $(_dragElement).attr("id");
           for(let i = 0; i < $(".diagram-object-container").length; i++) {
@@ -538,6 +542,7 @@ define(function(require, exports, module) {
 
         selectedManager.removeSelected();
         selectedManager.setSelected(curId);
+        _dragElement = null;
         //
         // diagramDesigner.addDiagramControlOverlay(curId);
         // diagramDesigner.addDiagramAnchorOverlay(curId);
@@ -776,7 +781,7 @@ define(function(require, exports, module) {
         diagramDesigner.drawDiagram($("#creating-designer-canvas")[0],"line",curPosRelative);
       },
       drawLineMouseUpHandler : function(e) {
-        if (_dragElement != null) {
+        if (_dragElement != null && e.button == 0) {
           // we're done with these events until the next OnMouseDown
           document.onmousemove = null;
           document.onselectstart = null;
@@ -804,6 +809,7 @@ define(function(require, exports, module) {
             end.y = posInfoOfDiagram.y;
             argList["toId"] = posInfoOfDiagram.id;
           }
+          argList["linetype"] = diagramManager.configManager.getLineType();
           newId = objectManager.addNewDiagram("line",start,end,argList);
           if(argList && argList.hasOwnProperty("fromId") && argList.fromId) {
             objectManager.setLinkLine(argList.fromId,newId);

@@ -479,8 +479,11 @@ define(function(require, exports, module) {
         var contextMenuVM = new Vue({
           el: '#designer-contextmenu',
           data: {
+            //model variable
             selectedObj : selectedManager.getSelected(),
+            locked : false,
 
+            //view variable
             isCutShow : "none",
             isCopyShow : "none",
             isPasteShow : "none",
@@ -530,26 +533,52 @@ define(function(require, exports, module) {
               //current selected diagram is ONE diagram
               else if(val.length == 1) {
                 //current selected diagram is diagramObj
-                this.isCutShow = "block";
-                this.isCopyShow = "block";
-                this.isPasteShow = "none";
-                this.isDuplicateShow = "block";
-                this.isFirstsplitShow = "block";
-                this.isFrontShow = "block";
-                this.isBackShow = "block";
-                this.isLockShow = "block";
-                this.isUnLockShow = "none";
-                this.isGroupShow = "none";
-                this.isUnGroupShow = "none";
-                this.isAlignShow = "none";
-                this.isSecondsplitShow = "block";
-                this.isChangeLinkShow = "none";
-                this.isEditShow = "block";
-                this.isDeleteShow = "block";
-                this.isThirdsplitShow = "block";
-                this.isSelecteAllShow = "block";
-                this.isFourthsplitShow = "block";
-                this.isDrawlineShow = "block";
+                let lock = diagramManager.getAttrById(val[0],{locked:[]});
+                this.locked = lock.locked ? lock.locked : false;
+                if(this.locked) {
+                  this.isCutShow = "none";
+                  this.isCopyShow = "none";
+                  this.isPasteShow = "block";
+                  this.isDuplicateShow = "none";
+                  this.isFirstsplitShow = "block";
+                  this.isFrontShow = "none";
+                  this.isBackShow = "none";
+                  this.isLockShow = "none";
+                  this.isUnLockShow = "block";
+                  this.isGroupShow = "none";
+                  this.isUnGroupShow = "none";
+                  this.isAlignShow = "none";
+                  this.isSecondsplitShow = "none";
+                  this.isChangeLinkShow = "none";
+                  this.isEditShow = "none";
+                  this.isDeleteShow = "none";
+                  this.isThirdsplitShow = "block";
+                  this.isSelecteAllShow = "block";
+                  this.isFourthsplitShow = "block";
+                  this.isDrawlineShow = "block";
+                }
+                else {
+                  this.isCutShow = "block";
+                  this.isCopyShow = "block";
+                  this.isPasteShow = "none";
+                  this.isDuplicateShow = "block";
+                  this.isFirstsplitShow = "block";
+                  this.isFrontShow = "block";
+                  this.isBackShow = "block";
+                  this.isLockShow = "block";
+                  this.isUnLockShow = "none";
+                  this.isGroupShow = "none";
+                  this.isUnGroupShow = "none";
+                  this.isAlignShow = "none";
+                  this.isSecondsplitShow = "block";
+                  this.isChangeLinkShow = "none";
+                  this.isEditShow = "block";
+                  this.isDeleteShow = "block";
+                  this.isThirdsplitShow = "block";
+                  this.isSelecteAllShow = "block";
+                  this.isFourthsplitShow = "block";
+                  this.isDrawlineShow = "block";
+                }
               }
               //current selected diagram is a GROUP
               else {
@@ -564,7 +593,7 @@ define(function(require, exports, module) {
               }
             },
             _hideMenu : function () {
-              $("#designer-contextmenu").hide();
+              $(this.$el).hide();
             },
             menuCutClickHandler : function (e) {
               this._hideMenu();
@@ -585,9 +614,13 @@ define(function(require, exports, module) {
               this._hideMenu();
             },
             menuLockClickHandler : function (e) {
+              diagramManager.setAttr(this.selectedObj[0],{locked:true});
+              selectedManager.setSelected(this.selectedObj[0]);
               this._hideMenu();
             },
             menuUnlockClickHandler : function (e) {
+              diagramManager.setAttr(this.selectedObj[0],{locked:false});
+              selectedManager.setSelected(this.selectedObj[0]);
               this._hideMenu();
             },
             menuGroupClickHandler : function (e) {

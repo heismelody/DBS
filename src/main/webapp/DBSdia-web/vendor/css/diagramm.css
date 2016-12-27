@@ -1022,7 +1022,8 @@ input, textarea, div {
 #control-overlay-container {
   position: absolute;
 }
-#control-overlay-container #control-boundary {
+#control-overlay-container #control-boundary,
+#control-overlay-container #control-lockcanvas {
     position: absolute;
     pointer-events: none;
 }

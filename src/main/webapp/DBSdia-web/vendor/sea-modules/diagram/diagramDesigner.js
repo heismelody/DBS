@@ -422,13 +422,28 @@ define(function(require, exports, module) {
       addDiagramControlOverlay : function(diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         if(curshapeName == "line") {
-          lineManager.addLineOverlay(diagramId);
-          this.drawDiagramById(diagramId);
+          let locked = diagramManager.getAttrById(diagramId,{locked:[]});
+          locked = locked.locked ? locked.locked : false;
+
+          if(locked) {
+
+          }
+          else {
+            lineManager.addLineOverlay(diagramId);
+            this.drawDiagramById(diagramId);
+          }
         }
         else {
           let curCanvas = $("#" + diagramId).find('canvas').get(0);
+          let locked = diagramManager.getAttrById(diagramId,{locked:[]});
+          locked = locked.locked ? locked.locked : false;
 
-          this._drawDiagramControls(curCanvas);
+          if(locked) {
+            this._drawLockedDiagramControls(curCanvas);
+          }
+          else {
+            this._drawDiagramControls(curCanvas);
+          }
         }
       },
       removeControlOverlay : function (diagramId) {
@@ -497,6 +512,50 @@ define(function(require, exports, module) {
         this.strokeRect(10,10,w-20,h-20);
         this.stroke();
         this.closePath();
+      },
+      _drawLockedDiagramControls : function(canvas) {
+        let ctx = canvas.getContext('2d');
+        let curCanvasParent = $(canvas).parent();
+        let curCanvasLeft = parseFloat(curCanvasParent.css("left"));
+        let curCanvasTop = parseFloat(curCanvasParent.css("top"));
+        let curCanvasWidth = parseFloat(curCanvasParent.css("width"));
+        let curCanvasHeight = parseFloat(curCanvasParent.css("height"));
+        let controlsHtml = "<div id='control-overlay-container' targetid='" + curCanvasParent.attr("id") + "'></div>";
+        let lockcanvasHtml = "<canvas id='control-lockcanvas' width=" + canvas.width + " height=" + canvas.height + ">";
+        this._tempVar._w = canvas.width;
+        this._tempVar._h = canvas.height;
+
+        if($("#control-overlay-container").length != 0) {
+          $("#control-overlay-container").remove();
+        }
+        $(controlsHtml).appendTo(".design-canvas").css({
+          left: curCanvasLeft,
+          top: curCanvasTop,
+          width : "0px",
+          height : "0px"
+        });
+
+        $(lockcanvasHtml).appendTo("#control-overlay-container");
+        let lockCtx = $("#control-lockcanvas")[0].getContext('2d');
+        let w = canvas.width,
+            h = canvas.height;
+        lockCtx.strokeStyle = "#777";
+        lockCtx.lineWidth = 1;
+        this._drawX.call(lockCtx,10,10);
+        this._drawX.call(lockCtx,w-10,10);
+        this._drawX.call(lockCtx,10,h-10);
+        this._drawX.call(lockCtx,w-10,h-10);
+      },
+      _drawX : function(x,y) {
+        let Xwidth = 4;
+
+        this.moveTo(x - Xwidth, y - Xwidth);
+        this.lineTo(x + Xwidth, y + Xwidth);
+        this.stroke();
+
+        this.moveTo(x + Xwidth, y - Xwidth);
+        this.lineTo(x - Xwidth, y + Xwidth);
+        this.stroke();
       },
 
       //this three functions used for create overlay after mouse moved over diagram
@@ -732,8 +791,8 @@ define(function(require, exports, module) {
         let farthestPointIndiagram = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)];
         let record;
         for(let lamda = 0.0; lamda <= 1.0; lamda += 0.1) {
-          let curX = lamda * x + (1 - lamda) * farthestPointIndiagram.x;
-          let curY = lamda * y + (1 - lamda) * farthestPointIndiagram.y;
+          let curX = lamda * x + (1 - lamda) * farthestPointIndiagram.x,
+              curY = lamda * y + (1 - lamda) * farthestPointIndiagram.y;
           let iscurPointInPath = this.isPointInPath(curX,curY);
 
           if(lamda == 0.0) {
@@ -881,6 +940,44 @@ define(function(require, exports, module) {
           }
         }
 
+      },
+      /**
+     * calculate the vertical line from the diagram border.
+     * the distance from returned point on this vertical line to the border is 100.
+     * Used in creating curve line's control point when connect diagram.
+     * @param {number} x - diagram object id
+     * @param {number} y - draw line in which diagram state.
+     *                         default / move / resize / rotate
+     * @param {number} r - The radius.
+     * @return {point} point on this vertical line
+     */
+      calVerticalLineFromBorder : function(x,y,d) {
+        let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
+        let pointsInDiagram = [],
+            tangentLinePoint = [];
+
+        for(let i in circlePoints) {
+          if(this.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
+            pointsInDiagram.push(circlePoints[i]);
+          }
+        }
+        tangentLinePoint.push(pointsInDiagram[0]);
+        tangentLinePoint.push(pointsInDiagram[pointsInDiagram.length]-1);
+        let Xm = (tangentLinePoint[0].x + tangentLinePoint[1].x) / 2,     //midpoint of tangentLinePoint
+            Ym = (tangentLinePoint[0].y + tangentLinePoint[1].y) / 2,
+            Xr = x,     //central of the circle
+            Yr = y,
+            Xv,     //vertical line's point
+            Yv;
+        let lamda = (Math.sqrt(Math.pow((Xr - Xm),2) + Math.pow((Yr - Ym),2))) / 100;
+        //    lamda * M + (1 - lamda) * V = R
+        Xv = (Xr - lamda * Xm) / (1 - lamda);
+        Yv = (Yr - lamda * Ym) / (1 - lamda);
+
+        return {
+          x: Xv,
+          y: Yv,
+        }
       },
       /**
      * update a diagram's all linked line properties.
@@ -1282,19 +1379,6 @@ define(function(require, exports, module) {
       },
       hidePositionFloat: function() {
         $("#position-float").fadeOut(10);
-      },
-      _drawX : function (x,y) {
-        this.beginPath();
-        this.strokeStyle = "#777";
-        this.lineWidth = 1;
-        
-        this.moveTo(x - 20, y - 20);
-        this.lineTo(x + 20, y + 20);
-        this.stroke();
-
-        this.moveTo(x + 20, y - 20);
-        this.lineTo(x - 20, y + 20);
-        this.stroke();
       },
 
 

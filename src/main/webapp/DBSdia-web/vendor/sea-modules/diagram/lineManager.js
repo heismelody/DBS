@@ -63,13 +63,39 @@ define(function(require, exports, module) {
         return Date.now() + generateUIDNotMoreThan1million();
       },
       addNewLine : function(start,end,argList) {
-        let linetype = "basic";
+        let linetype = argList.linetype;
         let newId =  this.generateDiagramId();
         let width = Math.abs(start.x - end.x);
         let height = Math.abs(start.y - end.y);
 
         switch (linetype) {
           case "curve":
+            //link two diagram
+            if(argList.hasOwnProperty("fromId") && argList.hasOwnProperty("toId")
+                && argList.fromId && argList.toId
+                && (argList.fromId != "") && (argList.toId != "")) {
+              let startControlX = argList.startControlX,
+                  startControlY = argList.startControlY,
+                  endControlX = argList.endControlX,
+                  endControlY = argList.endControlY;
+
+            }
+            //link one diagram at this line's start point.
+            else if(argList.hasOwnProperty("fromId") && argList.fromId && (argList.fromId != "")) {
+              let startControlX = argList.startControlX,
+                  startControlY = argList.startControlY;
+            }
+            //link one diagram at this line's end point.
+            else if(argList.hasOwnProperty("toId") && argList.toId && (argList.toId != "")){
+              let endControlX = argList.endControlX,
+                  endControlY = argList.endControlY;
+            }
+            //this line not link diagram
+            else {
+              console.log("not link");
+            }
+
+
             let control = {
               startControl : {
                 x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
@@ -88,6 +114,8 @@ define(function(require, exports, module) {
               "id" : newId,
               "name" : "line",
               "linetype" : linetype,
+              "fromId": argList.hasOwnProperty("fromId") ? argList.fromId : null,
+              "toId": argList.hasOwnProperty("toId") ? argList.toId : null,
               "properties": {
                 "startX": start.x,
                 "startY": start.y,
@@ -152,16 +180,6 @@ define(function(require, exports, module) {
       getLineTypeById : function(lineId) {
         return _GlobalLineObject[lineId]["linetype"];
       },
-      // updateLinePosition: function(lineId,isStart,pos) {
-      //   if(isStart) {
-      //     _GlobalLineObject[lineId]["properties"]["startX"] = pos.x;
-      //     _GlobalLineObject[lineId]["properties"]["startY"] = pos.y;
-      //   }
-      //   else {
-      //     _GlobalLineObject[lineId]["properties"]["endX"] = pos.x;
-      //     _GlobalLineObject[lineId]["properties"]["endY"] = pos.y;
-      //   }
-      // },
       updateCurveControlPosition : function (lineId,isStart,pos) {
         if(isStart) {
           _GlobalLineObject[lineId]["properties"]["startControlX"] = pos.x;
