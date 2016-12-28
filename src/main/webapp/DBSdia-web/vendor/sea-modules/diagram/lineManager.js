@@ -68,34 +68,24 @@ define(function(require, exports, module) {
         let width = Math.abs(start.x - end.x);
         let height = Math.abs(start.y - end.y);
 
+        _GlobalLineObject[newId] = {
+          "id" : newId,
+          "name" : "line",
+          "fromId": null,
+          "toId" : null,
+          "linetype" : linetype,
+          "properties": {
+            "startX": start.x,
+            "startY": start.y,
+            "endX" : end.x,
+            "endY" : end.y,
+            "width" : width,
+            "height" : height,
+          },
+        };
         switch (linetype) {
           case "curve":
             //link two diagram
-            if(argList.hasOwnProperty("fromId") && argList.hasOwnProperty("toId")
-                && argList.fromId && argList.toId
-                && (argList.fromId != "") && (argList.toId != "")) {
-              let startControlX = argList.startControlX,
-                  startControlY = argList.startControlY,
-                  endControlX = argList.endControlX,
-                  endControlY = argList.endControlY;
-
-            }
-            //link one diagram at this line's start point.
-            else if(argList.hasOwnProperty("fromId") && argList.fromId && (argList.fromId != "")) {
-              let startControlX = argList.startControlX,
-                  startControlY = argList.startControlY;
-            }
-            //link one diagram at this line's end point.
-            else if(argList.hasOwnProperty("toId") && argList.toId && (argList.toId != "")){
-              let endControlX = argList.endControlX,
-                  endControlY = argList.endControlY;
-            }
-            //this line not link diagram
-            else {
-              console.log("not link");
-            }
-
-
             let control = {
               startControl : {
                 x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
@@ -105,63 +95,41 @@ define(function(require, exports, module) {
                 x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
                 y: end.y,
               }
+            };
+            let _startControlX = argList.startControlX,
+                _startControlY = argList.startControlY,
+                _endControlX = argList.endControlX,
+                _endControlY = argList.endControlY;
+            //link one diagram at this line's start point.
+            if(argList.hasOwnProperty("fromId") && argList.fromId && (argList.fromId != "")) {
+              control["startControl"] = {
+                  x: _startControlX,
+                  y: _startControlY,
+              };
             }
+            //link one diagram at this line's end point.
+            else if(argList.hasOwnProperty("toId") && argList.toId && (argList.toId != "")){
+              control["endControl"] = {
+                x: _endControlX,
+                y: _endControlY,
+              };
+            }
+            _GlobalLineObject[newId]["properties"]["startControlX"] = control.startControl.x;
+            _GlobalLineObject[newId]["properties"]["startControlY"] = control.startControl.y;
+            _GlobalLineObject[newId]["properties"]["endControlX"] = control.startControl.x;
+            _GlobalLineObject[newId]["properties"]["endControlY"] = control.endControl.y;
+            _bezierObj = null;
             _bezierObj = new Bezier(start.x,start.y,
                                    control.startControl.x,control.startControl.y,
                                    control.endControl.x,control.endControl.y,
                                    end.x,end.y);
-            _GlobalLineObject[newId] = {
-              "id" : newId,
-              "name" : "line",
-              "linetype" : linetype,
-              "fromId": argList.hasOwnProperty("fromId") ? argList.fromId : null,
-              "toId": argList.hasOwnProperty("toId") ? argList.toId : null,
-              "properties": {
-                "startX": start.x,
-                "startY": start.y,
-                "endX" : end.x,
-                "endY" : end.y,
-                "startControlX": control.startControl.x,
-                "startControlY": control.startControl.y,
-                "endControlX": control.endControl.x,
-                "endControlY": control.endControl.y,
-                "width" : width,
-                "height" : height,
-              },
-            };
+            //console.log(argList);
+            //console.log(_GlobalLineObject[newId]);
             break;
           case "basic":
             if(argList) {
-              _GlobalLineObject[newId] = {
-                "id" : newId,
-                "name" : "line",
-                "linetype" : linetype,
-                "fromId": argList.hasOwnProperty("fromId") ? argList.fromId : null,
-                "toId": argList.hasOwnProperty("toId") ? argList.toId : null,
-                "properties": {
-                  "startX": start.x,
-                  "startY": start.y,
-                  "endX" : end.x,
-                  "endY" : end.y,
-                  "width" : width,
-                  "height" : height,
-                },
-              };
-            }
-            else {
-              _GlobalLineObject[newId] = {
-                "id" : newId,
-                "name" : "line",
-                "linetype" : linetype,
-                "properties": {
-                  "startX": start.x,
-                  "startY": start.y,
-                  "endX" : end.x,
-                  "endY" : end.y,
-                  "width" : width,
-                  "height" : height,
-                },
-              };
+              _GlobalLineObject[newId]["fromId"] = argList.hasOwnProperty("fromId") ? argList.fromId : null;
+              _GlobalLineObject[newId]["toId"] = argList.hasOwnProperty("toId") ? argList.toId : null;
             }
             break;
           case "step":

@@ -692,6 +692,7 @@ define(function(require, exports, module) {
           y: pos.y,
         };
         argList = {};
+        argList["linetype"] = diagramManager.configManager.getLineType();
 
         $(".canvas-container").css("cursor","default");
         $('#creating-designer-diagram').append(creatingCanvasHtml)
@@ -714,16 +715,33 @@ define(function(require, exports, module) {
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
         let creatingCanvasHtml = '<canvas id="creating-designer-canvas" width="0" height = "0"></canvas>';
         _shapeName = "line";
+        curId = $(e.target).parent().attr("id");
         start = {
           x: pos.x,
           y: pos.y,
         };
-        let closestAnchor = diagramDesigner.getClosestAnchor(start.x,start.y,$(e.target).parent().attr("id"));
-        start.x = closestAnchor.x;
-        start.y = closestAnchor.y;
 
         argList = {};
-        argList["fromId"] = $(e.target).parent().attr("id");
+        argList["linetype"] = diagramManager.configManager.getLineType();
+        argList["fromId"] = curId;
+        if(argList["linetype"] == "basic") {
+          let closestAnchor = diagramDesigner.getClosestAnchor(start.x,start.y,curId);
+          start.x = closestAnchor.x;
+          start.y = closestAnchor.y;
+        }
+        //handle draw curve line from diagram border mousedown
+        else if(argList["linetype"] == "curve") {
+          let closestAnchor = diagramDesigner.getClosestAnchor(start.x,start.y,curId);
+          start.x = closestAnchor.x;
+          start.y = closestAnchor.y;
+          let startControl = diagramDesigner.calVerticalLineFromAnchor(pos.x,pos.y,start.x,start.y);
+          argList["startControlX"] = startControl.x;
+          argList["startControlY"] = startControl.y;
+        }
+        //handle draw step line from diagram border mousedown
+        else if (argList["linetype"] == "step") {
+
+        }
 
         $(".canvas-container").css("cursor","default");
         $('#creating-designer-diagram').append(creatingCanvasHtml)
@@ -804,19 +822,27 @@ define(function(require, exports, module) {
           $("#line-diagram-circle").hide();
           $("#anchor-overlay-container").hide();
           argList["toId"] = null;
-          if(posInfoOfDiagram) {
-            end.x = posInfoOfDiagram.x;
-            end.y = posInfoOfDiagram.y;
-            argList["toId"] = posInfoOfDiagram.id;
+          if (argList["linetype"] == "basic") {
+            if(posInfoOfDiagram) {
+              end.x = posInfoOfDiagram.x;
+              end.y = posInfoOfDiagram.y;
+              argList["toId"] = posInfoOfDiagram.id;
+            }
           }
-          argList["linetype"] = diagramManager.configManager.getLineType();
+          else if (argList["linetype"] == "curve") {
+            if(posInfoOfDiagram) {
+              console.log(1);
+              end.x = posInfoOfDiagram.x;
+              end.y = posInfoOfDiagram.y;
+              argList["toId"] = posInfoOfDiagram.id;
+              let endControl = diagramDesigner.calVerticalLineFromAnchor(pos.x,pos.y,end.x,end.y);
+              argList["endControlX"] = endControl.x;
+              argList["endControlY"] = endControl.y;
+            }
+          }
+          else if (argList["linetype"] == "step") {
+          }
           newId = objectManager.addNewDiagram("line",start,end,argList);
-          if(argList && argList.hasOwnProperty("fromId") && argList.fromId) {
-            objectManager.setLinkLine(argList.fromId,newId);
-          }
-          if(argList && argList.hasOwnProperty("toId") && argList.toId) {
-            objectManager.setLinkLine(argList.toId,newId);
-          }
 
           curJqueryCanvas.attr({
             width: Math.abs(end.x - start.x) + 20,

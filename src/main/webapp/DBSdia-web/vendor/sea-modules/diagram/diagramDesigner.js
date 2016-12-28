@@ -788,7 +788,16 @@ define(function(require, exports, module) {
           }
         }
 
-        let farthestPointIndiagram = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)];
+        let farthestPointIndiagram = {};
+        if(pointsInDiagram.length % 2 == 0) {
+          let tempA = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)],
+              tempB = pointsInDiagram[Math.floor(pointsInDiagram.length / 2) + 1];
+          farthestPointIndiagram.x = (tempA.x + tempB.x) / 2;
+          farthestPointIndiagram.y = (tempA.y + tempB.y) / 2;
+        }
+        else {
+          farthestPointIndiagram = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)];
+        }
         let record;
         for(let lamda = 0.0; lamda <= 1.0; lamda += 0.1) {
           let curX = lamda * x + (1 - lamda) * farthestPointIndiagram.x,
@@ -860,36 +869,22 @@ define(function(require, exports, module) {
         diagramDesigner.addDiagramAnchorOverlay(diagramId);
         if(posInfoposition == "border" || posInfoposition == "anchor") {
           let jqueryEle = $("#" + diagramId);
-          if($("#line-diagram-circle").length != 0) {
-            $("#line-diagram-circle").css({
-                                        "opacity" : 0.3,
-                                        "background-color": "#833",
-                                        "border-color": "#833",
-                                        "border-radius": 16,
-                                        "border": "solid 1px #772E2E",
-                                        "width": 32,
-                                        "height": 32,
-                                        "left": x - 16,
-                                        "top": y - 16,
-                                      })
-                                      .show();
-          }
-          else {
+          if($("#line-diagram-circle").length == 0) {
             let circleHtml = "<canvas id='line-diagram-circle' width='32' height='32'></canvas>";
-            $(circleHtml).appendTo(".design-canvas")
-                         .css({
-                           "opacity" : 0.3,
-                           "background-color": "#833",
-                           "border-color": "#833",
-                           "border-radius": 16,
-                           "border": "solid 1px #772E2E",
-                           "width": 32,
-                           "height": 32,
-                           "left": x - 16,
-                           "top": y - 16,
-                         })
-                         .show();
+            $(circleHtml).appendTo(".design-canvas");
           }
+          $("#line-diagram-circle").css({
+                                      "opacity" : 0.3,
+                                      "background-color": "#833",
+                                      "border-color": "#833",
+                                      "border-radius": 16,
+                                      "border": "solid 1px #772E2E",
+                                      "width": 32,
+                                      "height": 32,
+                                      "left": x - 16,
+                                      "top": y - 16,
+                                    })
+                                    .show();
         }
         else {
           $("#line-diagram-circle").hide();
@@ -948,31 +943,68 @@ define(function(require, exports, module) {
      * @param {number} x - diagram object id
      * @param {number} y - draw line in which diagram state.
      *                         default / move / resize / rotate
-     * @param {number} r - The radius.
+     * @param {number} r - The radius,11
      * @return {point} point on this vertical line
      */
-      calVerticalLineFromBorder : function(x,y,d) {
-        let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
+      calVerticalLineFromBorder : function(x,y,d,diagramId) {
+        let jqueryEle = $("#" + diagramId);
+        let ctx = jqueryEle.find("canvas")[0].getContext("2d");
+        let relativePos = {
+          x : x - parseFloat(jqueryEle.css("left")),
+          y : y - parseFloat(jqueryEle.css("top")),
+        }
+        let circlePoints = diagramDesigner.getCirclePoints(relativePos.x,relativePos.y,d);
         let pointsInDiagram = [],
             tangentLinePoint = [];
 
         for(let i in circlePoints) {
-          if(this.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
+          if(ctx.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
             pointsInDiagram.push(circlePoints[i]);
           }
         }
-        tangentLinePoint.push(pointsInDiagram[0]);
-        tangentLinePoint.push(pointsInDiagram[pointsInDiagram.length]-1);
-        let Xm = (tangentLinePoint[0].x + tangentLinePoint[1].x) / 2,     //midpoint of tangentLinePoint
-            Ym = (tangentLinePoint[0].y + tangentLinePoint[1].y) / 2,
+
+        let Xm,     //midpoint of tangentLinePoint
+            Ym,
             Xr = x,     //central of the circle
             Yr = y,
             Xv,     //vertical line's point
             Yv;
+        if(pointsInDiagram.length >= 2) {
+          tangentLinePoint.push(pointsInDiagram[0]);
+          tangentLinePoint.push(pointsInDiagram[pointsInDiagram.length-1]);
+          Xm = (tangentLinePoint[0].x + tangentLinePoint[1].x) / 2;
+          Ym = (tangentLinePoint[0].y + tangentLinePoint[1].y) / 2;
+        }
+        else if(pointsInDiagram.length == 1) {
+          tangentLinePoint.push(pointsInDiagram[0]);
+          Xm = tangentLinePoint[0].x;
+          Ym = tangentLinePoint[0].y;
+        }
+        else {
+          return ;
+        }
         let lamda = (Math.sqrt(Math.pow((Xr - Xm),2) + Math.pow((Yr - Ym),2))) / 100;
         //    lamda * M + (1 - lamda) * V = R
         Xv = (Xr - lamda * Xm) / (1 - lamda);
         Yv = (Yr - lamda * Ym) / (1 - lamda);
+
+        return {
+          x: parseFloat(jqueryEle.css("left")) + Xv,
+          y: parseFloat(jqueryEle.css("top")) + Yv,
+        }
+      },
+      calVerticalLineFromAnchor : function(x,y,anchorX,anchorY) {
+        let Xa = anchorX,     //anchor
+            Ya = anchorY,
+            Xr = x,     //central of the circle
+            Yr = y,
+            Xv,     //vertical line's point
+            Yv;
+        let lamda = (Math.sqrt(Math.pow((Xr - Xa),2) + Math.pow((Yr - Ya),2))) / 100;
+        lamda = 1 - lamda;
+        //    lamda * M + (1 - lamda) * V = R
+        Xv = (Xr - lamda * Xa) / (1 - lamda);
+        Yv = (Yr - lamda * Ya) / (1 - lamda);
 
         return {
           x: Xv,

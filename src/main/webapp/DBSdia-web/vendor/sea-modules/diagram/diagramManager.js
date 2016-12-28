@@ -461,7 +461,7 @@ define(function(require, exports, module) {
               curLineType = "curve";
               break;
             case "broken":
-              curLineType = "broken";
+              curLineType = "step";
               break;
             default:
               curLineType = "basic";
@@ -599,6 +599,12 @@ define(function(require, exports, module) {
             let newLineObj = lineManager.addNewLine(x,y,argList);
             let newId = newLineObj["id"];
 
+            if(argList && argList.hasOwnProperty("fromId") && argList.fromId) {
+              this.setLinkLine(argList.fromId,newId);
+            }
+            if(argList && argList.hasOwnProperty("toId") && argList.toId) {
+              this.setLinkLine(argList.toId,newId);
+            }
             _GlobalDiagramOjects[newId] = newLineObj;
             return newId;
           }
