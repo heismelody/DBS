@@ -1081,63 +1081,63 @@ define(function(require, exports, module) {
               diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
                 bold: (this.bold == "bold") ? (true) : (false),
               }});
-              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+              diagramDesigner.drawTextAreaById(this.selectedObj[0]);
             },
             italicClick : function (e) {
               this.italic == "italic" ? this.italic = "" : this.italic = "italic";
               diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
                 italic: (this.italic == "italic") ? (true) : (false),
               }});
-              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+              diagramDesigner.drawTextAreaById(this.selectedObj[0]);
             },
             underlineClick : function (e) {
               this.underline == "underline" ? this.underline = "" : this.underline = "underline";
               diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
                 underline: (this.underline == "underline") ? (true) : (false),
               }});
-              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+              diagramDesigner.drawTextAreaById(this.selectedObj[0]);
             },
             textalignLeftClick : function (e) {
               this.textalign = "left" ;
               diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
                 textAlign: "left",
               }});
-              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+              diagramDesigner.drawTextAreaById(this.selectedObj[0]);
             },
             textalignCenterClick : function (e) {
               this.textalign = "center";
               diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
                 textAlign: "center",
               }});
-              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+              diagramDesigner.drawTextAreaById(this.selectedObj[0]);
             },
             textalignRightClick : function (e) {
               this.textalign = "right";
               diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
                 textAlign: "right",
               }});
-              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+              diagramDesigner.drawTextAreaById(this.selectedObj[0]);
             },
             valignTopClick : function (e) {
               this.valign = "top" ;
               diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
                 vAlign: "top",
               }});
-              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+              diagramDesigner.drawTextAreaById(this.selectedObj[0]);
             },
             valignMiddleClick : function (e) {
               this.valign = "middle";
               diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
                 vAlign: "middle",
               }});
-              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+              diagramDesigner.drawTextAreaById(this.selectedObj[0]);
             },
             valignBottomClick : function (e) {
               this.valign = "bottom";
               diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
                 vAlign: "bottom",
               }});
-              diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+              diagramDesigner.drawTextAreaById(this.selectedObj[0]);
             },
 
             fontSizeUpClick : function (e) {
@@ -1146,7 +1146,7 @@ define(function(require, exports, module) {
                 diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
                   size: this.fontsize,
                 }});
-                diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+                diagramDesigner.drawTextAreaById(this.selectedObj[0]);
               }
             },
             fontSizeDownClick : function (e) {
@@ -1155,7 +1155,7 @@ define(function(require, exports, module) {
                 diagramManager.setAttr(this.selectedObj[0],{fontStyle:{
                   size: this.fontsize,
                 }});
-                diagramDesigner.drawTextArea($("#" + this.selectedObj[0]).find("textarea"));
+                diagramDesigner.drawTextAreaById(this.selectedObj[0]);
               }
             },
             fontColorClick : function (e) {

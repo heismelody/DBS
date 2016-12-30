@@ -1,9 +1,7 @@
 define(function(require, exports, module) {
   var BasicDiagram = require('../diagram/diagrams/basicDiagram.js');
-  var LineManager = require('./lineManager.js');
 
   var basicDiagram = BasicDiagram.basicDiagram;
-  var lineManager = LineManager.lineManager;
 
   var diagramManager = (function () {
     /**
@@ -596,7 +594,7 @@ define(function(require, exports, module) {
        */
         addNewDiagram : function addNewDiagram(shapeName,x,y,argList) {
           if(shapeName == "line") {
-            let newLineObj = lineManager.addNewLine(x,y,argList);
+            let newLineObj = this._addNewLine(x,y,argList);
             let newId = newLineObj["id"];
 
             if(argList && argList.hasOwnProperty("fromId") && argList.fromId) {
@@ -637,11 +635,83 @@ define(function(require, exports, module) {
             return newId;
           }
         },
+        _addNewLine : function(start,end,argList) {
+          let newLineObj = {};
+          let linetype = argList.linetype;
+          let newId =  this.generateDiagramId();
+          let width = Math.abs(start.x - end.x),
+              height = Math.abs(start.y - end.y);
+
+          newLineObj[newId] = {
+            "id" : newId,
+            "name" : "line",
+            "fromId": null,
+            "toId" : null,
+            "linetype" : linetype,
+            "properties": {
+              "startX": start.x,
+              "startY": start.y,
+              "endX" : end.x,
+              "endY" : end.y,
+              "width" : width,
+              "height" : height,
+            },
+          };
+          switch (linetype) {
+            case "curve":
+              //link two diagram
+              let control = {
+                startControl : {
+                  x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                  y: start.y,
+                },
+                endControl : {
+                  x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                  y: end.y,
+                }
+              };
+              let _startControlX = argList.startControlX,
+                  _startControlY = argList.startControlY,
+                  _endControlX = argList.endControlX,
+                  _endControlY = argList.endControlY;
+              //link one diagram at this line's start point.
+              if(argList.hasOwnProperty("fromId") && argList.fromId && (argList.fromId != "")) {
+                control["startControl"] = {
+                    x: _startControlX,
+                    y: _startControlY,
+                };
+              }
+              //link one diagram at this line's end point.
+              else if(argList.hasOwnProperty("toId") && argList.toId && (argList.toId != "")){
+                control["endControl"] = {
+                  x: _endControlX,
+                  y: _endControlY,
+                };
+              }
+              newLineObj[newId]["properties"]["startControlX"] = control.startControl.x;
+              newLineObj[newId]["properties"]["startControlY"] = control.startControl.y;
+              newLineObj[newId]["properties"]["endControlX"] = control.startControl.x;
+              newLineObj[newId]["properties"]["endControlY"] = control.endControl.y;
+              break;
+            case "basic":
+              if(argList) {
+                newLineObj[newId]["fromId"] = argList.hasOwnProperty("fromId") ? argList.fromId : null;
+                newLineObj[newId]["toId"] = argList.hasOwnProperty("toId") ? argList.toId : null;
+              }
+              break;
+            case "step":
+
+              break;
+            default:
+
+          }
+
+          return newLineObj[newId];
+        },
         deleteDiagram : function (id) {
           let curshapeName = this.getShapeNameById(id);
 
           if(curshapeName == "line") {
-            lineManager.deleteLine(id);
             delete _GlobalDiagramOjects[id];
           }
         },
@@ -664,6 +734,9 @@ define(function(require, exports, module) {
         },
         getAnchorsByName : function(shapeName) {
           return diagramManager.getAttrByShapeName(shapeName,{"anchors":[]});
+        },
+        getLineTypeById : function (lineId) {
+          return _GlobalDiagramOjects[lineId]["linetype"];
         },
         setLinkLine : function (diagramId,lineId) {
           if(!_GlobalDiagramOjects[diagramId].hasOwnProperty("linkerList")) {
@@ -828,7 +901,7 @@ define(function(require, exports, module) {
 
         if(_GlobalDiagramOjects.hasOwnProperty(id)) {
           let shapeName = this.objectManager.getShapeNameById(id);
-          shapeName = (shapeName == "line") ? lineManager.getLineTypeById(id) + "-line" : shapeName;
+          shapeName = (shapeName == "line") ? this.objectManager.getLineTypeById(id) + "-line" : shapeName;
 
           for(let arg in args) {
             let attrObj = _GlobalDiagramOjects[id][arg];

@@ -1,10 +1,13 @@
 define(function(require, exports, module) {
   var bezier = require('Bezier');
   var DiagramUtil = require('./Util.js');
+  var DiagramManager = require('./diagramManager.js');
 
+  var diagramManager = DiagramManager.diagramManager;
+  var objectManager = DiagramManager.diagramManager.objectManager;
   var diagramUtil = DiagramUtil.diagramUtil;
 
-  var lineManager = (function () {
+  var lineDesigner = (function () {
     /**
      * --------------------------------------------------------------------------
      * Defination of the const;
@@ -51,115 +54,11 @@ define(function(require, exports, module) {
      			text: ""
      		},
      	};
-    var _GlobalLineObject = {};
     var _bezierObj = {};
 
-    var lineManager = {
-      generateDiagramId : function generateDiagramId() {
-        //http://stackoverflow.com/questions/6248666/how-to-generate-short-uid-like-ax4j9z-in-js
-        function generateUIDNotMoreThan1million() {
-          return ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4)
-        }
-        return Date.now() + generateUIDNotMoreThan1million();
-      },
-      addNewLine : function(start,end,argList) {
-        let linetype = argList.linetype;
-        let newId =  this.generateDiagramId();
-        let width = Math.abs(start.x - end.x);
-        let height = Math.abs(start.y - end.y);
-
-        _GlobalLineObject[newId] = {
-          "id" : newId,
-          "name" : "line",
-          "fromId": null,
-          "toId" : null,
-          "linetype" : linetype,
-          "properties": {
-            "startX": start.x,
-            "startY": start.y,
-            "endX" : end.x,
-            "endY" : end.y,
-            "width" : width,
-            "height" : height,
-          },
-        };
-        switch (linetype) {
-          case "curve":
-            //link two diagram
-            let control = {
-              startControl : {
-                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                y: start.y,
-              },
-              endControl : {
-                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                y: end.y,
-              }
-            };
-            let _startControlX = argList.startControlX,
-                _startControlY = argList.startControlY,
-                _endControlX = argList.endControlX,
-                _endControlY = argList.endControlY;
-            //link one diagram at this line's start point.
-            if(argList.hasOwnProperty("fromId") && argList.fromId && (argList.fromId != "")) {
-              control["startControl"] = {
-                  x: _startControlX,
-                  y: _startControlY,
-              };
-            }
-            //link one diagram at this line's end point.
-            else if(argList.hasOwnProperty("toId") && argList.toId && (argList.toId != "")){
-              control["endControl"] = {
-                x: _endControlX,
-                y: _endControlY,
-              };
-            }
-            _GlobalLineObject[newId]["properties"]["startControlX"] = control.startControl.x;
-            _GlobalLineObject[newId]["properties"]["startControlY"] = control.startControl.y;
-            _GlobalLineObject[newId]["properties"]["endControlX"] = control.startControl.x;
-            _GlobalLineObject[newId]["properties"]["endControlY"] = control.endControl.y;
-            _bezierObj = null;
-            _bezierObj = new Bezier(start.x,start.y,
-                                   control.startControl.x,control.startControl.y,
-                                   control.endControl.x,control.endControl.y,
-                                   end.x,end.y);
-            //console.log(argList);
-            //console.log(_GlobalLineObject[newId]);
-            break;
-          case "basic":
-            if(argList) {
-              _GlobalLineObject[newId]["fromId"] = argList.hasOwnProperty("fromId") ? argList.fromId : null;
-              _GlobalLineObject[newId]["toId"] = argList.hasOwnProperty("toId") ? argList.toId : null;
-            }
-            break;
-          case "step":
-
-            break;
-          default:
-
-        }
-
-        return _GlobalLineObject[newId];
-      },
-      deleteLine : function(lineId) {
-        $("#" + lineId).remove();
-        delete _GlobalLineObject[lineId];
-      },
-      getLineTypeById : function(lineId) {
-        return _GlobalLineObject[lineId]["linetype"];
-      },
-      updateCurveControlPosition : function (lineId,isStart,pos) {
-        if(isStart) {
-          _GlobalLineObject[lineId]["properties"]["startControlX"] = pos.x;
-          _GlobalLineObject[lineId]["properties"]["startControlY"] = pos.y;
-        }
-        else {
-          _GlobalLineObject[lineId]["properties"]["endControlX"] = pos.x;
-          _GlobalLineObject[lineId]["properties"]["endControlY"] = pos.y;
-        }
-      },
+    var lineDesigner = {
       getStartPosition : function(lineId) {
-        let curProperties = _GlobalLineObject[lineId]["properties"];
+        let curProperties = diagramManager.getAttrById(lineId,{properties:[]});
 
         return {
           x: curProperties["startX"],
@@ -167,7 +66,7 @@ define(function(require, exports, module) {
         };
       },
       getEndPosition : function(lineId) {
-        let curProperties = _GlobalLineObject[lineId]["properties"];
+        let curProperties = diagramManager.getAttrById(lineId,{properties:[]});
 
         return {
           x: curProperties["endX"],
@@ -175,44 +74,51 @@ define(function(require, exports, module) {
         };
       },
       getCotrolPosition : function(lineId) {
-        let curProperties = _GlobalLineObject[lineId]["properties"];
-        let start = {
-          x: curProperties.startX,
-          y: curProperties.startY,
-        };
+        let curProperties = diagramManager.getAttrById(lineId,{properties:[]});
+        let control = {};
         let end = {
-          x: curProperties.endX,
-          y: curProperties.endY,
-        };
+              x: curProperties.endX,
+              y: curProperties.endY,
+            },
+            start = {
+              x: curProperties.startX,
+              y: curProperties.startY,
+            };
 
-        if(curProperties.hasOwnProperty("startControlX")) {
-          return {
-            startControl : {
-              x: curProperties.startControlX,
-              y: curProperties.startControlY,
-            },
-            endControl : {
-              x: curProperties.endControlX,
-              y: curProperties.endControlY,
-            },
-          }
+        //start control point defined
+        if(curProperties.hasOwnProperty("startControlX") && curProperties.startControlX) {
+          control["startControl"] = {
+            x: curProperties.startControlX,
+            y: curProperties.startControlY,
+          };
         }
+        //start control point undefined
         else {
-          return {
-            startControl : {
-              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-              y: start.y,
-            },
-            endControl : {
-              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-              y: end.y,
-            },
-          }
+          control["startControl"] = {
+            x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+            y: start.y,
+          };
         }
 
+        //end control point defined
+        if (curProperties.hasOwnProperty("endControlX") && curProperties.endControlX) {
+          control["endControl"] = {
+            x: curProperties.endControlX,
+            y: curProperties.endControlY,
+          };
+        }
+        //end control point undefined
+        else {
+          control["endControl"] = {
+            x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+            y: end.y,
+          };
+        }
+
+        return control;
       },
       isPointOnLine : function(lineId,currPoint) {
-        let curLineType = this.getLineTypeById(lineId);
+        let curLineType = objectManager.getLineTypeById(lineId);
 
         switch (curLineType) {
           case "basic":
@@ -238,52 +144,142 @@ define(function(require, exports, module) {
         }
       },
       _isPointOnBezierCurve : function(point,lineId) {
+        let start = this.getStartPosition(lineId),
+            end = this.getEndPosition(lineId),
+            control = this.getCotrolPosition(lineId);
+        _bezierObj = null;
+        _bezierObj = new Bezier(start.x,start.y,
+                               control.startControl.x,control.startControl.y,
+                               control.endControl.x,control.endControl.y,
+                               end.x,end.y);
+
         let curProject = _bezierObj.project(point);
         return curProject.d <= 5 ? true : false;
       },
       _isPointOnStepLine : function(point,lineId) {
 
       },
+      drawLineById : function (lineId) {
+        let jqObj = $("#" + lineId);
+        let canvas = jqObj.find("canvas")[0];
+        let ctx = canvas.getContext("2d");
+        let linetype = diagramManager.getAttrById(lineId,{linetype:[]});
+        let curProperties = diagramManager.getAttrById(lineId,{properties: ["startX","startY","endX","endY"]});
+        let start = {
+              x : curProperties["startX"],
+              y : curProperties["startY"],
+            },
+            end = {
+              x : curProperties["endX"],
+              y : curProperties["endY"],
+            };
+        let lineStyle = diagramManager.getAttrById(lineId,{lineStyle:[]});
+        let argList = {};
+
+        linetype = linetype.linetype;
+        start = {
+          x: start.x - parseFloat(jqObj.css("left")),
+          y: start.y - parseFloat(jqObj.css("top")),
+        };
+        end = {
+          x: end.x - parseFloat(jqObj.css("left")),
+          y: end.y - parseFloat(jqObj.css("top")),
+        };
+        switch (linetype) {
+          case "curve":
+            let properties = diagramManager.getAttrById(lineId,{properties:[]});
+
+            argList.startControlX = properties.startControlX - parseFloat(jqObj.css("left"));
+            argList.startControlY = properties.startControlY - parseFloat(jqObj.css("top"));
+            argList.endControlX = properties.endControlX - parseFloat(jqObj.css("left"));
+            argList.endControlY = properties.endControlY - parseFloat(jqObj.css("top"));
+            break;
+          default:
+
+        }
+
+        let styleArgList = {};
+        styleArgList.lineStyle = lineStyle;
+        this.resolveStyle(ctx,styleArgList);
+
+        argList.beginArrow = lineStyle.beginArrow;
+        argList.endArrow = lineStyle.endArrow;
+        this.drawTextAreaById(lineId);
+        this.drawLine(canvas,linetype,start,end,argList);
+      },
       //when you draw the line, you should change coordinates to relative position of the canvas.
       //you should notice that after you change the size of canvas, the context change so you have to
       //reset the lineStyle and other properties.
-      drawCanvasAndLine : function(lineId,start,end,argList) {
+      drawCanvasAndLine : function(lineId,argList) {
+        let start = argList["start"],
+            end = argList["end"];
+        let curJqueryEle = $("#" + lineId);
+        let ctx = curJqueryEle.find("canvas")[0].getContext("2d");
+        let curLineType = objectManager.getLineTypeById(lineId);
+
+
+        //-------draw text area start--------------
+        let textareajqObj = $("#" + lineId).find("textarea");
+        let textArea = diagramManager.getAttrById(lineId,{textArea:["position"]}),
+            fontStyle = diagramManager.getAttrById(lineId,{fontStyle:[]});
+        let textAreaArgList = {};
+
+        textArea = diagramUtil.evaluateLineTextArea(textArea["position"],curLineType,{
+          startX: start.x,
+          startY: start.y,
+          endX: end.x,
+          endY: end.y,
+        });
+        textAreaArgList.textArea = textArea;
+        textAreaArgList.fontStyle = fontStyle;
+
+        this.drawTextArea(textareajqObj,textAreaArgList);
+        //----------draw text area end--------------
+
         let curEndRelative;
         let curStartRelative;
-        let curLineType = this.getLineTypeById(lineId);
-        let curJqueryEle = $("#" + lineId);
         let curJqueryCanvas = curJqueryEle.find("canvas");
-        let ctx = curJqueryCanvas[0].getContext("2d");
-
         if(curLineType == "curve") {
-          if(!argList.hasOwnProperty("startControl") && !argList.hasOwnProperty("endControl")) {
-            argList = {
-              "startControl" : {
-                  x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                  y: start.y,
-              },
-              "endControl" : {
-                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                y: end.y,
-              }
-            };
-          }
-          else if(!argList.hasOwnProperty("startControl")){
-            argList["startControl"] = {
-                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                y: start.y,
-            };
-          }
-          else if(!argList.hasOwnProperty("endControl")){
-            argList["endControl"] = {
-              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-              y: end.y,
-            };
-          }
+          // if(!argList.hasOwnProperty("startControl") && !argList.hasOwnProperty("endControl")) {
+          //   argList = {
+          //     "startControl" : {
+          //         x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+          //         y: start.y,
+          //     },
+          //     "endControl" : {
+          //       x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+          //       y: end.y,
+          //     }
+          //   };
+          // }
+          // else if(!argList.hasOwnProperty("startControl")){
+          //   argList["startControl"] = {
+          //       x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+          //       y: start.y,
+          //   };
+          // }
+          // else if(!argList.hasOwnProperty("endControl")){
+          //   argList["endControl"] = {
+          //     x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+          //     y: end.y,
+          //   };
+          // }
+          let properties = diagramManager.getAttrById(lineId,{properties:[]});
+          let control = {
+            startControl : {
+              x: properties.startControlX,
+              y: properties.startControlY,
+            },
+            endControl : {
+              x: properties.endControlX,
+              y: properties.endControlY,
+            },
+          };
 
+          _bezierObj = null;
           _bezierObj = new Bezier(start.x,start.y,
-                                 argList.startControl.x,argList.startControl.y,
-                                 argList.endControl.x,argList.endControl.y,
+                                 control.startControl.x,control.startControl.y,
+                                 control.endControl.x,control.endControl.y,
                                  end.x,end.y);
 
           curJqueryCanvas.attr({
@@ -304,16 +300,10 @@ define(function(require, exports, module) {
             x: end.x - parseFloat(curJqueryEle.css("left")),
             y: end.y - parseFloat(curJqueryEle.css("top")),
           };
-          let RelativeStartControl = {
-            x: argList.startControl.x - parseFloat(curJqueryEle.css("left")),
-            y: argList.startControl.y - parseFloat(curJqueryEle.css("top")),
-          };
-          let RelativeEndControl = {
-            x: argList.endControl.x - parseFloat(curJqueryEle.css("left")),
-            y: argList.endControl.y - parseFloat(curJqueryEle.css("top")),
-          };
-          argList.startControl = RelativeStartControl;
-          argList.endControl = RelativeEndControl;
+          argList.startControlX = control.startControl.x - parseFloat(curJqueryEle.css("left"));
+          argList.startControlX = control.startControl.y - parseFloat(curJqueryEle.css("top"));
+          argList.endControlX = control.endControl.x - parseFloat(curJqueryEle.css("left"));
+          argList.endControlY = control.endControl.y - parseFloat(curJqueryEle.css("top"));
           this.drawLine(curJqueryCanvas[0],curLineType,curStartRelative,curEndRelative,argList);
         }
         else {
@@ -336,7 +326,18 @@ define(function(require, exports, module) {
             y: end.y - parseFloat(curJqueryEle.css("top")),
           };
 
-          this.resolveStyle(ctx,argList);
+
+          //----------resolve line style start--------------
+          let lineStyle = diagramManager.getAttrById(lineId,{lineStyle:[]});
+          let styleArgList = {};
+
+          styleArgList.lineStyle = lineStyle;
+          argList.beginArrow = lineStyle.beginArrow;
+          argList.endArrow = lineStyle.endArrow;
+          this.resolveStyle(ctx,styleArgList);
+          //----------resolve line style end--------------
+
+
           this.drawLine(curJqueryCanvas[0],curLineType,curStartRelative,curEndRelative,argList);
         }
       },
@@ -358,19 +359,32 @@ define(function(require, exports, module) {
             this.drawStepLine.call(ctx,start,end);
             break;
           case "curve":
-            if (argList == undefined) {
-              argList = {
-                "startControl" : {
-                    x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                    y: start.y,
-                },
-                "endControl" : {
-                  x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                  y: end.y,
-                }
+            let control = {};
+            if(argList && argList.hasOwnProperty("startControlX") && argList.startControlX ) {
+              control.startControl = {
+                x: argList.startControlX,
+                y: argList.startControlY,
               };
             }
-            this.drawBezierCurve.call(ctx,start,argList.startControl,end,argList.endControl);
+            else {
+              control.startControl = {
+                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                y: start.y,
+              };
+            }
+            if(argList && argList.hasOwnProperty("endControlX") && argList.endControlX ) {
+              control.endControl = {
+                x: argList.endControlX ,
+                y: argList.endControlY ,
+              };
+            }
+            else {
+              control.endControl = {
+                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                y: end.y,
+              };
+            }
+            this.drawBezierCurve.call(ctx,start,control.startControl,end,control.endControl);
             break;
           default:
             this.drawBasicLine.call(ctx,start,end);
@@ -452,7 +466,7 @@ define(function(require, exports, module) {
         let canvas = $("#" + lineId).find("canvas")[0];
         let start = this.getStartPosition(lineId);
         let end = this.getEndPosition(lineId);
-        let curLineType = this.getLineTypeById(lineId);
+        let curLineType = objectManager.getLineTypeById(lineId);
 
         if($("#line-overlay-container").length != 0) {
           $("#line-overlay-container").remove();
@@ -542,12 +556,38 @@ define(function(require, exports, module) {
         ctx.isHighlight = false;
         $("#line-overlay-container").remove();
       },
-      drawTextArea : function (diagramId,argList) {
-        let diagramEle = $("#" + diagramId);
+
+      drawTextAreaById : function (lineId) {
+        let diagramEle = $("#" + lineId);
         let canvas = diagramEle.find("canvas")[0];
         let jquerytextArea = diagramEle.find("textarea");
-        let fontStyle = argList.fontStyle;
-        let textAreaPos = argList.textArea;
+        if(jquerytextArea.length == 0) { return ;}
+        let textAreaPos = diagramManager.getAttrById(lineId,{textArea:[]}),
+            fontStyle = diagramManager.getAttrById(lineId,{fontStyle:[]}),
+            lineType = objectManager.getLineTypeById(lineId);
+            pos = diagramManager.getAttrById(lineId,{properties:[]});
+        let textArea;
+        let argList = {};
+
+        textArea = diagramUtil.evaluateLineTextArea(textAreaPos["position"],lineType,{
+            startX: pos.startX,
+            startY: pos.startY,
+            endX: pos.endX,
+            endY: pos.endY,
+        });
+        argList = {
+          "textArea": textArea,
+          "fontStyle": fontStyle,
+        };
+
+        this.drawTextArea(jquerytextArea,argList);
+      },
+      drawTextArea : function (textareajqObj,argList) {
+        if(textareajqObj.length == 0) { return; }
+        let diagramEle = textareajqObj.parent();
+        let canvas = textareajqObj.siblings("canvas")[0];
+        let textAreaPos = argList.textArea,
+            fontStyle = argList.fontStyle;
         let w = 50;
         //let h = 0;
         let text;
@@ -562,15 +602,15 @@ define(function(require, exports, module) {
           "color"          : "rgb(" + fontStyle.color + ")",
           "text-decoration": fontStyle.underline ? "underline" : "none"
         }
-        text = diagramEle.find("textarea").val();
+        text = textareajqObj.val();
         text = (text == undefined) ? "" : text ;
 
-        $(jquerytextArea).css({
-                          "left": textAreaPos.x - 26 - parseInt(diagramEle.css("left")),
-                          "top": textAreaPos.y - 17 - parseInt(diagramEle.css("top")),
-                          })
-                         .css(textAreaStyle)
-                         .val(text);
+        textareajqObj.css({
+                      "left": textAreaPos.x - 26 - parseInt(diagramEle.css("left")),
+                      "top": textAreaPos.y - 17 - parseInt(diagramEle.css("top")),
+                      })
+                     .css(textAreaStyle)
+                     .val(text);
       },
       addLineTextArea : function (diagramId,argList) {
         let diagramEle = $("#" + diagramId);
@@ -763,8 +803,8 @@ define(function(require, exports, module) {
       },
     };
 
-    return lineManager;
+    return lineDesigner;
   })();
 
-  exports.lineManager = lineManager;
+  exports.lineDesigner = lineDesigner;
 });

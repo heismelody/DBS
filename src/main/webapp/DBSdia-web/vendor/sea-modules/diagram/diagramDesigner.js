@@ -1,10 +1,10 @@
 define(function(require, exports, module) {
   var DiagramManager = require('./diagramManager.js');
   var DiagramUtil = require('./Util.js');
-  var LineManager = require('./lineManager.js');
+  var lineDesigner = require('./lineDesigner.js');
 
   var diagramManager = DiagramManager.diagramManager;
-  var lineManager = LineManager.lineManager;
+  var lineDesigner = lineDesigner.lineDesigner;
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
   var pageManager = DiagramManager.diagramManager.pageManager;
@@ -69,10 +69,32 @@ define(function(require, exports, module) {
         let ctx = canvas.getContext("2d");
         ctx.shapeName = shapeName;
         if(shapeName == "line") {
-          let curStartRelative = argList["start"];
-          let curEndRelative = argList["end"];
+          let curjqDiaggram = $(canvas).parent();
+          let curStartRelative,
+              curEndRelative;
           let curLineTypeConfig = diagramManager.configManager.getLineType();
-          lineManager.drawLine(canvas,curLineTypeConfig,curStartRelative,curEndRelative);
+          let lineArguList = {};
+          let eleLeft = parseInt(curjqDiaggram.css("left")),
+              eleTop = parseInt(curjqDiaggram.css("top"));
+
+          curStartRelative = {
+            x: argList["start"].x - eleLeft,
+            y: argList["start"].y - eleTop,
+          }
+          curEndRelative = {
+            x: argList["end"].x - eleLeft,
+            y: argList["end"].y - eleTop,
+          }
+
+          if(argList && argList.hasOwnProperty("startControlX") && argList.startControlX) {
+            lineArguList.startControlX = argList.startControlX - eleLeft;
+            lineArguList.startControlY = argList.startControlY - eleTop;
+          }
+          if(argList && argList.hasOwnProperty("endControlX") && argList.endControlX) {
+            lineArguList.endControlX = argList.endControlX - eleLeft;
+            lineArguList.endControlY = argList.endControlY - eleTop;
+          }
+          lineDesigner.drawLine(canvas,curLineTypeConfig,curStartRelative,curEndRelative,lineArguList);
         }
         else {
           if(!ctx.fillStyleDefined || ctx.fillStyleDefined == false) {
@@ -89,19 +111,7 @@ define(function(require, exports, module) {
         let shapeName = objectManager.getShapeNameById(diagramId);
 
         if(shapeName == "line") {
-          let start = argList["start"],
-              end = argList["end"];
-          let ctx = $("#" + diagramId).find("canvas")[0].getContext("2d");
-          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
-          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
-
-          argList.fillStyle = fillStyle;
-          argList.lineStyle = lineStyle;
-          argList.beginArrow = lineStyle.beginArrow;
-          argList.endArrow = lineStyle.endArrow;
-
-          this.drawTextArea($("#" + diagramId).find("textarea"),argList);
-          lineManager.drawCanvasAndLine(diagramId,start,end,argList);
+          lineDesigner.drawCanvasAndLine(diagramId,argList);
         }
       },
       drawDiagramById : function (diagramId) {
@@ -111,47 +121,11 @@ define(function(require, exports, module) {
         let shapeName = objectManager.getShapeNameById(diagramId);
 
         if(shapeName == "line") {
-          let linetype = diagramManager.getAttrById(diagramId,{linetype:[]});
-          linetype = linetype.linetype;
-          let curProperties = diagramManager.getAttrById(diagramId,{properties: ["startX","startY","endX","endY"]});
-          let start = {
-            x : curProperties["startX"],
-            y : curProperties["startY"],
-          };
-          let end = {
-            x : curProperties["endX"],
-            y : curProperties["endY"],
-          };
-          start = {
-            x: start.x - parseFloat(jqObj.css("left")),
-            y: start.y - parseFloat(jqObj.css("top")),
-          };
-          end = {
-            x: end.x - parseFloat(jqObj.css("left")),
-            y: end.y - parseFloat(jqObj.css("top")),
-          };
-
-
-          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
-          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
-          let arrowStyle = {
-            beginArrow: lineStyle.beginArrow,
-            endArrow: lineStyle.endArrow,
-          };
-
-          this._resolveStyle(ctx,{
-            "fillStyle" : fillStyle,
-            "lineStyle" : lineStyle,
-          });
-          if(jqObj.find("textarea").length != 0) {
-            this.drawTextArea(jqObj.find("textarea"));
-          }
-
-          lineManager.drawLine(canvas,linetype,start,end,arrowStyle);
+          lineDesigner.drawLineById(diagramId);
         }
         else {
           if(jqObj.find("textarea").length != 0) {
-            this.drawTextArea(jqObj.find("textarea"));
+            this.drawTextAreaById(diagramId);
           }
           let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
           let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
@@ -220,59 +194,23 @@ define(function(require, exports, module) {
           }
         }
       },
-      drawTextArea : function (jqObj,argList) {
-        if(jqObj.length == 0) {
+      drawTextAreaById : function (diagramId) {
+        let diagramEle = $("#" + diagramId),
+            textareajqObj = diagramEle.find("textarea");
+        let curshapeName = objectManager.getShapeNameById(diagramId);
+
+        if(textareajqObj.length == 0) {
           return;
         }
-        let curId = jqObj.attr("target");
-        let curshapeName = objectManager.getShapeNameById(curId);
         if(curshapeName == "line") {
-          if(argList && argList.hasOwnProperty("start")) {
-            let textArea = diagramManager.getAttrById(curId,{textArea:["position"]});
-            let fontStyle = diagramManager.getAttrById(curId,{fontStyle:[]});
-            let pos = diagramManager.getAttrById(curId,{properties:[]});
-            let lineType = lineManager.getLineTypeById(curId);
-
-            textArea = diagramUtil.evaluateLineTextArea(textArea["position"],lineType,{
-              startX: argList.start.x,
-              startY: argList.start.y,
-              endX: argList.end.x,
-              endY: argList.end.y,
-            });
-            argList.fontStyle = fontStyle;
-            argList.textArea = textArea;
-
-            lineManager.drawTextArea(curId,argList);
-          }
-          else {
-            let textArea = diagramManager.getAttrById(curId,{textArea:["position"]});
-            let fontStyle = diagramManager.getAttrById(curId,{fontStyle:[]});
-            let pos = diagramManager.getAttrById(curId,{properties:[]});
-            let lineType = lineManager.getLineTypeById(curId);
-            let argList = {};
-
-            textArea = diagramUtil.evaluateLineTextArea(textArea["position"],lineType,{
-              startX: pos.startX,
-              startY: pos.startY,
-              endX: pos.endX,
-              endY: pos.endY,
-            });
-            argList = {
-              "fontStyle" : fontStyle,
-              "textArea" : textArea,
-            };
-
-            lineManager.drawTextArea(curId,argList);
-          }
+          lineDesigner.drawTextAreaById(diagramId);
         }
         else {
-          let diagramEle = $("#" + curId);
-          let diagramTextArea = diagramManager.getAttrById(curId,{textArea:[]});
-          let diagramFontStyle = diagramManager.getAttrById(curId,{fontStyle:[]});
-          let textAlignTB = diagramFontStyle["vAlign"];
-          let textAlignLMR = diagramFontStyle["textAlign"];
-          let w = jqObj.siblings("canvas")[0].width;
-          let h = jqObj.siblings("canvas")[0].height;
+          let diagramFontStyle = diagramManager.getAttrById(diagramId,{fontStyle:[]});
+          let textAlignTB = diagramFontStyle["vAlign"],
+              textAlignLMR = diagramFontStyle["textAlign"];
+          let w = textareajqObj.siblings("canvas")[0].width,
+              h = textareajqObj.siblings("canvas")[0].height;
           let text;
           let textAreaStyle = {
             "width"          : w - 40 + "px",
@@ -286,13 +224,13 @@ define(function(require, exports, module) {
             "color"          : "rgb(" + diagramFontStyle.color + ")",
             "text-decoration": diagramFontStyle.underline ? "underline" : "none"
           }
-          text = jqObj.val();
+          text = textareajqObj.val();
           text = (text == undefined) ? "" : text ;
           switch (textAlignTB) {
             case "top":
               anchor = templateManager.getDefaultAnchor("n");
               curanchorXY = diagramUtil.evaluate(anchor,w,h);
-              $(jqObj).css({
+              textareajqObj.css({
                         "left": curanchorXY.x - w/2 + 20,
                         "top": curanchorXY.y,
                       })
@@ -302,7 +240,7 @@ define(function(require, exports, module) {
             case "bottom":
               anchor = templateManager.getDefaultAnchor("s");
               curanchorXY = diagramUtil.evaluate(anchor,w,h);
-              $(jqObj).css({
+              textareajqObj.css({
                        "left": curanchorXY.x - w/2 + 20,
                        "top": curanchorXY.y - parseInt(textAreaStyle["line-height"])*2,
                       })
@@ -310,7 +248,7 @@ define(function(require, exports, module) {
                      .val(text);
               break;
             case "middle":
-              $(jqObj).css({
+              textareajqObj.css({
                          "left": 20,
                          "top": h/2 - parseInt(textAreaStyle["line-height"])/2,
                        })
@@ -321,14 +259,13 @@ define(function(require, exports, module) {
           }
         }
       },
-
       addTextarea : function (diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         if(curshapeName == "line") {
           let textArea = diagramManager.getAttrById(diagramId,{textArea:["position"]});
           let fontStyle = diagramManager.getAttrById(diagramId,{fontStyle:[]});
           let pos = diagramManager.getAttrById(diagramId,{properties:[]});
-          let lineType = lineManager.getLineTypeById(diagramId);
+          let lineType = objectManager.getLineTypeById(diagramId);
           let argList = {};
 
           textArea = diagramUtil.evaluateLineTextArea(textArea["position"],lineType,{
@@ -342,7 +279,7 @@ define(function(require, exports, module) {
             "textArea" : textArea,
           };
 
-          lineManager.addLineTextArea(diagramId,argList);
+          lineDesigner.addLineTextArea(diagramId,argList);
         }
         else {
           this._addDiagramTextArea(diagramId);
@@ -429,7 +366,7 @@ define(function(require, exports, module) {
 
           }
           else {
-            lineManager.addLineOverlay(diagramId);
+            lineDesigner.addLineOverlay(diagramId);
             this.drawDiagramById(diagramId);
           }
         }
@@ -452,7 +389,7 @@ define(function(require, exports, module) {
           let canvas = $("#" + diagramId).find("canvas")[0];
           let ctx = canvas.getContext("2d");
 
-          lineManager.removeHightlight(canvas);
+          lineDesigner.removeHightlight(canvas);
           this.drawDiagramById(diagramId);
         }
         else {
@@ -789,15 +726,16 @@ define(function(require, exports, module) {
         }
 
         let farthestPointIndiagram = {};
-        if(pointsInDiagram.length % 2 == 0) {
-          let tempA = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)],
-              tempB = pointsInDiagram[Math.floor(pointsInDiagram.length / 2) + 1];
-          farthestPointIndiagram.x = (tempA.x + tempB.x) / 2;
-          farthestPointIndiagram.y = (tempA.y + tempB.y) / 2;
-        }
-        else {
-          farthestPointIndiagram = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)];
-        }
+        // if(pointsInDiagram.length % 2 == 0) {
+        //   let tempA = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)],
+        //       tempB = pointsInDiagram[Math.floor(pointsInDiagram.length / 2) + 1];
+        //   farthestPointIndiagram.x = (tempA.x + tempB.x) / 2;
+        //   farthestPointIndiagram.y = (tempA.y + tempB.y) / 2;
+        // }
+        // else {
+        //   farthestPointIndiagram = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)];
+        // }
+        farthestPointIndiagram = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)];
         let record;
         for(let lamda = 0.0; lamda <= 1.0; lamda += 0.1) {
           let curX = lamda * x + (1 - lamda) * farthestPointIndiagram.x,
@@ -1007,8 +945,8 @@ define(function(require, exports, module) {
         Yv = (Yr - lamda * Ya) / (1 - lamda);
 
         return {
-          x: Xv,
-          y: Yv,
+          x: Math.round(Xv),
+          y: Math.round(Yv),
         }
       },
       /**
@@ -1383,7 +1321,7 @@ define(function(require, exports, module) {
             break;
           case "default":
             for(let curLineId in allLinkLineIdArray) {
-              this.drawDiagramById(allLinkLineIdArray[curLineId],argList);
+              this.drawDiagramById(allLinkLineIdArray[curLineId]);
             }
             break;
           default:

@@ -1,8 +1,9 @@
 define(function(require, exports, module) {
+  var bezier = require('Bezier');
   var DiagramDesigner = require('./diagramDesigner.js');
   var DiagramUtil = require('./Util.js');
   var DiagramManager = require('./diagramManager.js');
-  var LineManager = require('./lineManager.js');
+  var lineDesigner = require('./lineDesigner.js');
   var SelectedManager = require('./selectedManager.js');
   var UIManager = require('./uIManager.js');
 
@@ -12,7 +13,7 @@ define(function(require, exports, module) {
   var templateManager = DiagramManager.diagramManager.templateManager;
   var objectManager = DiagramManager.diagramManager.objectManager;
   var stateManager = DiagramManager.diagramManager.stateManager;
-  var lineManager = LineManager.lineManager;
+  var lineDesigner = lineDesigner.lineDesigner;
   var selectedManager = SelectedManager.selectedManager;
   var themeManager = diagramManager.themeManager;
   var uIManager = UIManager.uIManager;
@@ -56,7 +57,7 @@ define(function(require, exports, module) {
      var end;
      var isStart;
      var argList = {};       //used to store arguments in draw line
-
+     var _bezierObj;
      var _mousePosDiagramArray = new Array();
 
      function ExtractNumber(value) {
@@ -127,7 +128,7 @@ define(function(require, exports, module) {
           }
           let pos = diagramUtil.getRelativePosOffset(curX,curY,$(".design-canvas"));
 
-          if(lineManager.isPointOnLine(curId,pos)) {
+          if(lineDesigner.isPointOnLine(curId,pos)) {
             onLineFunction(e);
             for(var i in _mousePosDiagramArray) {
               $("#" + _mousePosDiagramArray[i]).removeClass("event-none");
@@ -228,14 +229,14 @@ define(function(require, exports, module) {
             },
             inBorderAreaFunction : function (e) {
               //begin draw line starting from diagram border(anchor)
+              if(position != undefined) {
+                e.clientX = position.x;
+                e.clientY = position.y;
+                e.pageX = position.x;
+                e.pageY = position.y;
+                e.button = 0;
+              }
               if(e.button == 0) {
-                if(position != undefined) {
-                  e.clientX = position.x;
-                  e.clientY = position.y;
-                  e.pageX = position.x;
-                  e.pageY = position.y;
-                  e.button = 0;
-                }
                 eventHelper.MouseDownHandler(e,eventHelper.drawLineFromDiagramMousedownHandler);
               }
             },
@@ -575,15 +576,17 @@ define(function(require, exports, module) {
       },
       resizeMouseMoveHandler : function(e) {
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
+        let jqueryEle = $("#" + curId),
+            jqueryCanvasEle = jqueryEle.find("canvas");
 
         if(hasN != -1) {
           let curOffsetY = _startY - e.clientY + curdiagramHeight;
           if(curOffsetY > 40) {
-            $("#" + curId).css({
+            jqueryEle.css({
               height: curOffsetY,
               top: pos.y - 10
             });
-            $("#" + curId + " canvas").attr({
+            jqueryCanvasEle.attr({
               height: curOffsetY,
             });
           }
@@ -591,10 +594,10 @@ define(function(require, exports, module) {
         if(hasS != -1) {
           let curOffsetY = e.clientY -_startY + curdiagramHeight;
           if(curOffsetY > 40) {
-            $("#" + curId).css({
+            jqueryEle.css({
               height: curOffsetY
             });
-            $("#" + curId + " canvas").attr({
+            jqueryCanvasEle.attr({
               height: curOffsetY,
             });
           }
@@ -602,11 +605,11 @@ define(function(require, exports, module) {
         if(hasW != -1) {
           let curOffsetX = _startX - e.clientX + curdiagramWidth;
           if(curOffsetX > 40) {
-            $("#" + curId).css({
+            jqueryEle.css({
               width: curOffsetX,
               left: pos.x - 10
             });
-            $("#" + curId + " canvas").attr({
+            jqueryCanvasEle.attr({
               width: curOffsetX
             });
           }
@@ -614,10 +617,10 @@ define(function(require, exports, module) {
         if(hasE != -1) {
           let curOffsetX = e.clientX - _startX + curdiagramWidth;
           if(curOffsetX > 40) {
-            $("#" + curId).css({
+            jqueryEle.css({
               width: curOffsetX
             });
-            $("#" + curId + " canvas").attr({
+            jqueryCanvasEle.attr({
               width: curOffsetX
             });
           }
@@ -654,7 +657,7 @@ define(function(require, exports, module) {
             if($("#page-contextual-properties-dialog").css("display") != "none") {
               $("#contextual-properties-shape-trigger")[0].click();
             }
-            diagramDesigner.drawTextArea($("#" + curId).find("textarea"));
+            diagramDesigner.drawTextAreaById(curId);
 
             //update all linked line
             diagramDesigner.updateDiagramAllLinkLine(curId,"resize",{
@@ -692,6 +695,7 @@ define(function(require, exports, module) {
           y: pos.y,
         };
         argList = {};
+        argList["start"] = start;
         argList["linetype"] = diagramManager.configManager.getLineType();
 
         $(".canvas-container").css("cursor","default");
@@ -722,6 +726,7 @@ define(function(require, exports, module) {
         };
 
         argList = {};
+        argList["start"] = start;
         argList["linetype"] = diagramManager.configManager.getLineType();
         argList["fromId"] = curId;
         if(argList["linetype"] == "basic") {
@@ -765,38 +770,62 @@ define(function(require, exports, module) {
         let curJqueryCanvas = $("#creating-designer-canvas");
         let curJqueryDiagram = $("#creating-designer-diagram");
 
+        argList["end"] = end;
         //show hightlight circle when touch diagram
         let posInfoOfDiagram = diagramDesigner.resolvePointInContainedDiagram(pos.x,pos.y);
         $(".canvas-container").css("cursor","default");
         $("#line-diagram-circle").hide();
         $("#anchor-overlay-container").hide();
-        if(posInfoOfDiagram) {
-          diagramDesigner.drawWithInAnchorAreaPointCircle(posInfoOfDiagram.x,posInfoOfDiagram.y,posInfoOfDiagram.id,posInfoOfDiagram.position);
-          end.x = posInfoOfDiagram.x;
-          end.y = posInfoOfDiagram.y;
+
+        if (argList["linetype"] == "basic") {
+          if(posInfoOfDiagram) {
+            diagramDesigner.drawWithInAnchorAreaPointCircle(posInfoOfDiagram.x,posInfoOfDiagram.y,posInfoOfDiagram.id,posInfoOfDiagram.position);
+            end.x = posInfoOfDiagram.x;
+            end.y = posInfoOfDiagram.y;
+          }
+
+          curJqueryCanvas.attr({
+            width: Math.abs(end.x - start.x) + 20,
+            height: Math.abs(end.y - start.y) + 20,
+          });
+          curJqueryDiagram.css({
+                                left: Math.min(start.x,end.x) - 10,
+                                top: Math.min(start.y,end.y) - 10,
+                                width: Math.abs(end.x - start.x) + 20,
+                                height: Math.abs(end.y - start.y) + 20,
+                              })
+        }
+        else if (argList["linetype"] == "curve") {
+          if(posInfoOfDiagram) {
+            end.x = posInfoOfDiagram.x;
+            end.y = posInfoOfDiagram.y;
+            diagramDesigner.drawWithInAnchorAreaPointCircle(posInfoOfDiagram.x,posInfoOfDiagram.y,posInfoOfDiagram.id,posInfoOfDiagram.position);
+            let endControl = diagramDesigner.calVerticalLineFromAnchor(pos.x,pos.y,end.x,end.y);
+            argList["endControlX"] = endControl.x;
+            argList["endControlY"] = endControl.y;
+          }
+
+          _bezierObj = null;
+          _bezierObj = new Bezier(start.x,start.y,
+                                 control.startControl.x,control.startControl.y,
+                                 control.endControl.x,control.endControl.y,
+                                 end.x,end.y);
+
+          curJqueryCanvas.attr({
+            width: _bezierObj.bbox().x.size + 20,
+            height: _bezierObj.bbox().y.size + 20,
+          });
+          curJqueryEle.css({
+            left: _bezierObj.bbox().x.min - 10,
+            top: _bezierObj.bbox().y.min - 10,
+            width: _bezierObj.bbox().x.size + 20,
+            height: _bezierObj.bbox().y.size + 20,
+          });
+        }
+        else if (argList["linetype"] == "step") {
         }
 
-        curJqueryCanvas.attr({
-          width: Math.abs(end.x - start.x) + 20,
-          height: Math.abs(end.y - start.y) + 20,
-        });
-        curJqueryDiagram.css({
-                              left: Math.min(start.x,end.x) - 10,
-                              top: Math.min(start.y,end.y) - 10,
-                              width: Math.abs(end.x - start.x) + 20,
-                              height: Math.abs(end.y - start.y) + 20,
-                            })
-        curPosRelative = {
-          start : {
-            x: start.x - parseFloat(curJqueryDiagram.css("left")),
-            y: start.y - parseFloat(curJqueryDiagram.css("top")),
-          },
-          end : {
-            x: end.x - parseFloat(curJqueryDiagram.css("left")),
-            y: end.y - parseFloat(curJqueryDiagram.css("top")),
-          },
-        };
-        diagramDesigner.drawDiagram($("#creating-designer-canvas")[0],"line",curPosRelative);
+        diagramDesigner.drawDiagram($("#creating-designer-canvas")[0],"line",argList);
       },
       drawLineMouseUpHandler : function(e) {
         if (_dragElement != null && e.button == 0) {
@@ -822,16 +851,28 @@ define(function(require, exports, module) {
           $("#line-diagram-circle").hide();
           $("#anchor-overlay-container").hide();
           argList["toId"] = null;
+          argList["endControlX"] = null;
+          argList["endControlY"] = null;
           if (argList["linetype"] == "basic") {
             if(posInfoOfDiagram) {
               end.x = posInfoOfDiagram.x;
               end.y = posInfoOfDiagram.y;
               argList["toId"] = posInfoOfDiagram.id;
             }
+
+            curJqueryCanvas.attr({
+              width: Math.abs(end.x - start.x) + 20,
+              height: Math.abs(end.y - start.y) + 20,
+            });
+            curJqueryDiagram.css({
+              left: Math.min(start.x,end.x) - 10,
+              top: Math.min(start.y,end.y) - 10,
+              width: Math.abs(end.x - start.x) + 20,
+              height: Math.abs(end.y - start.y) + 20,
+            });
           }
           else if (argList["linetype"] == "curve") {
             if(posInfoOfDiagram) {
-              console.log(1);
               end.x = posInfoOfDiagram.x;
               end.y = posInfoOfDiagram.y;
               argList["toId"] = posInfoOfDiagram.id;
@@ -839,32 +880,22 @@ define(function(require, exports, module) {
               argList["endControlX"] = endControl.x;
               argList["endControlY"] = endControl.y;
             }
+
+            curJqueryCanvas.attr({
+              width: _bezierObj.bbox().x.size + 20,
+              height: _bezierObj.bbox().y.size + 20,
+            });
+            curJqueryDiagram.css({
+              left: _bezierObj.bbox().x.min - 10,
+              top: _bezierObj.bbox().y.min - 10,
+              width: _bezierObj.bbox().x.size + 20,
+              height: _bezierObj.bbox().y.size + 20,
+            });
           }
           else if (argList["linetype"] == "step") {
           }
           newId = objectManager.addNewDiagram("line",start,end,argList);
-
-          curJqueryCanvas.attr({
-            width: Math.abs(end.x - start.x) + 20,
-            height: Math.abs(end.y - start.y) + 20,
-          });
-          curJqueryDiagram.css({
-            left: Math.min(start.x,end.x) - 10,
-            top: Math.min(start.y,end.y) - 10,
-            width: Math.abs(end.x - start.x) + 20,
-            height: Math.abs(end.y - start.y) + 20,
-          });
-          curPosRelative = {
-            start : {
-              x: start.x - parseFloat(curJqueryDiagram.css("left")),
-              y: start.y - parseFloat(curJqueryDiagram.css("top")),
-            },
-            end : {
-              x: end.x - parseFloat(curJqueryDiagram.css("left")),
-              y: end.y - parseFloat(curJqueryDiagram.css("top")),
-            },
-          };
-          diagramDesigner.drawDiagram($("#creating-designer-canvas")[0],"line",curPosRelative);
+          diagramDesigner.drawDiagram($("#creating-designer-canvas")[0],"line",argList);
           curJqueryDiagram.detach()
                           .appendTo('.design-canvas')
                           .attr("id",newId)
@@ -973,7 +1004,7 @@ define(function(require, exports, module) {
         let curId = $(target).parent().attr("id");
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
 
-        // if(lineManager.isPointOnLine(curId,pos)) {
+        // if(lineDesigner.isPointOnLine(curId,pos)) {
         //   diagramDesigner.addDiagramControlOverlay(curId);
         // }
       },
@@ -1010,6 +1041,7 @@ define(function(require, exports, module) {
         let targetid = $(target).parent().attr("targetid");
         let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
         let posInfoOfDiagram = diagramDesigner.resolvePointInContainedDiagram(pos.x,pos.y);
+        argList = {};
 
         $(".canvas-container").css("cursor","default");
         $("#line-diagram-circle").hide();
@@ -1164,9 +1196,9 @@ define(function(require, exports, module) {
         argList["start"] = start
         argList["end"] = end;
         diagramDesigner.drawCanvasAndDiagram(targetid,argList);
-        lineManager.updateCurveControlPosition(targetid,isStart,pos);
-        lineManager.removeCurveOverlay(isStart);
-        lineManager.addCurveControlLine(targetid,{"isStart":isStart});
+        lineDesigner.updateCurveControlPosition(targetid,isStart,pos);
+        lineDesigner.removeCurveOverlay(isStart);
+        lineDesigner.addCurveControlLine(targetid,{"isStart":isStart});
       },
       lineControlOverlayMouseUpHandler : function(e) {
         if (_dragElement != null && _dragElement.className.indexOf("line-overlay-controlpoint") != -1) {
@@ -1181,7 +1213,7 @@ define(function(require, exports, module) {
           //real handler
           let targetid = $(target).parent().attr("targetid");
           let pos = diagramUtil.getRelativePosOffset(e.pageX,e.pageY,$(".design-canvas"));
-          lineManager.updateCurveControlPosition(targetid,isStart,pos);
+          lineDesigner.updateCurveControlPosition(targetid,isStart,pos);
 
           // this is how we know we're not dragging
           _dragElement = null;
