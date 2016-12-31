@@ -58,6 +58,7 @@ define(function(require, exports, module) {
      var isStart;
      var argList = {};       //used to store arguments in draw line
      var _bezierObj;
+     var control;
      var _mousePosDiagramArray = new Array();
 
      function ExtractNumber(value) {
@@ -805,6 +806,31 @@ define(function(require, exports, module) {
             argList["endControlY"] = endControl.y;
           }
 
+          control = {};
+          if(argList && argList.hasOwnProperty("startControlX") && argList.startControlX ) {
+            control.startControl = {
+              x: argList.startControlX,
+              y: argList.startControlY,
+            };
+          }
+          else {
+            control.startControl = {
+              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+              y: start.y,
+            };
+          }
+          if(argList && argList.hasOwnProperty("endControlX") && argList.endControlX ) {
+            control.endControl = {
+              x: argList.endControlX ,
+              y: argList.endControlY ,
+            };
+          }
+          else {
+            control.endControl = {
+              x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+              y: end.y,
+            };
+          }
           _bezierObj = null;
           _bezierObj = new Bezier(start.x,start.y,
                                  control.startControl.x,control.startControl.y,
@@ -815,7 +841,7 @@ define(function(require, exports, module) {
             width: _bezierObj.bbox().x.size + 20,
             height: _bezierObj.bbox().y.size + 20,
           });
-          curJqueryEle.css({
+          curJqueryDiagram.css({
             left: _bezierObj.bbox().x.min - 10,
             top: _bezierObj.bbox().y.min - 10,
             width: _bezierObj.bbox().x.size + 20,
@@ -840,6 +866,10 @@ define(function(require, exports, module) {
             x: pos.x,
             y: pos.y,
           };
+          if(Math.abs(start.x - end.x) <= 7 && Math.abs(start.y - end.y) <= 7) {
+            _dragElement = null;
+            return;
+          }
           let newId;
           let curPosRelative = {};
           let curJqueryCanvas = $("#creating-designer-canvas");
@@ -881,6 +911,36 @@ define(function(require, exports, module) {
               argList["endControlY"] = endControl.y;
             }
 
+            control = {};
+            if(argList && argList.hasOwnProperty("startControlX") && argList.startControlX ) {
+              control.startControl = {
+                x: argList.startControlX,
+                y: argList.startControlY,
+              };
+            }
+            else {
+              control.startControl = {
+                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                y: start.y,
+              };
+            }
+            if(argList && argList.hasOwnProperty("endControlX") && argList.endControlX ) {
+              control.endControl = {
+                x: argList.endControlX ,
+                y: argList.endControlY ,
+              };
+            }
+            else {
+              control.endControl = {
+                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
+                y: end.y,
+              };
+            }
+            _bezierObj = null;
+            _bezierObj = new Bezier(start.x,start.y,
+                                   control.startControl.x,control.startControl.y,
+                                   control.endControl.x,control.endControl.y,
+                                   end.x,end.y);
             curJqueryCanvas.attr({
               width: _bezierObj.bbox().x.size + 20,
               height: _bezierObj.bbox().y.size + 20,

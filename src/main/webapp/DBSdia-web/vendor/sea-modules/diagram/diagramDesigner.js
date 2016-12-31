@@ -717,25 +717,40 @@ define(function(require, exports, module) {
      */
       getAnchorPosByCurPos : function (x,y,d) {
         let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
-        let pointsInDiagram = [];
 
+        //traverse the circlePoints and set isPointIn ctx's Path
         for(let i in circlePoints) {
           if(this.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
-            pointsInDiagram.push(circlePoints[i]);
+            circlePoints[i].isPointInPath = true;
+          }
+          else {
+            circlePoints[i].isPointInPath = false;
           }
         }
 
+        //get two point in the boundary of InCtxPath Area / NotInCtxPath Area
+        let borderPointA,
+            borderPointB;
+        let length = circlePoints.length;
+        for (let i in circlePoints) {
+          if(circlePoints[i].isPointInPath == false) {
+            if (borderPointA == null) {
+              let prePoint = circlePoints[(i - 1 + length) % length]
+              if(prePoint.isPointInPath == true) { borderPointA = prePoint; }
+            }
+            if (borderPointB == null) {
+              let nextPoint = circlePoints[(i + 1 + length) % length];
+              if(nextPoint.isPointInPath == true) { borderPointB = nextPoint; }
+            }
+            if (borderPointA && borderPointB) { break; }
+          }
+        }
+
+        //get the farthest Point from given (x,y) point In diagram
         let farthestPointIndiagram = {};
-        // if(pointsInDiagram.length % 2 == 0) {
-        //   let tempA = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)],
-        //       tempB = pointsInDiagram[Math.floor(pointsInDiagram.length / 2) + 1];
-        //   farthestPointIndiagram.x = (tempA.x + tempB.x) / 2;
-        //   farthestPointIndiagram.y = (tempA.y + tempB.y) / 2;
-        // }
-        // else {
-        //   farthestPointIndiagram = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)];
-        // }
-        farthestPointIndiagram = pointsInDiagram[Math.floor(pointsInDiagram.length / 2)];
+        farthestPointIndiagram.x = (borderPointA.x + borderPointB.x) / 2;
+        farthestPointIndiagram.y = (borderPointA.y + borderPointB.y) / 2;
+
         let record;
         for(let lamda = 0.0; lamda <= 1.0; lamda += 0.1) {
           let curX = lamda * x + (1 - lamda) * farthestPointIndiagram.x,

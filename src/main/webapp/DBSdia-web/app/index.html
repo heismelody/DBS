@@ -129,10 +129,10 @@
               <div class="icon ico-back"></div>
             </div>
             <div class="toolbar-devider"></div>
-            <div id="bar-lock" title="Lock (Ctrl+L)" class="toolbar-button" v-bind:class="{ 'disabled': barlockDisabled }" @click.select="toolbarButtonClickHandler">
+            <div id="bar-lock" title="Lock (Ctrl+L)" class="toolbar-button" v-bind:class="{ 'disabled': barlockDisabled }" @click="toolbarButtonLockClickHandler">
               <div class="icon ico-lock"></div>
             </div>
-            <div id="bar-unlock" title="Unlock (Ctrl+Shift+L)" class="toolbar-button" v-bind:class="{ 'disabled': barunlockDisabled }" @click.select="toolbarButtonClickHandler">
+            <div id="bar-unlock" title="Unlock (Ctrl+Shift+L)" class="toolbar-button" v-bind:class="{ 'disabled': barunlockDisabled }" @click="toolbarButtonUnlockClickHandler">
               <div class="icon ico-unlock"></div>
             </div>
             <div class="toolbar-small-devider"></div>

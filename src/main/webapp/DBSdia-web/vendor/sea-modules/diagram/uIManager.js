@@ -134,6 +134,7 @@ define(function(require, exports, module) {
             lineColor: "rgb(50,50,50)",
             beginArrow: "",
             endArrow: "",
+            locked : false,
 
             //view var
             beginArrowStyle: "larrow-none",
@@ -169,6 +170,16 @@ define(function(require, exports, module) {
             targetMenuList:targetMenu,
           },
           watch : {
+            locked : function (val) {
+              if(val) {
+                this.barunlockDisabled = false;
+                this.barlockDisabled = true;
+              }
+              else {
+                this.barunlockDisabled = true;
+                this.barlockDisabled = false;
+              }
+            },
             beginArrow : function (val) {
               this.beginArrowStyle = "larrow-" + this.beginArrow.toLowerCase();
             },
@@ -210,8 +221,8 @@ define(function(require, exports, module) {
                 this.barendarrowDisabled = true,
                 this.barfrontDisabled = true,
                 this.barbackDisabled = true,
-                //this.barlockDisabled = true,
-                //this.barunlockDisabled = true,
+                this.barlockDisabled = true,
+                this.barunlockDisabled = true,
                 this.barlinkdisabled = true;
               }
               //current selected diagram is ONE diagram
@@ -238,8 +249,8 @@ define(function(require, exports, module) {
                   this.barendarrowDisabled = false,
                   this.barfrontDisabled = false,
                   this.barbackDisabled = false,
-                  //this.barlockDisabled = true,
-                  //this.barunlockDisabled = true,
+                  this.barlockDisabled = false,
+                  this.barunlockDisabled = true,
                   this.barlinkdisabled = true;
 
                   let fontStyle = diagramManager.getAttrById(val[0],{fontStyle:["color"]});
@@ -272,14 +283,24 @@ define(function(require, exports, module) {
                   this.barendarrowDisabled = true,
                   this.barfrontDisabled = false,
                   this.barbackDisabled = false,
-                  //this.barlockDisabled = true,
-                  //this.barunlockDisabled = true,
+                  this.barlockDisabled = false,
+                  this.barunlockDisabled = true,
                   this.barlinkdisabled = false;
 
-                  let fontStyle = diagramManager.getAttrById(val[0],{fontStyle:["color"]});
-                  let lineStyle = diagramManager.getAttrById(val[0],{lineStyle:["lineColor"]});
-                  let fillStyle = diagramManager.getAttrById(val[0],{fillStyle:[]});
+                  let fontStyle = diagramManager.getAttrById(val[0],{fontStyle:["color"]}),
+                      lineStyle = diagramManager.getAttrById(val[0],{lineStyle:["lineColor"]}),
+                      fillStyle = diagramManager.getAttrById(val[0],{fillStyle:[]}),
+                      lock = diagramManager.getAttrById(val[0],{locked:[]});
 
+                  this.locked = lock.locked;
+                  if(this.locked) {
+                    this.barunlockDisabled = false;
+                    this.barlockDisabled = true;
+                  }
+                  else {
+                    this.barunlockDisabled = true;
+                    this.barlockDisabled = false;
+                  }
                   if(fillStyle.type == "solid") {
                     this.fillColor = "rgb(" + fillStyle.color + ")";
                   }
@@ -362,6 +383,46 @@ define(function(require, exports, module) {
                   target       : this.targetMenuList[curId],
                   initFunction : targetMenuListInitHandler[curId]
                 });
+              }
+            },
+            toolbarButtonLockClickHandler : function (e) {
+              let isButton = e.target.className.indexOf("toolbar-button") != -1 ? true : false;
+              let isIcon = e.target.className.indexOf("icon") != -1  ? true : false;
+              let curButton;
+
+              //set the current click element
+              if(isButton) {
+                curButton = e.target;
+              }
+              else if(isIcon || isTextContent || isBtnColor) {
+                curButton = $(e.target).parent()[0];
+              }
+
+              if(!$(curButton).hasClass("disabled")) {
+                diagramManager.setAttr(this.selectedObj[0],{locked:true});
+                this.locked = true;
+                selectedManager.setSelected(this.selectedObj[0]);
+                $("#page-contextual-properties-dialog-trigger").hide();
+              }
+            },
+            toolbarButtonUnlockClickHandler : function (e) {
+              let isButton = e.target.className.indexOf("toolbar-button") != -1 ? true : false;
+              let isIcon = e.target.className.indexOf("icon") != -1  ? true : false;
+              let curButton;
+
+              //set the current click element
+              if(isButton) {
+                curButton = e.target;
+              }
+              else if(isIcon || isTextContent || isBtnColor) {
+                curButton = $(e.target).parent()[0];
+              }
+
+              if(!$(curButton).hasClass("disabled")) {
+                diagramManager.setAttr(this.selectedObj[0],{locked:false});
+                this.locked = false;
+                selectedManager.setSelected(this.selectedObj[0]);
+                $("#page-contextual-properties-dialog-trigger").hide();
               }
             },
 
