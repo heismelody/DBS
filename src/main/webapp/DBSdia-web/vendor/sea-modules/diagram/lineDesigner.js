@@ -19,7 +19,16 @@ define(function(require, exports, module) {
      * Defination of the API;
      * --------------------------------------------------------------------------
      */
-     //diagram Object is identified by id
+     /**The line need to be stored in three place if necessary
+     *  1. if a line connect two diagram, it should be stored in
+     *  lineObj's {from.Id,to.Id}: the from.Id, to.Id is the diagram's Id
+     *  it from and to.It also should be stored in these two connected diagrams.
+     *  linkerList["xxx",] xxx is line's id.
+     *  2.if a line only connect one diagram,
+     *  lineObj {from.Id,to.Id}: only store the id it connected
+     *  diagramObj linkerList: store line's id
+     *  3.not connect diagram.
+     */
      var defaultLineTemplate =  {
      		id: "",
      		name: "line",
@@ -29,15 +38,19 @@ define(function(require, exports, module) {
      		group: "",
      		groupName: null,
      		locked: false,
-     		linkStart: "",
-        linkEnd: "",
+     		from : {
+          id: "",
+          angle: 0,
+        },
+        to : {
+          id: "",
+          angle: 0,
+        },
      		properties: {
      			startX: 0,
      			startY: 0,
      			endX : 120,
      			endY : 80,
-          startAngle: 0,
-          endAngle: 0,
           width : 0,
           height : 0,
      			zindex: 0,
@@ -55,342 +68,274 @@ define(function(require, exports, module) {
     var _bezierObj = {};
 
     var lineDesigner = {
-      getStartPosition : function(lineId) {
-        let curProperties = diagramManager.getAttrById(lineId,{properties:[]});
-
+      /**
+      *  1 from/to ojbect stored in line object : { id: "", angle: 0 }
+      *  2 from/to ojbect used in other place to represent a line's position:
+      *                                     { x: 0, y: 0, angle: 0 }
+      */
+      getFromToObjectById : function (lineId) {
+        let properties = diagramManager.getAttrById(lineId,{properties:[]}),
+            from = diagramManager.getAttrById(lineId,{from:[]}),
+            to = diagramManager.getAttrById(lineId,{to:[]});
         return {
-          x: curProperties["startX"],
-          y: curProperties["startY"],
-        };
+          from: {
+            x: properties.startX,
+            y: properties.startY,
+            angle: from.angle,
+          },
+          to : {
+            x: properties.endY,
+            y: properties.endX,
+            angle: to.angle,
+          },
+        }
       },
-      getEndPosition : function(lineId) {
-        let curProperties = diagramManager.getAttrById(lineId,{properties:[]});
-
+      getFromObjectById : function (lineId) {
+        let properties = diagramManager.getAttrById(lineId,{properties:["startX","startY"]}),
+            from = diagramManager.getAttrById(lineId,{from:[]});
         return {
-          x: curProperties["endX"],
-          y: curProperties["endY"],
-        };
+          from: {
+            x: properties.startX,
+            y: properties.startY,
+            angle: from.angle,
+          },
+        }
       },
-      getCotrolPosition : function(lineId) {
-        let curProperties = diagramManager.getAttrById(lineId,{properties:[]});
+      getToObjectById : function (lineId) {
+        let properties = diagramManager.getAttrById(lineId,{properties:["endX","endY"]}),
+            to = diagramManager.getAttrById(lineId,{to:[]});
+        return {
+          to : {
+            x: properties.endY,
+            y: properties.endX,
+            angle: to.angle,
+          },
+        }
+      },
+
+      genFromToObject : function (startX,startY,endX,endY,startAngle,endAngle) {
+        return {
+          from: {
+            x: startX,
+            y: startY,
+            angle: startAngle,
+          },
+          to : {
+            x: endX,
+            y: endY,
+            angle: endAngle,
+          },
+        }
+      },
+      genFromObject : function (startX,startY,startAngle) {
+        return {
+          from: {
+            x: startX,
+            y: startY,
+            angle: startAngle,
+          },
+        }
+      },
+      genToObject : function (endX,endY,endAngle) {
+        return {
+          to : {
+            x: endX,
+            y: endY,
+            angle: endAngle,
+          },
+        }
+      },
+      calControlPoint : function (from,to) {
         let control = {};
-        let end = {
-              x: curProperties.endX,
-              y: curProperties.endY,
-            },
-            start = {
-              x: curProperties.startX,
-              y: curProperties.startY,
-            };
 
-        //start control point defined
-        if(curProperties.hasOwnProperty("startControlX") && curProperties.startControlX) {
-          control["startControl"] = {
-            x: curProperties.startControlX,
-            y: curProperties.startControlY,
-          };
+        //calculate start control point
+        if(from.angle == null) {
+          control["from"] = {
+            x: from.x * 2 / 5 + to.x * 3 / 5,
+            y: from.y * 2 / 5 + to.y * 3 / 5,
+          }
         }
-        //start control point undefined
         else {
-          control["startControl"] = {
-            x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-            y: start.y,
-          };
+          let distance = diagramUtil.calDistance(from,to);
+
+          distance = distance * 2 / 5;
+          control["from"] = {
+            x: from.x - Math.cos(from.angle) * distance,
+            y: from.y + Math.sin(from.angle) * distance,
+          }
         }
 
-        //end control point defined
-        if (curProperties.hasOwnProperty("endControlX") && curProperties.endControlX) {
-          control["endControl"] = {
-            x: curProperties.endControlX,
-            y: curProperties.endControlY,
-          };
+        //calculate end control point
+        if(to.angle == null) {
+          control["to"] = {
+            x: to.x * 2 / 5 + from.x * 3 / 5,
+            y: to.y * 2 / 5 + from.y * 3 / 5,
+          }
         }
-        //end control point undefined
         else {
-          control["endControl"] = {
-            x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-            y: end.y,
-          };
-        }
+          let distance = diagramUtil.calDistance(from,to);
 
+          distance = distance * 2 / 5;
+          control["to"] = {
+            x: to.x - Math.cos(to.angle) * distance,
+            y: to.y + Math.sin(to.angle) * distance,
+          }
+        }
         return control;
       },
-      isPointOnLine : function(lineId,currPoint) {
-        let curLineType = objectManager.getLineTypeById(lineId);
 
-        switch (curLineType) {
-          case "basic":
-            return this._isPointOnBasicLine(currPoint,lineId);
-            break;
-          case "curve":
-            return this._isPointOnBezierCurve(currPoint,lineId);
-            break;
-          default:
+      posToRelative : function (canvas,pos) {
+        let left = parseFloat($(canvas).parent().css("left")),
+            top = parseFloat($(canvas).parent().css("top"));
 
+        pos.x = pos.x - left;
+        pos.y = pos.y - top;
+        return pos;
+      },
+
+      //-start-------------most used draw functions------------------
+      drawLineContainerById : function (lineId,from,to) {
+        let jqObj = $("#" + lineId),
+            jqCanvas = jqObj.find("canvas");
+
+        let linetype = objectManager.getLineTypeById(lineId);
+
+        if(linetype == "basic") {
+          jqCanvas.attr({
+            width: Math.abs(from.x - to.x) + 20,
+            height: Math.abs(from.y - to.y) + 20,
+          });
+          jqObj.css({
+            left: Math.min(from.x,to.x) - 10,
+            top: Math.min(from.y,to.y) - 10,
+            width: Math.abs(from.x - to.x) + 20,
+            height: Math.abs(from.y - to.y) + 20,
+          });
         }
-      },
-      _isPointOnBasicLine : function(currPoint,lineId) {
-        let point1 = this.getStartPosition(lineId);
-        let point2 = this.getEndPosition(lineId);
-
-        if((currPoint.x >= Math.min(point1.x,point2.x) && currPoint.x <= Math.max(point1.x,point2.x))
-           && (currPoint.y >= Math.min(point1.y,point2.y) && currPoint.y <= Math.max(point1.y,point2.y)) ) {
-          return Math.abs((currPoint.y - point1.y)*(point2.x - point1.x) - (currPoint.x - point1.x)*(point2.y - point1.y)) <= 2500;
-        }
-        else {
-          return false;
-        }
-      },
-      _isPointOnBezierCurve : function(point,lineId) {
-        let start = this.getStartPosition(lineId),
-            end = this.getEndPosition(lineId),
-            control = this.getCotrolPosition(lineId);
-        _bezierObj = null;
-        _bezierObj = new Bezier(start.x,start.y,
-                               control.startControl.x,control.startControl.y,
-                               control.endControl.x,control.endControl.y,
-                               end.x,end.y);
-
-        let curProject = _bezierObj.project(point);
-        return curProject.d <= 5 ? true : false;
-      },
-      _isPointOnStepLine : function(point,lineId) {
-
-      },
-      drawLineById : function (lineId) {
-        let jqObj = $("#" + lineId);
-        let canvas = jqObj.find("canvas")[0];
-        let ctx = canvas.getContext("2d");
-        let linetype = diagramManager.getAttrById(lineId,{linetype:[]});
-        let curProperties = diagramManager.getAttrById(lineId,{properties: ["startX","startY","endX","endY"]});
-        let start = {
-              x : curProperties["startX"],
-              y : curProperties["startY"],
-            },
-            end = {
-              x : curProperties["endX"],
-              y : curProperties["endY"],
-            };
-        let lineStyle = diagramManager.getAttrById(lineId,{lineStyle:[]});
-        let argList = {};
-
-        linetype = linetype.linetype;
-        start = {
-          x: start.x - parseFloat(jqObj.css("left")),
-          y: start.y - parseFloat(jqObj.css("top")),
-        };
-        end = {
-          x: end.x - parseFloat(jqObj.css("left")),
-          y: end.y - parseFloat(jqObj.css("top")),
-        };
-        switch (linetype) {
-          case "curve":
-            let properties = diagramManager.getAttrById(lineId,{properties:[]});
-
-            argList.startControlX = properties.startControlX - parseFloat(jqObj.css("left"));
-            argList.startControlY = properties.startControlY - parseFloat(jqObj.css("top"));
-            argList.endControlX = properties.endControlX - parseFloat(jqObj.css("left"));
-            argList.endControlY = properties.endControlY - parseFloat(jqObj.css("top"));
-            break;
-          default:
-
-        }
-
-        let styleArgList = {};
-        styleArgList.lineStyle = lineStyle;
-        this.resolveStyle(ctx,styleArgList);
-
-        argList.beginArrow = lineStyle.beginArrow;
-        argList.endArrow = lineStyle.endArrow;
-        this.drawTextAreaById(lineId);
-        this.drawLine(canvas,linetype,start,end,argList);
-      },
-      //when you draw the line, you should change coordinates to relative position of the canvas.
-      //you should notice that after you change the size of canvas, the context change so you have to
-      //reset the lineStyle and other properties.
-      drawCanvasAndLine : function(lineId,argList) {
-        let start = argList["start"],
-            end = argList["end"];
-        let curJqueryEle = $("#" + lineId);
-        let ctx = curJqueryEle.find("canvas")[0].getContext("2d");
-        let curLineType = objectManager.getLineTypeById(lineId);
-
-
-        //-------draw text area start--------------
-        let textareajqObj = $("#" + lineId).find("textarea");
-        let textArea = diagramManager.getAttrById(lineId,{textArea:["position"]}),
-            fontStyle = diagramManager.getAttrById(lineId,{fontStyle:[]});
-        let textAreaArgList = {};
-
-        textArea = diagramUtil.evaluateLineTextArea(textArea["position"],curLineType,{
-          startX: start.x,
-          startY: start.y,
-          endX: end.x,
-          endY: end.y,
-        });
-        textAreaArgList.textArea = textArea;
-        textAreaArgList.fontStyle = fontStyle;
-
-        this.drawTextArea(textareajqObj,textAreaArgList);
-        //----------draw text area end--------------
-
-        let curEndRelative;
-        let curStartRelative;
-        let curJqueryCanvas = curJqueryEle.find("canvas");
-        if(curLineType == "curve") {
-          // if(!argList.hasOwnProperty("startControl") && !argList.hasOwnProperty("endControl")) {
-          //   argList = {
-          //     "startControl" : {
-          //         x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-          //         y: start.y,
-          //     },
-          //     "endControl" : {
-          //       x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-          //       y: end.y,
-          //     }
-          //   };
-          // }
-          // else if(!argList.hasOwnProperty("startControl")){
-          //   argList["startControl"] = {
-          //       x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-          //       y: start.y,
-          //   };
-          // }
-          // else if(!argList.hasOwnProperty("endControl")){
-          //   argList["endControl"] = {
-          //     x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-          //     y: end.y,
-          //   };
-          // }
-          let properties = diagramManager.getAttrById(lineId,{properties:[]});
-          let control = {
-            startControl : {
-              x: properties.startControlX,
-              y: properties.startControlY,
-            },
-            endControl : {
-              x: properties.endControlX,
-              y: properties.endControlY,
-            },
-          };
+        else if(linetype == "curve") {
+          let control = this.calControlPoint(from,to);
 
           _bezierObj = null;
-          _bezierObj = new Bezier(start.x,start.y,
-                                 control.startControl.x,control.startControl.y,
-                                 control.endControl.x,control.endControl.y,
-                                 end.x,end.y);
+          _bezierObj = new Bezier(from.x,from.y,
+                                 control.from.x,control.from.y,
+                                 control.to.x,control.to.y,
+                                 to.x,to.y);
 
-          curJqueryCanvas.attr({
+          jqCanvas.attr({
             width: _bezierObj.bbox().x.size + 20,
             height: _bezierObj.bbox().y.size + 20,
           });
-          curJqueryEle.css({
+          jqObj.css({
             left: _bezierObj.bbox().x.min - 10,
             top: _bezierObj.bbox().y.min - 10,
             width: _bezierObj.bbox().x.size + 20,
             height: _bezierObj.bbox().y.size + 20,
           });
-          curStartRelative = {
-            x: start.x - parseFloat(curJqueryEle.css("left")),
-            y: start.y - parseFloat(curJqueryEle.css("top")),
-          };
-          curEndRelative = {
-            x: end.x - parseFloat(curJqueryEle.css("left")),
-            y: end.y - parseFloat(curJqueryEle.css("top")),
-          };
-          argList.startControlX = control.startControl.x - parseFloat(curJqueryEle.css("left"));
-          argList.startControlX = control.startControl.y - parseFloat(curJqueryEle.css("top"));
-          argList.endControlX = control.endControl.x - parseFloat(curJqueryEle.css("left"));
-          argList.endControlY = control.endControl.y - parseFloat(curJqueryEle.css("top"));
-          this.drawLine(curJqueryCanvas[0],curLineType,curStartRelative,curEndRelative,argList);
         }
-        else {
-          curJqueryCanvas.attr({
-            width: Math.abs(end.x - start.x) + 20,
-            height: Math.abs(end.y - start.y) + 20,
-          });
-          curJqueryEle.css({
-            left: Math.min(start.x,end.x) - 10,
-            top: Math.min(start.y,end.y) - 10,
-            width: Math.abs(end.x - start.x) + 20,
-            height: Math.abs(end.y - start.y) + 20,
-          });
-          curStartRelative = {
-            x: start.x - parseFloat(curJqueryEle.css("left")),
-            y: start.y - parseFloat(curJqueryEle.css("top")),
-          };
-          curEndRelative = {
-            x: end.x - parseFloat(curJqueryEle.css("left")),
-            y: end.y - parseFloat(curJqueryEle.css("top")),
-          };
+        else if(linetype == "step") {
 
-
-          //----------resolve line style start--------------
-          let lineStyle = diagramManager.getAttrById(lineId,{lineStyle:[]});
-          let styleArgList = {};
-
-          styleArgList.lineStyle = lineStyle;
-          argList.beginArrow = lineStyle.beginArrow;
-          argList.endArrow = lineStyle.endArrow;
-          this.resolveStyle(ctx,styleArgList);
-          //----------resolve line style end--------------
-
-
-          this.drawLine(curJqueryCanvas[0],curLineType,curStartRelative,curEndRelative,argList);
         }
       },
-      drawLine : function(canvas,linetype,start,end,argList) {
+      drawLineById : function (lineId) {
+        let jqObj = $("#" + lineId),
+            canvas = jqObj.find("canvas")[0],
+            ctx = canvas.getContext("2d");
+
+        let linetype = objectManager.getLineTypeById(lineId),
+            lineStyle = diagramManager.getAttrById(lineId,{lineStyle:[]}),
+            fromAndTo = this.getFromToObjectById(lineId);
+
+        //1,set line style
+        this._resolveStyle(ctx,{"lineStyle":lineStyle});
+        //2.draw text area
+        this.drawTextAreaById(lineId);
+        //3.set arrow
+        from.beginArrow = lineStyle.beginArrow;
+        to.endArrow = lineStyle.endArrow;
+        //4.draw line
+        this.drawLine(canvas,linetype,fromAndTo.from,fromAndTo.to)
+      },
+      /**
+      *  you should notice that after you change the size of canvas, the ctx changed. so you have to
+      *  reset the lineStyle and other properties.
+      */
+      drawCanvasAndLine : function(lineId,from,to) {
+        let curJqueryEle = $("#" + lineId),
+            curJqueryCanvas = curJqueryEle.find("canvas"),
+            ctx = curJqueryEle.find("canvas")[0].getContext("2d");
+
+        let linetype = objectManager.getLineTypeById(lineId);
+
+        //1.set container position and height/width
+        this.drawLineContainerById(lineId,from,to);
+        //2.draw text area
+        let textareajqObj = $("#" + lineId).find("textarea");
+        let textArea = diagramManager.getAttrById(lineId,{textArea:["position"]}),
+            fontStyle = diagramManager.getAttrById(lineId,{fontStyle:[]});
+        let textAreaPos;
+
+        textAreaPos = diagramUtil.evaluateLineTextArea(textArea["position"],linetype,{
+          "from" : fromAndTo.from,
+          "to" : fromAndTo.to,
+        });
+        this.drawTextArea(textareajqObj,textAreaPos,fontStyle);
+        //3,set line style
+        let lineStyle = diagramManager.getAttrById(lineId,{lineStyle:[]});
+        this._resolveStyle(ctx,{"lineStyle":lineStyle});
+        //4.set arrow
+        from.beginArrow = lineStyle.beginArrow;
+        to.endArrow = lineStyle.endArrow;
+        //5.draw line
+        this.drawLine(curJqueryCanvas[0],linetype,from,to);
+      },
+      /**
+     * draw line
+     * @param {object} canvas - canvas object
+     * @param {string} linetype - linetype : basic / step / curve
+     * @param {object} from - {
+     *                          x: 0,
+     *                          y: 0,
+     *                          angle : 0,
+     *                          beginArrow : "",
+     *                        }
+     * @param {object} to - {
+     *                          x: 0,
+     *                          y: 0,
+     *                          angle : "xxxxxx",
+     *                          endArrow : "",
+     *                      }
+     */
+      drawLine : function (canvas,linetype,from,to) {
         let ctx = canvas.getContext("2d");
+
+        from = this.posToRelative(canvas,from);
+        to = this.posToRelative(canvas,to);
 
         switch (linetype) {
           case "basic":
-            this.drawBasicLine.call(ctx,start,end);
-            if(argList && argList.hasOwnProperty("beginArrow") && argList.hasOwnProperty("endArrow")) {
-              let arrowStyle = {
-                beginArrow: argList.beginArrow,
-                endArrow: argList.endArrow,
-              };
-              this._drawArrow(ctx,start.x,start.y,end.x,end.y,arrowStyle);
-            }
+            let arrowStyle = {
+              beginArrow: from.beginArrow,
+              endArrow: to.endArrow,
+            };
+
+            this._drawBasicLine.call(ctx,from,to);
+            this._drawArrow(ctx,from.x,from.y,to.x,to.y,arrowStyle);
             break;
           case "step":
-            this.drawStepLine.call(ctx,start,end);
+            //this.drawStepLine.call(ctx,from,end);
             break;
           case "curve":
-            let control = {};
-            if(argList && argList.hasOwnProperty("startControlX") && argList.startControlX ) {
-              control.startControl = {
-                x: argList.startControlX,
-                y: argList.startControlY,
-              };
-            }
-            else {
-              control.startControl = {
-                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                y: start.y,
-              };
-            }
-            if(argList && argList.hasOwnProperty("endControlX") && argList.endControlX ) {
-              control.endControl = {
-                x: argList.endControlX ,
-                y: argList.endControlY ,
-              };
-            }
-            else {
-              control.endControl = {
-                x: Math.min(start.x,end.x) + Math.abs(start.x - end.x)/2,
-                y: end.y,
-              };
-            }
-            this.drawBezierCurve.call(ctx,start,control.startControl,end,control.endControl);
+            let control = this.calControlPoint(from,to);
+
+            this._drawBezierCurve.call(ctx,start,control.from,end,control.to);
             break;
           default:
-            this.drawBasicLine.call(ctx,start,end);
+            //this.drawBasicLine.call(ctx,start,end);
         }
-
       },
+      //-end-------------most used draw functions------------------
 
-      drawBasicLine : function(start,end) {
+      _drawBasicLine : function(start,end) {
         let w = this.canvas.width;
         let h = this.canvas.height;
 
@@ -412,7 +357,7 @@ define(function(require, exports, module) {
         this.stroke();
         this.closePath();
       },
-      drawStepLine : function(start,end) {
+      _drawStepLine : function(start,end) {
         let w = this.canvas.width;
         let h = this.canvas.height;
         if(arguments.length == 2) {
@@ -427,7 +372,7 @@ define(function(require, exports, module) {
         this.stroke();
         this.closePath();
       },
-      drawBezierCurve : function(start,startControl,end,endControl) {
+      _drawBezierCurve : function(start,startControl,end,endControl) {
         let w = this.canvas.width;
         let h = this.canvas.height;
 
@@ -438,212 +383,7 @@ define(function(require, exports, module) {
         this.stroke();
         this.closePath();
       },
-      //http://stackoverflow.com/questions/4270485/drawing-lines-on-html-page
-      drawLineWithoutCanvas : function(start,end,className,appendedElement) {
-        let lineHtml = "<div class=" + className + "></div>";
-        let a = start.x - end.x,
-            b = start.y - end.y,
-            length = Math.sqrt(a * a + b * b);
-        let sx = (start.x + end.x) / 2,
-            sy = (start.y + end.y) / 2;
-        let x = sx - length / 2,
-            y = sy;
-        let angle = Math.PI - Math.atan2(-b, a);
-
-        $(lineHtml).appendTo($(appendedElement))
-                   .attr("style",'width: ' + length + 'px; '
-                                + '-moz-transform: rotate(' + angle + 'rad); '
-                                + '-webkit-transform: rotate(' + angle + 'rad); '
-                                + '-o-transform: rotate(' + angle + 'rad); '
-                                + '-ms-transform: rotate(' + angle + 'rad); '
-                                + 'top: ' + y + 'px; '
-                                + 'left: ' + x + 'px; ');
-        return $(lineHtml);
-      },
-      addLineOverlay : function(lineId) {
-        let canvas = $("#" + lineId).find("canvas")[0];
-        let start = this.getStartPosition(lineId);
-        let end = this.getEndPosition(lineId);
-        let curLineType = objectManager.getLineTypeById(lineId);
-
-        if($("#line-overlay-container").length != 0) {
-          $("#line-overlay-container").remove();
-        }
-        if(curLineType == "curve") {
-          this.addLineEndPoints(canvas,start,end);
-          this.addCurveControlPoint(canvas);
-        }
-        else {
-          this.addLineEndPoints(canvas,start,end);
-        }
-        this.addLineHightlight(canvas);
-      },
-      addLineEndPoints : function(canvas,start,end) {
-        let controlsHtml = "<div id='line-overlay-container' targetid='" + $(canvas).parent().attr("id") + "'></div>";
-        let startHtml = "<div class='line-overlay-point line-overlay-start'></div>";
-        let endHtml = "<div class='line-overlay-point line-overlay-end'></div>";
-
-        $(controlsHtml).appendTo(".design-canvas");
-        $(startHtml).appendTo("#line-overlay-container").css({
-          left: start.x - 6,
-          top: start.y - 6,
-        });
-        $(endHtml).appendTo("#line-overlay-container").css({
-          left: end.x - 6,
-          top: end.y - 6,
-        });
-      },
-      addCurveControlPoint : function(canvas) {
-        let lineId = $(canvas).parent().attr("id");
-        let start = this.getStartPosition(lineId);
-        let end = this.getEndPosition(lineId);
-        let startHtml = "<div class='line-overlay-controlpoint line-overlay-controlstart'></div>";
-        let endHtml = "<div class='line-overlay-controlpoint line-overlay-controlend'></div>";
-        let controlPoint = this.getCotrolPosition(lineId);
-
-        if($("#line-overlay-container").length == 0) {
-          let controlsHtml = "<div id='line-overlay-container' targetid='" + lineId + "'></div>";
-          $(controlsHtml).appendTo(".design-canvas");
-        }
-
-        this.drawLineWithoutCanvas(start,controlPoint.startControl,"line-overlay-start-controlline",$("#line-overlay-container")[0]);
-        this.drawLineWithoutCanvas(end,controlPoint.endControl,"line-overlay-end-controlline",$("#line-overlay-container")[0]);
-        $(startHtml).appendTo("#line-overlay-container").css({
-          left: controlPoint.startControl.x - 4,
-          top: controlPoint.startControl.y - 4,
-        });
-        $(endHtml).appendTo("#line-overlay-container").css({
-          left: controlPoint.endControl.x - 4,
-          top: controlPoint.endControl.y - 4,
-        });
-      },
-      addCurveControlLine : function (lineId,argList) {
-        let isStart = (argList && argList.hasOwnProperty("isStart")) ? argList.isStart : undefined;
-        let start = this.getStartPosition(lineId);
-        let end = this.getEndPosition(lineId);
-        let controlPoint = this.getCotrolPosition(lineId);
-
-        if(isStart == undefined) {
-          this.drawLineWithoutCanvas(start,controlPoint.startControl,"line-overlay-start-controlline",$("#line-overlay-container")[0]);
-          this.drawLineWithoutCanvas(end,controlPoint.endControl,"line-overlay-end-controlline",$("#line-overlay-container")[0]);
-        }
-        else if(isStart) {
-          this.drawLineWithoutCanvas(start,controlPoint.startControl,"line-overlay-start-controlline",$("#line-overlay-container")[0]);
-        }
-        else {
-          this.drawLineWithoutCanvas(end,controlPoint.endControl,"line-overlay-end-controlline",$("#line-overlay-container")[0]);
-        }
-
-      },
-      removeCurveOverlay : function (isStart) {
-        if(isStart) {
-          ($(".line-overlay-start-controlline").length != 0) ? $(".line-overlay-start-controlline").remove() : "";
-        }
-        else {
-          ($(".line-overlay-end-controlline").length != 0) ? $(".line-overlay-end-controlline").remove() : "";
-        }
-      },
-      addLineHightlight : function(canvas) {
-        let ctx = canvas.getContext("2d");
-
-        ctx.isHighlight = true;
-      },
-      removeHightlight : function (canvas) {
-        let ctx = canvas.getContext("2d");
-
-        ctx.isHighlight = false;
-        $("#line-overlay-container").remove();
-      },
-
-      drawTextAreaById : function (lineId) {
-        let diagramEle = $("#" + lineId);
-        let canvas = diagramEle.find("canvas")[0];
-        let jquerytextArea = diagramEle.find("textarea");
-        if(jquerytextArea.length == 0) { return ;}
-        let textAreaPos = diagramManager.getAttrById(lineId,{textArea:[]}),
-            fontStyle = diagramManager.getAttrById(lineId,{fontStyle:[]}),
-            lineType = objectManager.getLineTypeById(lineId);
-            pos = diagramManager.getAttrById(lineId,{properties:[]});
-        let textArea;
-        let argList = {};
-
-        textArea = diagramUtil.evaluateLineTextArea(textAreaPos["position"],lineType,{
-            startX: pos.startX,
-            startY: pos.startY,
-            endX: pos.endX,
-            endY: pos.endY,
-        });
-        argList = {
-          "textArea": textArea,
-          "fontStyle": fontStyle,
-        };
-
-        this.drawTextArea(jquerytextArea,argList);
-      },
-      drawTextArea : function (textareajqObj,argList) {
-        if(textareajqObj.length == 0) { return; }
-        let diagramEle = textareajqObj.parent();
-        let canvas = textareajqObj.siblings("canvas")[0];
-        let textAreaPos = argList.textArea,
-            fontStyle = argList.fontStyle;
-        let w = 50;
-        //let h = 0;
-        let text;
-        let textAreaStyle = {
-          "width"          : w + "px",
-          "z-index"        : "50",
-          "line-height"    : Math.round(fontStyle.size * 1.25) + "px",
-          "font-size"      : fontStyle.size + "px",
-          "font-family"    : fontStyle.fontFamily,
-          "font-weight"    : fontStyle.bold ? "bold" : "normal",
-          "font-style"     : fontStyle.italic ? "italic" : "normal",
-          "color"          : "rgb(" + fontStyle.color + ")",
-          "text-decoration": fontStyle.underline ? "underline" : "none"
-        }
-        text = textareajqObj.val();
-        text = (text == undefined) ? "" : text ;
-
-        textareajqObj.css({
-                      "left": textAreaPos.x - 26 - parseInt(diagramEle.css("left")),
-                      "top": textAreaPos.y - 17 - parseInt(diagramEle.css("top")),
-                      })
-                     .css(textAreaStyle)
-                     .val(text);
-      },
-      addLineTextArea : function (diagramId,argList) {
-        let diagramEle = $("#" + diagramId);
-        let canvas = diagramEle.find("canvas")[0];
-        let textAreaHtml = "<textarea id='shape-textarea-editing' target='" + diagramId + "'></textarea>";
-        let fontStyle = argList.fontStyle;
-        let textAreaPos = argList.textArea;
-        let w = 50;
-        //let h = 0;
-        let text;
-        let textAreaStyle = {
-          "width"          : w + "px",
-          "z-index"        : "50",
-          "line-height"    : Math.round(fontStyle.size * 1.25) + "px",
-          "font-size"      : fontStyle.size + "px",
-          "font-family"    : fontStyle.fontFamily,
-          "font-weight"    : fontStyle.bold ? "bold" : "normal",
-          "font-style"     : fontStyle.italic ? "italic" : "normal",
-          "color"          : "rgb(" + fontStyle.color + ")",
-          "text-decoration": fontStyle.underline ? "underline" : "none"
-        }
-        text = diagramEle.find("textarea").val();
-        text = (text == undefined) ? "" : text ;
-        diagramEle.find("textarea").remove();
-
-        $(textAreaHtml).appendTo($(".design-canvas"))
-                        .css({
-                          "left": textAreaPos.x - 26,
-                          "top": textAreaPos.y - 17,
-                        })
-                       .css(textAreaStyle)
-                       .val(text)
-                       .select();
-      },
-      resolveStyle : function (ctx,argList) {
+      _resolveStyle : function (ctx,argList) {
         if(argList.hasOwnProperty("lineStyle")) {
           let lineStyle = argList.lineStyle;
 
@@ -678,8 +418,10 @@ define(function(require, exports, module) {
                :ctx.strokeStyle = "rgba(255,255,255,0)";
         }
       },
-      //http://www.dbp-consulting.com/tutorials/canvas/CanvasArrow.html
-      //(x1,y1) is start point , (x2,y2) is end point
+      /**
+      *  http://www.dbp-consulting.com/tutorials/canvas/CanvasArrow.html
+      *  (x1,y1) is start point , (x2,y2) is end point
+      */
       _drawArrow : function(ctx,x1,y1,x2,y2,style,angle,d) {
         'use strict';
         // Ceason pointed to a problem when x1 or y1 were a string, and concatenation
@@ -786,19 +528,924 @@ define(function(require, exports, module) {
         }
       },
 
-      //The line need to be stored in three place if necessary
-      //1. if a line connect two diagram, it should be stored in
-      //lineObj's {fromId,toId}: the fromId, toId is the diagram's Id
-      //it from and to.It also should be stored in these two connected diagrams.
-      //linkerList["xxx",] xxx is line's id.
-      //2.if a line only connect one diagram,
-      //lineObj {fromId,toId}: only store the id it connected
-      //diagramObj linkerList: store line's id
-      //3.not connect diagram.
-      //lineObj {fromId,toId}: fromId = null, toId = null
-      f : function () {
+      //-start-------common line overlay op------------------------
+      addLineOverlay : function(lineId) {
+        let canvas = $("#" + lineId).find("canvas")[0];
+
+        let fromAndTo = this.getFromToObjectById(lineId),
+            linetype = objectManager.getLineTypeById(lineId);
+
+        //1.remove line overlay container if exist
+        if($("#line-overlay-container").length != 0) {
+          $("#line-overlay-container").remove();
+        }
+        //2.draw control point, control line
+        if(linetype == "curve") {
+          this.addCurveControlLineNPoints(lineId);
+        }
+        //2.draw end point
+        this.addLineEndPoints(canvas,fromAndTo.from,fromAndTo.to);
+        //3.draw highlight
+        this.addLineHighlight(canvas);
+      },
+      addLineEndPoints : function(canvas,start,end) {
+        let controlsHtml = "<div id='line-overlay-container' targetid='" + $(canvas).parent().attr("id") + "'></div>",
+            startHtml = "<div class='line-overlay-point line-overlay-start'></div>",
+            endHtml = "<div class='line-overlay-point line-overlay-end'></div>";
+
+        $(controlsHtml).appendTo(".design-canvas");
+        $(startHtml).appendTo("#line-overlay-container").css({
+          left: start.x - 6,
+          top: start.y - 6,
+        });
+        $(endHtml).appendTo("#line-overlay-container").css({
+          left: end.x - 6,
+          top: end.y - 6,
+        });
+      },
+      //-end-------common line overlay op------------------------
+
+
+      //-start-----------curve line control overlay op ------------
+      addCurveControlLineNPoints : function(lineId) {
+        let fromAndTo = this.getFromToObjectById(lineId);
+
+        let startHtml = "<div class='line-overlay-controlpoint line-overlay-controlstart'></div>",
+            endHtml = "<div class='line-overlay-controlpoint line-overlay-controlend'></div>";
+
+        let controlPoint = this.calControlPoint(fromAndTo.from,fromAndTo.to);
+
+        //1.create line overlay container if not exist.
+        if($("#line-overlay-container").length == 0) {
+          let controlsHtml = "<div id='line-overlay-container' targetid='" + lineId + "'></div>";
+          $(controlsHtml).appendTo(".design-canvas");
+        }
+        //2.draw curve control line
+        diagramUtil.drawLineUsingCSS(from,control.from,"line-overlay-start-controlline",$("#line-overlay-container")[0]);
+        diagramUtil.drawLineUsingCSS(to,control.to,"line-overlay-end-controlline",$("#line-overlay-container")[0]);
+        //3.draw curve control point
+        $(startHtml).appendTo("#line-overlay-container").css({
+          left: control.from.x - 4,
+          top: control.from.y - 4,
+        });
+        $(endHtml).appendTo("#line-overlay-container").css({
+          left: control.to.x - 4,
+          top: control.to.y - 4,
+        });
+      },
+      addCurveControlLine : function (lineId,isStart) {
+        let fromAndTo = this.getFromToObjectById(lineId),
+            control = this.calControlPoint(fromAndTo.from,fromAndTo.to);
+
+        if(isStart == true) {
+          diagramUtil.drawLineUsingCSS(fromAndTo.from,control.from,"line-overlay-start-controlline",$("#line-overlay-container")[0]);
+        }
+        else if(isStart == false){
+          diagramUtil.drawLineUsingCSS(fromAndTo.to,control.to,"line-overlay-end-controlline",$("#line-overlay-container")[0]);
+        }
+        else if(isStart == undefined) {
+          diagramUtil.drawLineUsingCSS(fromAndTo.from,control.from,"line-overlay-start-controlline",$("#line-overlay-container")[0]);
+          diagramUtil.drawLineUsingCSS(fromAndTo.to,control.to,"line-overlay-end-controlline",$("#line-overlay-container")[0]);
+        }
+      },
+      removeCurveControlLine : function (isStart) {
+        if(isStart == true) {
+          ($(".line-overlay-start-controlline").length != 0) ? $(".line-overlay-start-controlline").remove() : "";
+        }
+        else if(isStart == false){
+          ($(".line-overlay-end-controlline").length != 0) ? $(".line-overlay-end-controlline").remove() : "";
+        }
+        else if(isStart == undefined) {
+          ($(".line-overlay-start-controlline").length != 0) ? $(".line-overlay-start-controlline").remove() : "";
+          ($(".line-overlay-end-controlline").length != 0) ? $(".line-overlay-end-controlline").remove() : "";
+        }
+      },
+      //-end-----------curve line control overlay op ------------
+
+      //-start-----------Line Highlight op-------------
+      addLineHighlight : function(canvas) {
+        let ctx = canvas.getContext("2d");
+
+        ctx.isHighlight = true;
+      },
+      removeHighlight : function (canvas) {
+        let ctx = canvas.getContext("2d");
+
+        ctx.isHighlight = false;
+        $("#line-overlay-container").remove();
+      },
+      //-end-----------Line Highlight op-------------
+
+      //-start-----------draw existing line textArea -------------
+      drawTextAreaById : function (lineId) {
+        let diagramEle = $("#" + lineId);
+        let canvas = diagramEle.find("canvas")[0];
+        let jquerytextArea = diagramEle.find("textarea");
+        if(jquerytextArea.length == 0) { return ;}
+        let textArea = diagramManager.getAttrById(lineId,{textArea:[]}),
+            fontStyle = diagramManager.getAttrById(lineId,{fontStyle:[]}),
+            lineType = objectManager.getLineTypeById(lineId);
+            fromAndTo = this.getFromToObjectById(lineId);
+        let textAreaPos;
+
+        textAreaPos = diagramUtil.evaluateLineTextArea(textArea["position"],lineType,{
+          "from" : fromAndTo.from,
+          "to" : fromAndTo.to,
+        });
+        this.drawTextArea(jquerytextArea,textAreaPos,fontStyle);
+      },
+      //when you change the pos of line, the textArea should redraw but the model hasn't been
+      //updated,so you should draw line's textArea with arguments.
+      drawTextArea : function (textareajqObj,textArea,fontStyle) {
+        if(textareajqObj.length == 0) { return; }
+        let diagramEle = textareajqObj.parent();
+        let canvas = textareajqObj.siblings("canvas")[0];
+        let w = 50;
+        //let h = 0;
+        let text;
+        let textAreaStyle = {
+          "width"          : w + "px",
+          "z-index"        : "50",
+          "line-height"    : Math.round(fontStyle.size * 1.25) + "px",
+          "font-size"      : fontStyle.size + "px",
+          "font-family"    : fontStyle.fontFamily,
+          "font-weight"    : fontStyle.bold ? "bold" : "normal",
+          "font-style"     : fontStyle.italic ? "italic" : "normal",
+          "color"          : "rgb(" + fontStyle.color + ")",
+          "text-decoration": fontStyle.underline ? "underline" : "none"
+        }
+        text = textareajqObj.val();
+        text = (text == undefined) ? "" : text ;
+
+        textareajqObj.css({
+                      "left": textAreaPos.x - 26 - parseInt(diagramEle.css("left")),
+                      "top": textAreaPos.y - 17 - parseInt(diagramEle.css("top")),
+                      })
+                     .css(textAreaStyle)
+                     .val(text);
+      },
+      addLineTextArea : function (lineId) {
+        let diagramEle = $("#" + lineId),
+            canvas = diagramEle.find("canvas")[0];
+        let textAreaHtml = "<textarea id='shape-textarea-editing' target='" + lineId + "'></textarea>";
+
+        let textArea = diagramManager.getAttrById(lineId,{textArea:["position"]}),
+            fromAndTo = this.getFromToObjectById(lineId),
+            lineType = objectManager.getLineTypeById(lineId),
+            fontStyle = diagramManager.getAttrById(lineId,{fontStyle:[]});
+        let textAreaPos = diagramUtil.evaluateLineTextArea(textArea["position"],lineType,{
+          "from" : fromAndTo.from,
+          "to" : fromAndTo.to,
+        });
+        let w = 50;
+        //let h = 0;
+        let text;
+        let textAreaStyle = {
+          "width"          : w + "px",
+          "z-index"        : "50",
+          "line-height"    : Math.round(fontStyle.size * 1.25) + "px",
+          "font-size"      : fontStyle.size + "px",
+          "font-family"    : fontStyle.fontFamily,
+          "font-weight"    : fontStyle.bold ? "bold" : "normal",
+          "font-style"     : fontStyle.italic ? "italic" : "normal",
+          "color"          : "rgb(" + fontStyle.color + ")",
+          "text-decoration": fontStyle.underline ? "underline" : "none"
+        }
+
+        text = diagramEle.find("textarea").val();
+        text = (text == undefined) ? "" : text ;
+        diagramEle.find("textarea").remove();
+
+        $(textAreaHtml).appendTo($(".design-canvas"))
+                        .css({
+                          "left": textAreaPos.x - 26,
+                          "top": textAreaPos.y - 17,
+                        })
+                       .css(textAreaStyle)
+                       .val(text)
+                       .select();
+      },
+      //-end-----------draw existing line textArea -------------
+
+      //-start-----------determine if point on line ---------------
+      isPointOnLine : function(lineId,currPoint) {
+        let curLineType = objectManager.getLineTypeById(lineId);
+
+        switch (curLineType) {
+          case "basic":
+            return this._isPointOnBasicLine(lineId,currPoint);
+            break;
+          case "curve":
+            return this._isPointOnBezierCurve(lineId,currPoint);
+            break;
+          default:
+
+        }
+      },
+      _isPointOnBasicLine : function(lineId,currPoint) {
+        let point1 = this.getFromObjectById(lineId),
+            point2 = this.getToObjectById(lineId);
+
+        if((currPoint.x >= Math.min(point1.x,point2.x) && currPoint.x <= Math.max(point1.x,point2.x))
+           && (currPoint.y >= Math.min(point1.y,point2.y) && currPoint.y <= Math.max(point1.y,point2.y)) ) {
+          return Math.abs((currPoint.y - point1.y)*(point2.x - point1.x) - (currPoint.x - point1.x)*(point2.y - point1.y)) <= 2500;
+        }
+        else {
+          return false;
+        }
+      },
+      _isPointOnBezierCurve : function(lineId,curPoint) {
+        let from = this.getFromObjectById(lineId),
+            to = this.getToObjectById(lineId),
+            control = this.getControlPosById(lineId);
+        let curProject;
+
+        _bezierObj = null;
+        _bezierObj = new Bezier(from.x,from.y,
+                               control.from.x,control.from.y,
+                               control.to.x,control.to.y,
+                               to.x,to.y);
+        curProject = _bezierObj.project(curPoint);
+
+        return curProject.d <= 5 ? true : false;
+      },
+      _isPointOnStepLine : function(lineId,curPoint) {
+      },
+      //-end-----------determine if point on line ---------------
+
+
+      /**
+     * Get all Points given radius and centre of this circle(36 points)
+     * @param {number} x - The centre of this circle x value.
+     * @param {number} y - The centre of this circle y value.
+     * @param {number} r - The radius.
+     * @return {Array} Points in this circle(36 points).
+     */
+      getCirclePoints: function(x,y,r) {
+        let theta = Math.PI / 18;
+        let result = [];
+        for (let i = 0; i < 36; i++) {
+          let curAngle = theta * i;
+          let point = {
+            "x": x - Math.cos(curAngle) * r,
+            "y": y - Math.sin(curAngle) * r,
+            "angle": curAngle
+          };
+          result.push(point)
+        }
+        return result;
+      },
+      /**
+     * check if a point within the border area of given diagram object.
+     * @param {call obj} ctx - diagram object canvas ctx
+     * @param {number} x - The point x value.(must be coordinate relative to canvas)
+     * @param {number} y - The point y value.
+     * @param {number} d - The max distance of the border area.
+     * @return {boolean} true if is within the border area.
+     */
+      isPointWithinBorderArea : function (x,y,d) {
+        let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
+
+        for(let i in circlePoints) {
+          if(this.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
+            return true;
+          }
+        }
+        return false;
+      },
+      /**
+     * Given a point within the border area, return the corresponding anchor position
+     * in this diagramObj/canvas.
+     */
+      getAnchorPosByCurPos : function (x,y,d) {
+        let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
+
+        //traverse the circlePoints and set isPointIn ctx's Path
+        for(let i in circlePoints) {
+          if(this.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
+            circlePoints[i].isPointInPath = true;
+          }
+          else {
+            circlePoints[i].isPointInPath = false;
+          }
+        }
+
+        //get two point in the boundary of InCtxPath Area / NotInCtxPath Area
+        let borderPointA,
+            borderPointB;
+        let length = circlePoints.length;
+        for (let i in circlePoints) {
+          if(circlePoints[i].isPointInPath == false) {
+            if (borderPointA == null) {
+              let prePoint = circlePoints[(i - 1 + length) % length]
+              if(prePoint.isPointInPath == true) { borderPointA = prePoint; }
+            }
+            if (borderPointB == null) {
+              let nextPoint = circlePoints[(i + 1 + length) % length];
+              if(nextPoint.isPointInPath == true) { borderPointB = nextPoint; }
+            }
+            if (borderPointA && borderPointB) { break; }
+          }
+        }
+
+        //get the farthest Point from given (x,y) point In diagram
+        let farthestPointIndiagram = {};
+        farthestPointIndiagram.x = (borderPointA.x + borderPointB.x) / 2;
+        farthestPointIndiagram.y = (borderPointA.y + borderPointB.y) / 2;
+
+        let record;
+        for(let lamda = 0.0; lamda <= 1.0; lamda += 0.1) {
+          let curX = lamda * x + (1 - lamda) * farthestPointIndiagram.x,
+              curY = lamda * y + (1 - lamda) * farthestPointIndiagram.y;
+          let iscurPointInPath = this.isPointInPath(curX,curY);
+
+          if(lamda == 0.0) {
+            record = iscurPointInPath;
+          }
+          if(record != iscurPointInPath) {
+            return {
+              x: curX,
+              y: curY,
+            }
+          }
+        }
+      },
+      /**
+      * Given a point in the diagramObj border area, return the closest default anchor position
+      * in this diagramObj
+      */
+      getClosestAnchor : function (x,y,diagramId) {
+        let jqueryEle = $("#" + diagramId);
+        let ctx = jqueryEle.find("canvas")[0].getContext("2d");
+        let closestAnchor = this.getClosestDefaultAnchor(x,y,diagramId);
+        if(closestAnchor) {
+          return closestAnchor;
+        }
+        else {
+          let relativePos = {
+            x : x - parseFloat(jqueryEle.css("left")),
+            y : y - parseFloat(jqueryEle.css("top")),
+          }
+          closestAnchor = this.getAnchorPosByCurPos.call(ctx,relativePos.x,relativePos.y,11);
+          closestAnchor.x = parseFloat(jqueryEle.css("left")) + closestAnchor.x;
+          closestAnchor.y = parseFloat(jqueryEle.css("top")) + closestAnchor.y;
+          return closestAnchor;
+        }
+      },
+      getClosestDefaultAnchor : function (x,y,diagramId) {
+        let jqueryEle = $("#" + diagramId);
+        let canvas = jqueryEle.find("canvas")[0];
+        let shapeName = objectManager.getShapeNameById(diagramId);
+        let curAnchors = objectManager.getAnchorsByName(shapeName);
+        let w = canvas.width;
+        let h = canvas.height;
+
+        for(let i in curAnchors) {
+          let curAnchorXY = {};
+
+          let relativePos = {
+            x: x - parseFloat(jqueryEle.css("left")),
+            y: y - parseFloat(jqueryEle.css("top")),
+          }
+          curAnchorXY = diagramUtil.evaluate(curAnchors[i],w,h);
+          if( (Math.abs(relativePos.x - curAnchorXY.x) <= 8)
+           && (Math.abs(relativePos.y - curAnchorXY.y) <= 8)) {
+             curAnchorXY.x = parseFloat(jqueryEle.css("left")) + curAnchorXY.x;
+             curAnchorXY.y = parseFloat(jqueryEle.css("top")) + curAnchorXY.y;
+
+             return curAnchorXY;
+          }
+        }
+      },
+      //when draw line, if a vertex is within the area of one diagramObj's anchor.
+      //Draw hightlight circle to notice.
+      //reference the arguments function resolvePointInContainedDiagram return
+      drawWithInAnchorAreaPointCircle : function (x,y,diagramId,posInfoposition) {
+        diagramDesigner.addDiagramAnchorOverlay(diagramId);
+        if(posInfoposition == "border" || posInfoposition == "anchor") {
+          let jqueryEle = $("#" + diagramId);
+          if($("#line-diagram-circle").length == 0) {
+            let circleHtml = "<canvas id='line-diagram-circle' width='32' height='32'></canvas>";
+            $(circleHtml).appendTo(".design-canvas");
+          }
+          $("#line-diagram-circle").css({
+                                      "opacity" : 0.3,
+                                      "background-color": "#833",
+                                      "border-color": "#833",
+                                      "border-radius": 16,
+                                      "border": "solid 1px #772E2E",
+                                      "width": 32,
+                                      "height": 32,
+                                      "left": x - 16,
+                                      "top": y - 16,
+                                    })
+                                    .show();
+        }
+        else {
+          $("#line-diagram-circle").hide();
+        }
+      },
+      resolvePointInContainedDiagram : function (x,y) {
+        let INdiagrams = diagramUtil.getElesAt(x,y);
+
+        if(INdiagrams.length == 0) { return; }
+        for(let i = 0; i < INdiagrams.length; i++) {
+          let curJqueryEle = $(INdiagrams[i]);
+          let curId = curJqueryEle.attr("id");
+          let ctx = curJqueryEle.find("canvas")[0].getContext("2d");
+          let pos = {
+            x : x - parseFloat(curJqueryEle.css("left")),
+            y : y - parseFloat(curJqueryEle.css("top")),
+          }
+
+          if(ctx.isPointInPath(pos.x,pos.y)) {
+            return {
+              id: curId,
+              position: "inpath",
+              x: x,
+              y: y,
+            }
+          }
+          else if(diagramDesigner.isPointWithinBorderArea.call(ctx,pos.x,pos.y,9)) {
+            let closestAnchor = diagramDesigner.getClosestDefaultAnchor(x,y,curId);
+            if(closestAnchor) {
+              return {
+                id: curId,
+                position: "anchor",
+                x: closestAnchor.x,
+                y: closestAnchor.y,
+              }
+            }
+            else {
+              closestAnchor = this.getAnchorPosByCurPos.call(ctx,pos.x,pos.y,11);
+              closestAnchor.x = parseFloat(curJqueryEle.css("left")) + closestAnchor.x;
+              closestAnchor.y = parseFloat(curJqueryEle.css("top")) + closestAnchor.y;
+              return {
+                id: curId,
+                position: "border",
+                x: closestAnchor.x,
+                y: closestAnchor.y,
+              }
+            }
+          }
+        }
 
       },
+      /**
+     * calculate the vertical line from the diagram border.
+     * the distance from returned point on this vertical line to the border is 100.
+     * Used in creating curve line's control point when connect diagram.
+     * @param {number} x - diagram object id
+     * @param {number} y - draw line in which diagram state.
+     *                         default / move / resize / rotate
+     * @param {number} r - The radius,11
+     * @return {point} point on this vertical line
+     */
+      calVerticalLineFromBorder : function(x,y,d,diagramId) {
+        let jqueryEle = $("#" + diagramId);
+        let ctx = jqueryEle.find("canvas")[0].getContext("2d");
+        let relativePos = {
+          x : x - parseFloat(jqueryEle.css("left")),
+          y : y - parseFloat(jqueryEle.css("top")),
+        }
+        let circlePoints = diagramDesigner.getCirclePoints(relativePos.x,relativePos.y,d);
+        let pointsInDiagram = [],
+            tangentLinePoint = [];
+
+        for(let i in circlePoints) {
+          if(ctx.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
+            pointsInDiagram.push(circlePoints[i]);
+          }
+        }
+
+        let Xm,     //midpoint of tangentLinePoint
+            Ym,
+            Xr = x,     //central of the circle
+            Yr = y,
+            Xv,     //vertical line's point
+            Yv;
+        if(pointsInDiagram.length >= 2) {
+          tangentLinePoint.push(pointsInDiagram[0]);
+          tangentLinePoint.push(pointsInDiagram[pointsInDiagram.length-1]);
+          Xm = (tangentLinePoint[0].x + tangentLinePoint[1].x) / 2;
+          Ym = (tangentLinePoint[0].y + tangentLinePoint[1].y) / 2;
+        }
+        else if(pointsInDiagram.length == 1) {
+          tangentLinePoint.push(pointsInDiagram[0]);
+          Xm = tangentLinePoint[0].x;
+          Ym = tangentLinePoint[0].y;
+        }
+        else {
+          return ;
+        }
+        let lamda = (Math.sqrt(Math.pow((Xr - Xm),2) + Math.pow((Yr - Ym),2))) / 100;
+        //    lamda * M + (1 - lamda) * V = R
+        Xv = (Xr - lamda * Xm) / (1 - lamda);
+        Yv = (Yr - lamda * Ym) / (1 - lamda);
+
+        return {
+          x: parseFloat(jqueryEle.css("left")) + Xv,
+          y: parseFloat(jqueryEle.css("top")) + Yv,
+        }
+      },
+      calVerticalLineFromAnchor : function(x,y,anchorX,anchorY) {
+        let Xa = anchorX,     //anchor
+            Ya = anchorY,
+            Xr = x,     //central of the circle
+            Yr = y,
+            Xv,     //vertical line's point
+            Yv;
+        let lamda = (Math.sqrt(Math.pow((Xr - Xa),2) + Math.pow((Yr - Ya),2))) / 100;
+        lamda = 1 - lamda;
+        //    lamda * M + (1 - lamda) * V = R
+        Xv = (Xr - lamda * Xa) / (1 - lamda);
+        Yv = (Yr - lamda * Ya) / (1 - lamda);
+
+        return {
+          x: Math.round(Xv),
+          y: Math.round(Yv),
+        }
+      },
+      /**
+     * update a diagram's all linked line properties.
+     * @param {string} diagramId - diagram object id
+     * @param {string} action - draw line in which diagram state.
+     *                          move / resize / rotate
+     * @param {argList} y - reserved
+     * @return {boolean} true if is within the border area.
+     */
+      updateDiagramAllLinkLine : function (diagramId,action,argList) {
+        let allLinkLineIdArray = diagramManager.getAttrById(diagramId,{linkerList:[]});
+
+        if(!allLinkLineIdArray || allLinkLineIdArray.length == 0) { return; }
+        switch (action) {
+          case "move":
+            let originX = argList.originX,
+                originY = argList.originY,
+                currentX = argList.currentX,
+                currentY = argList.currentY;
+            let offsetX = currentX - originX,
+                offsetY = currentY - originY;
+            for(let curLineId in allLinkLineIdArray) {
+              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
+                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
+              let argList = {};
+              let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
+              let end = {
+                x : curProperties["endX"],
+                y : curProperties["endY"],
+              };
+              let start = {
+                x : curProperties["startX"],
+                y : curProperties["startY"],
+              };
+              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "startX": start.x + offsetX,
+                  "startY": start.y + offsetY,
+                  "endX" : end.x + offsetX,
+                  "endY" : end.y + offsetY,
+                }});
+              }
+              //line start from this diagram
+              else if(fromId["fromId"] == diagramId) {
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "startX": start.x + offsetX,
+                  "startY": start.y + offsetY,
+                }});
+              }
+              //line end to this diagram
+              else if(toId["toId"] == diagramId) {
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "endX" : end.x + offsetX,
+                  "endY" : end.y + offsetY,
+                }});
+              }
+            }
+            break;
+          case "resize":
+            let jqueryEle = $("#" + diagramId);
+            let originW = argList.originW,
+                originH = argList.originH,
+                currentW = argList.currentW,
+                currentH = argList.currentH,
+                originLeft = argList.originLeft,
+                originTop = argList.originTop;
+
+            originW = originW - 20;
+            originH = originH - 20;
+            currentW = currentW - 20;
+            currentH = currentH - 20;
+            originTop = originTop + 10;
+            originLeft = originLeft + 10;
+            for(let curLineId in allLinkLineIdArray) {
+              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
+                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
+              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
+                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
+                let end = {
+                    x : curProperties["endX"],
+                    y : curProperties["endY"],
+                  },
+                  start = {
+                    x : curProperties["startX"],
+                    y : curProperties["startY"],
+                  };
+                let relativeStartPos = {
+                      x : start.x - originLeft,
+                      y : start.y - originTop,
+                    },
+                    relativeEndPos = {
+                      x : end.x - originLeft,
+                      y : end.y - originTop,
+                    };
+                let startKx = relativeStartPos.x / originW,
+                    startKy = relativeStartPos.y / originH,
+                    endKx = relativeEndPos.x / originW,
+                    endKy = relativeEndPos.y / originH;
+                let curRelStartPos = {
+                      x: startKx * currentW + 10,
+                      y: startKy * currentH + 10,
+                    },
+                    curRelEndPos = {
+                      x: endKx * currentW + 10,
+                      y: endKy * currentH + 10,
+                    };
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "startX": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
+                  "startY": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
+                  "endX" : curRelEndPos.x + parseFloat(jqueryEle.css("left")),
+                  "endY" : curRelEndPos.y + parseFloat(jqueryEle.css("top")),
+                }});
+              }
+              //line start from this diagram
+              else if(fromId["fromId"] == diagramId) {
+                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY"]});
+                let start = {
+                  x : curProperties["startX"],
+                  y : curProperties["startY"],
+                };
+                let relativeStartPos = {
+                      x : start.x - originLeft,
+                      y : start.y - originTop,
+                    };
+                let startKx = relativeStartPos.x / originW,
+                    startKy = relativeStartPos.y / originH;
+                let curRelStartPos = {
+                      x: startKx * currentW + 10,
+                      y: startKy * currentH + 10,
+                    };
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "startX": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
+                  "startY": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
+                }});
+              }
+              //line end to this diagram
+              else if(toId["toId"] == diagramId) {
+                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["endX","endY"]});
+                let end = {
+                  x : curProperties["endX"],
+                  y : curProperties["endY"],
+                };
+                let relativeEndPos = {
+                      x : end.x - originLeft,
+                      y : end.y - originTop,
+                    };
+                let endKx = relativeEndPos.x / originW,
+                    endKy = relativeEndPos.y / originH;
+                let curRelEndPos = {
+                      x: endKx * currentW + 10,
+                      y: endKy * currentH + 10,
+                    };
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "endX" : curRelEndPos.x + parseFloat(jqueryEle.css("left")),
+                  "endY" : curRelEndPos.y + parseFloat(jqueryEle.css("top")),
+                }});
+              }
+            }
+            break;
+          case "rotate":
+
+            break;
+          default:
+
+        }
+      },
+      /**
+     * draw a diagram's all linked line.
+     * @param {string} diagramId - diagram object id
+     * @param {string} action - draw line in which diagram state.
+     *                         default / move / resize / rotate
+     * @param {argList} y - reserved
+     * @return {boolean} true if is within the border area.
+     */
+      drawDiagramAllLinkLine : function (diagramId,action,argList) {
+        let allLinkLineIdArray = diagramManager.getAttrById(diagramId,{linkerList:[]});
+
+        if(!allLinkLineIdArray || allLinkLineIdArray.length == 0) { return; }
+        switch (action) {
+          case "move":
+            let originX = argList.originX,
+                originY = argList.originY,
+                currentX = argList.currentX,
+                currentY = argList.currentY;
+            let offsetX = currentX - originX,
+                offsetY = currentY - originY;
+            for(let curLineId in allLinkLineIdArray) {
+              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
+                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
+              let curargList = {};
+              let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
+              let end = {
+                x : curProperties["endX"],
+                y : curProperties["endY"],
+              };
+              let start = {
+                x : curProperties["startX"],
+                y : curProperties["startY"],
+              };
+              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
+                curargList = {
+                  "start" : {
+                    "x": start.x + offsetX,
+                    "y": start.y + offsetY,
+                  },
+                  "end" : {
+                    "x": end.x + offsetX,
+                    "y": end.y + offsetY,
+                  },
+                };
+              }
+              //line start from this diagram
+              else if(fromId["fromId"] == diagramId) {
+                curargList = {
+                  "start" : {
+                    "x": start.x + offsetX,
+                    "y": start.y + offsetY,
+                  },
+                  "end" : {
+                    "x": end.x,
+                    "y": end.y,
+                  },
+                };
+              }
+              //line end to this diagram
+              else if(toId["toId"] == diagramId) {
+                curargList = {
+                  "start" : {
+                    "x": start.x,
+                    "y": start.y,
+                  },
+                  "end" : {
+                    "x": end.x + offsetX,
+                    "y": end.y + offsetY,
+                  },
+                };
+              }
+              this.drawCanvasAndDiagram(allLinkLineIdArray[curLineId],curargList);
+            }
+            break;
+          case "resize":
+            let jqueryEle = $("#" + diagramId);
+            let originW = argList.originW,
+                originH = argList.originH,
+                currentW = argList.currentW,
+                currentH = argList.currentH,
+                originLeft = argList.originLeft,
+                originTop = argList.originTop;
+
+            originW = originW - 20;
+            originH = originH - 20;
+            currentW = currentW - 20;
+            currentH = currentH - 20;
+            originTop = originTop + 10;
+            originLeft = originLeft + 10;
+            for(let curLineId in allLinkLineIdArray) {
+              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
+                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
+              let curargList = {};
+
+              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
+                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
+                let end = {
+                    x : curProperties["endX"],
+                    y : curProperties["endY"],
+                  },
+                  start = {
+                    x : curProperties["startX"],
+                    y : curProperties["startY"],
+                  };
+                let relativeStartPos = {
+                      x : start.x - originLeft,
+                      y : start.y - originTop,
+                    },
+                    relativeEndPos = {
+                      x : end.x - originLeft,
+                      y : end.y - originTop,
+                    };
+                let startKx = relativeStartPos.x / originW,
+                    startKy = relativeStartPos.y / originH,
+                    endKx = relativeEndPos.x / originW,
+                    endKy = relativeEndPos.y / originH;
+                let curRelStartPos = {
+                      x: startKx * currentW + 10,
+                      y: startKy * currentH + 10,
+                    },
+                    curRelEndPos = {
+                      x: endKx * currentW + 10,
+                      y: endKy * currentH + 10,
+                    };
+                curargList = {
+                  "start" : {
+                    "x": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
+                    "y": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
+                  },
+                  "end" : {
+                    "x": curRelEndPos.x + parseFloat(jqueryEle.css("left")),
+                    "y": curRelEndPos.y + parseFloat(jqueryEle.css("top")),
+                  },
+                };
+              }
+              //line start from this diagram
+              else if(fromId["fromId"] == diagramId) {
+                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
+                let start = {
+                      x : curProperties["startX"],
+                      y : curProperties["startY"],
+                    },
+                    end = {
+                      x : curProperties["endX"],
+                      y : curProperties["endY"],
+                    };
+                let relativeStartPos = {
+                      x : start.x - originLeft,
+                      y : start.y - originTop,
+                };
+                let startKx = relativeStartPos.x / originW,
+                    startKy = relativeStartPos.y / originH;
+                let curRelStartPos = {
+                      x: startKx * currentW + 10,
+                      y: startKy * currentH + 10,
+                };
+                curargList = {
+                  "start" : {
+                    "x": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
+                    "y": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
+                  },
+                  "end" : {
+                    "x": end.x,
+                    "y": end.y,
+                  },
+                };
+              }
+              //line end to this diagram
+              else if(toId["toId"] == diagramId) {
+                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
+                let end = {
+                      x : curProperties["endX"],
+                      y : curProperties["endY"],
+                    },
+                    start = {
+                      x : curProperties["startX"],
+                      y : curProperties["startY"],
+                    };
+                let relativeEndPos = {
+                      x : end.x - originLeft,
+                      y : end.y - originTop,
+                    };
+                let endKx = relativeEndPos.x / originW,
+                    endKy = relativeEndPos.y / originH;
+                let curRelEndPos = {
+                      x: endKx * currentW + 10,
+                      y: endKy * currentH + 10,
+                };
+                curargList = {
+                  "start" : {
+                    "x": start.x,
+                    "y": start.y,
+                  },
+                  "end" : {
+                    "x": curRelEndPos.x + parseFloat(jqueryEle.css("left")),
+                    "y": curRelEndPos.y + parseFloat(jqueryEle.css("top")),
+                  },
+                };
+              }
+              this.drawCanvasAndDiagram(allLinkLineIdArray[curLineId],curargList);
+            }
+            break;
+          case "rotate":
+
+            break;
+          case "default":
+            for(let curLineId in allLinkLineIdArray) {
+              this.drawDiagramById(allLinkLineIdArray[curLineId]);
+            }
+            break;
+          default:
+
+        }
+      },
+
     };
 
     return lineDesigner;

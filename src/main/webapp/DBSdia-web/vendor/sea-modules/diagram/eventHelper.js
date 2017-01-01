@@ -1257,8 +1257,8 @@ define(function(require, exports, module) {
         argList["end"] = end;
         diagramDesigner.drawCanvasAndDiagram(targetid,argList);
         lineDesigner.updateCurveControlPosition(targetid,isStart,pos);
-        lineDesigner.removeCurveOverlay(isStart);
-        lineDesigner.addCurveControlLine(targetid,{"isStart":isStart});
+        lineDesigner.removeCurveControlLine(isStart);
+        lineDesigner.addCurveControlLine(targetid,isStart);
       },
       lineControlOverlayMouseUpHandler : function(e) {
         if (_dragElement != null && _dragElement.className.indexOf("line-overlay-controlpoint") != -1) {

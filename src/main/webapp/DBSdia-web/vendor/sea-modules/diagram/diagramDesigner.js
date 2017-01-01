@@ -30,6 +30,7 @@ define(function(require, exports, module) {
         _w : 0,
         _h : 0,
       },
+
       drawPanelItemDiagram : function (canvas,shapeName) {
         let ctx = canvas.getContext("2d");
         ctx.clearRect(0,0,30,30);
@@ -40,9 +41,11 @@ define(function(require, exports, module) {
 
         this.drawDiagram(canvas,shapeName);
       },
-      //this function used for creating diagram from the left panel item.
-      //when you drag the left panel item to the right canvas,once the mouse
-      //moved into the right canvas, you can use this function to draw new diagram.
+      /**
+     * this function used for creating diagram from the left panel item.
+     * when you drag the left panel item to the right canvas,once the mouse
+     * moved into the right canvas, you can use this function to draw new diagram.
+     */
       drawThemeDiagram : function (canvas,shapeName,argList) {
         let curTheme = themeManager.getCurrentThemeObj();
         let curThemeConfig;
@@ -65,6 +68,7 @@ define(function(require, exports, module) {
           this.drawDiagram(canvas,shapeName);
         }
       },
+
       drawDiagram : function drawDiagram(canvas,shapeName,argList) {
         let ctx = canvas.getContext("2d");
         ctx.shapeName = shapeName;
@@ -127,8 +131,8 @@ define(function(require, exports, module) {
           if(jqObj.find("textarea").length != 0) {
             this.drawTextAreaById(diagramId);
           }
-          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]});
-          let lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
+          let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]}),
+              lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
 
           this._resolveStyle(ctx,{
             "fillStyle" : fillStyle,
@@ -138,224 +142,195 @@ define(function(require, exports, module) {
           this.drawDiagram(canvas,shapeName);
         }
       },
-      drawPageAndGrid : function(canvas){
-        let ctx = canvas.getContext('2d');
-        let w = pageManager.get("width");
-        let h = pageManager.get("height");
-        let padding = pageManager.get("padding");
-        let gridSize = pageManager.get("gridSize");
-        if(pageManager.get("orientation") == "landscape") {
-          let temp = w;
-          w = h;
-          h = temp;
+
+
+
+      _resolvePath : function (ctx,shapeName,diagramId) {
+        //draw template diagram
+        if(arguments.length == 2) {
+          let curActions = templateManager.getActionsByName(shapeName);
+
+          for(let eachaction in curActions) {
+            this.actions[curActions[eachaction].action].call(ctx,curActions[eachaction]);
+          }
         }
-        let curW = w - padding * 2;
-        let curH = h - padding * 2;
-        let backgroundColor =
-              (pageManager.get("backgroundColor") == "transparent")
-              ?  "rgb(255,255,255)" : pageManager.get("backgroundColor");
-        let darkerColor = diagramUtil.shadeBlendConvert(-0.05,backgroundColor);
-        let darkererColor = diagramUtil.shadeBlendConvert(-0.05,darkerColor);
+        //draw diagram object
+        else if(arguments.length == 3){
 
-        (gridSize <= 10) ? gridSize = 10 : "";
-
-        ctx.clearRect(0, 0, w, h);
-        ctx.fillStyle = backgroundColor;
-        ctx.beginPath();
-        ctx.rect(padding, padding, curW, curH);
-        ctx.fill();
-        if(pageManager.get("showGrid")) {
-          ctx.translate(padding,padding);
-          ctx.lineWidth = 1;
-          ctx.save();
-          //http://stackoverflow.com/questions/4172246/grid-drawn-using-a-canvas-element-looking-stretched
-          //this i should be 0.5
-          let count = 0;    //use for count darken line
-          for(let i = 0.5; i <=  curH + 1; i+= pageManager.get("gridSize")) {
-            ctx.restore();
-            (count % 4 == 0) ? ctx.strokeStyle = darkererColor: ctx.strokeStyle = darkerColor;
-            ctx.beginPath();
-            ctx.moveTo(0, i);
-            ctx.lineTo(curW, i);
-            ctx.stroke();
-
-            count++;
-          }
-          count = 0;
-          for(let i = 0.5; i <=  curW + 1; i+= pageManager.get("gridSize")) {
-            ctx.restore();
-            (count % 4 == 0) ? ctx.strokeStyle = darkererColor : ctx.strokeStyle = darkerColor;
-            ctx.beginPath();
-            ctx.moveTo(i, 0);
-            ctx.lineTo(i, curH);
-            ctx.stroke();
-
-            count++;
-          }
         }
       },
-      drawTextAreaById : function (diagramId) {
-        let diagramEle = $("#" + diagramId),
-            textareajqObj = diagramEle.find("textarea");
-        let curshapeName = objectManager.getShapeNameById(diagramId);
+      actions : {
+        move: function(action) {
+          this.beginPath();
+          let w = diagramDesigner._tempVar._w;
+          let h = diagramDesigner._tempVar._h;
+          let curXY = {};
+          let curProperties = templateManager.getProperties(this.shapeName);
 
-        if(textareajqObj.length == 0) {
-          return;
-        }
-        if(curshapeName == "line") {
-          lineDesigner.drawTextAreaById(diagramId);
-        }
-        else {
-          let diagramFontStyle = diagramManager.getAttrById(diagramId,{fontStyle:[]});
-          let textAlignTB = diagramFontStyle["vAlign"],
-              textAlignLMR = diagramFontStyle["textAlign"];
-          let w = textareajqObj.siblings("canvas")[0].width,
-              h = textareajqObj.siblings("canvas")[0].height;
-          let text;
-          let textAreaStyle = {
-            "width"          : w - 40 + "px",
-            "z-index"        : "50",
-            "line-height"    : Math.round(diagramFontStyle.size * 1.25) + "px",
-            "font-size"      : diagramFontStyle.size + "px",
-            "font-family"    : diagramFontStyle.fontFamily,
-            "font-weight"    : diagramFontStyle.bold ? "bold" : "normal",
-            "font-style"     : diagramFontStyle.italic ? "italic" : "normal",
-            "text-align"     : textAlignLMR,
-            "color"          : "rgb(" + diagramFontStyle.color + ")",
-            "text-decoration": diagramFontStyle.underline ? "underline" : "none"
+          if(w <= 40 || h <= 40) {
+            curXY.x = diagramUtil.evaluate(action.x,w,h,true);
+            curXY.y = diagramUtil.evaluate(action.y,w,h,true);
           }
-          text = textareajqObj.val();
-          text = (text == undefined) ? "" : text ;
-          switch (textAlignTB) {
-            case "top":
-              anchor = templateManager.getDefaultAnchor("n");
-              curanchorXY = diagramUtil.evaluate(anchor,w,h);
-              textareajqObj.css({
-                        "left": curanchorXY.x - w/2 + 20,
-                        "top": curanchorXY.y,
-                      })
-                     .css(textAreaStyle)
-                     .val(text);
+          else {
+            curXY = diagramUtil.evaluate(action,w,h);
+          }
+
+          if(this.startX == null || this.startY == null) {
+            this.startX = curXY.x;
+            this.startY = curXY.y;
+          }
+
+          this.clearRect(0,0,w,h);
+          this.moveTo(curXY.x,curXY.y);
+  			},
+  			line: function(action) {
+          let w = diagramDesigner._tempVar._w;
+          let h = diagramDesigner._tempVar._h;
+          let curXY = {};
+          let curProperties = templateManager.getProperties(this.shapeName);
+
+          if(w <= 40 || h <= 40) {
+            curXY.x = diagramUtil.evaluate(action.x,w,h,true);
+            curXY.y = diagramUtil.evaluate(action.y,w,h,true);
+          }
+          else {
+            curXY = diagramUtil.evaluate(action,w,h);
+          }
+
+  				this.lineTo(curXY.x,curXY.y);
+  			},
+        close: function() {
+          this.lineTo(this.startX,this.startY);
+          this.startX = null;
+          this.startY = null;
+
+          this.fill();
+          this.stroke();
+          this.closePath();
+  			},
+      },
+      _resolveStyle : function (ctx,argList) {
+        if(argList.hasOwnProperty("fillStyle")) {
+          let fillStyle = argList.fillStyle;
+
+          //set fill style here
+          switch (fillStyle.type) {
+            case "none":
+              ctx.fillStyle = "rgba(250, 250, 250, 0)";
+              ctx.fillStyleDefined = true;
               break;
-            case "bottom":
-              anchor = templateManager.getDefaultAnchor("s");
-              curanchorXY = diagramUtil.evaluate(anchor,w,h);
-              textareajqObj.css({
-                       "left": curanchorXY.x - w/2 + 20,
-                       "top": curanchorXY.y - parseInt(textAreaStyle["line-height"])*2,
-                      })
-                     .css(textAreaStyle)
-                     .val(text);
+            case "solid":
+              ctx.fillStyle = "rgb(" + fillStyle.color + ")";
+              ctx.fillStyleDefined = true;
               break;
-            case "middle":
-              textareajqObj.css({
-                         "left": 20,
-                         "top": h/2 - parseInt(textAreaStyle["line-height"])/2,
-                       })
-                       .css(textAreaStyle)
-                       .val(text);
+            case "gradient":
+              ctx.fillStyle = "gradient";
+              ctx.fillStyleDefined = true;
+              break;
+            case "image":
               break;
             default:
+              throw new Error("Set fillStyle type error!");
           }
         }
+        if(argList.hasOwnProperty("lineStyle")) {
+          let lineStyle = argList.lineStyle;
+
+          //set line style here
+          if(lineStyle.lineWidth) {
+            switch (lineStyle.lineStyle) {
+              case "solid":
+                ctx.setLineDash([]);
+                break;
+              case "dashed":
+                ctx.setLineDash([lineStyle.lineWidth * 5 , lineStyle.lineWidth* 2])
+                break;
+              case "dot":
+                ctx.setLineDash([lineStyle.lineWidth, lineStyle.lineWidth * 2])
+                break;
+              case "dashdot":
+                ctx.setLineDash([lineStyle.lineWidth * 5, lineStyle.lineWidth * 2, lineStyle.lineWidth, lineStyle.lineWidth * 2])
+                break;
+              default:
+                throw new Error("Set lineStyle lineStyle error!");
+            }
+          }
+          else {
+            lineStyle.lineWidth = 0;
+          }
+
+          ctx.lineJoin = "round";
+          ctx.lineCap = "round";
+          ctx.lineWidth = lineStyle.lineWidth;
+          (lineStyle.lineWidth != 0) ?
+                ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
+               :ctx.strokeStyle = "rgba(255,255,255,0)";
+        }
       },
-      addTextarea : function (diagramId) {
+
+      //-start-------anchor overlay op-----------------
+      /**
+      * this three functions used for create overlay after mouse moved over diagram
+      * add anchor overlay
+      */
+      addDiagramAnchorOverlay : function(diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
+        let curCanvas = $("#" + diagramId).find('canvas').get(0);
+
         if(curshapeName == "line") {
-          let textArea = diagramManager.getAttrById(diagramId,{textArea:["position"]});
-          let fontStyle = diagramManager.getAttrById(diagramId,{fontStyle:[]});
-          let pos = diagramManager.getAttrById(diagramId,{properties:[]});
-          let lineType = objectManager.getLineTypeById(diagramId);
-          let argList = {};
 
-          textArea = diagramUtil.evaluateLineTextArea(textArea["position"],lineType,{
-            startX: pos.startX,
-            startY: pos.startY,
-            endX: pos.endX,
-            endY: pos.endY,
-          });
-          argList = {
-            "fontStyle" : fontStyle,
-            "textArea" : textArea,
-          };
-
-          lineDesigner.addLineTextArea(diagramId,argList);
         }
         else {
-          this._addDiagramTextArea(diagramId);
+          this._drawDiagramAnchors(curCanvas,curshapeName);
         }
       },
-      _addDiagramTextArea: function (diagramId) {
-        let diagramEle = $("#" + diagramId);
-        let canvas = diagramEle.find("canvas")[0];
-        let textAreaHtml = "<textarea id='shape-textarea-editing' target='" + diagramId + "'></textarea>";
-        let diagramTextArea = diagramManager.getAttrById(diagramId,{textArea:[]});
-        let diagramFontStyle = diagramManager.getAttrById(diagramId,{fontStyle:[]});
-        let textAlignTB = diagramFontStyle["vAlign"];
-        let textAlignLMR = diagramFontStyle["textAlign"];
-        let anchor;
-        let w = canvas.width;
-        let h = canvas.height;
-        let curanchorXY = {};
-        let text;
-        let textAreaStyle = {
-          "width"          : w - 40 + "px",
-          "z-index"        : "50",
-          "line-height"    : Math.round(diagramFontStyle.size * 1.25) + "px",
-          "font-size"      : diagramFontStyle.size + "px",
-          "font-family"    : diagramFontStyle.fontFamily,
-          "font-weight"    : diagramFontStyle.bold ? "bold" : "normal",
-          "font-style"     : diagramFontStyle.italic ? "italic" : "normal",
-          "text-align"     : textAlignLMR,
-          "color"          : "rgb(" + diagramFontStyle.color + ")",
-          "text-decoration": diagramFontStyle.underline ? "underline" : "none"
-        }
-        text = diagramEle.find("textarea").val();
-        text = (text == undefined) ? "" : text ;
-        diagramEle.find("textarea").remove();
+      _drawDiagramAnchors : function(canvas,shapeName) {
+        let curDiagramId = $(canvas).parent().attr("id"),
+            ctx = canvas.getContext('2d');
+            anchorsHtml = "<div class='anchor-overlay-container' targetid='" + curDiagramId + "'></div>";
+        let curAnchors = objectManager.getAnchorsByName(shapeName);
 
-        switch (textAlignTB) {
-          case "top":
-            anchor = templateManager.getDefaultAnchor("n");
-            curanchorXY = diagramUtil.evaluate(anchor,w,h);
-            $(textAreaHtml).appendTo($(".design-canvas"))
-                            .css({
-                              "left": parseInt(diagramEle.css("left")) + curanchorXY.x - w/2 + 20,
-                              "top": parseInt(diagramEle.css("top")) + curanchorXY.y,
-                            })
-                           .css(textAreaStyle)
-                           .val(text)
-                           .select();
-            break;
-          case "bottom":
-            anchor = templateManager.getDefaultAnchor("s");
-            curanchorXY = diagramUtil.evaluate(anchor,w,h);
-            $(textAreaHtml).appendTo($(".design-canvas"))
-                           .css({
-                             "left": parseInt(diagramEle.css("left")) + curanchorXY.x - w/2 + 20,
-                             "top": parseInt(diagramEle.css("top")) + curanchorXY.y - parseInt(textAreaStyle["line-height"])*2,
-                           })
-                           .css(textAreaStyle)
-                           .val(text)
-                           .select();
-            break;
-          case "middle":
-            $(textAreaHtml).appendTo($(".design-canvas"))
-                           .css({
-                             "left": parseInt(diagramEle.css("left")) + 20,
-                             "top": parseInt(diagramEle.css("top")) + h/2 - parseInt(textAreaStyle["line-height"])/2,
-                           })
-                           .css(textAreaStyle)
-                           .val(text)
-                           .select();
-            break;
-          default:
+        this._tempVar._w = canvas.width;
+        this._tempVar._h = canvas.height;
+        ctx.shapeName = shapeName;
+        ctx.diagramId = curDiagramId;
+        if($(".anchor-overlay-container").length != 0) {
+          $(".anchor-overlay-container").remove();
         }
+        $(".design-canvas").append(anchorsHtml);
 
+        for(var i in curAnchors) {
+          this._drawDiagramAnchor.call(ctx,ctx,curAnchors[i]);
+        }
       },
+      _drawDiagramAnchor : function(ctx,curAnchor) {
+        let anchorHtml = '<div class="anchor-overlay"></div>';
+        let curCanvas = $("#" + this.diagramId);
+        let curCanvasLeft = parseFloat(curCanvas.css("left")),
+            curCanvasTop = parseFloat(curCanvas.css("top"));
+        let w = diagramDesigner._tempVar._w,
+            h = diagramDesigner._tempVar._h;
+        let curXY = {};
 
-      //this four functions used for create overlay after select the diagram
-      //including resize control overlay and canvas border overlay.
+        curXY = diagramUtil.evaluate(curAnchor,w,h);
+        $(".anchor-overlay-container").css({
+          left: curCanvasLeft,
+          top: curCanvasTop,
+          width : "0px",
+          height : "0px"
+        });
+        $(anchorHtml).appendTo(".anchor-overlay-container").css({
+          left: curXY.x - 4 + "px",
+          top:  curXY.y - 4 + "px"
+        });
+      },
+      //-end-------anchor overlay op-----------------
+
+      //-start-------------diagram selected overlay op ---------------
+      /**
+      * these functions used for create overlay after select the diagram
+      * including resize control overlay and canvas border overlay.
+      */
       addDiagramControlOverlay : function(diagramId) {
         let curshapeName = objectManager.getShapeNameById(diagramId);
         if(curshapeName == "line") {
@@ -389,7 +364,7 @@ define(function(require, exports, module) {
           let canvas = $("#" + diagramId).find("canvas")[0];
           let ctx = canvas.getContext("2d");
 
-          lineDesigner.removeHightlight(canvas);
+          lineDesigner.removeHighlight(canvas);
           this.drawDiagramById(diagramId);
         }
         else {
@@ -494,855 +469,9 @@ define(function(require, exports, module) {
         this.lineTo(x - Xwidth, y + Xwidth);
         this.stroke();
       },
+      //-end-------------diagram selected overlay op ---------------
 
-      //this three functions used for create overlay after mouse moved over diagram
-      //add anchor overlay
-      addDiagramAnchorOverlay : function(diagramId) {
-        let curshapeName = objectManager.getShapeNameById(diagramId);
-        let curCanvas = $("#" + diagramId).find('canvas').get(0);
-
-        if(curshapeName == "line") {
-
-        }
-        else {
-          this._drawDiagramAnchors(curCanvas,curshapeName);
-        }
-      },
-      _drawDiagramAnchors : function(canvas,shapeName) {
-        let curDiagramId = $(canvas).parent().attr("id");
-        let curAnchors = objectManager.getAnchorsByName(shapeName);
-        let anchorsHtml = "<div class='anchor-overlay-container' targetid='" + curDiagramId + "'></div>";
-        let ctx = canvas.getContext('2d');
-        this._tempVar._w = canvas.width;
-        this._tempVar._h = canvas.height;
-
-        if($(".anchor-overlay-container").length != 0) {
-          $(".anchor-overlay-container").remove();
-        }
-        $(".design-canvas").append(anchorsHtml);
-        ctx.shapeName = shapeName;
-        ctx.diagramId = curDiagramId;
-
-        for(var i in curAnchors) {
-          this._drawDiagramAnchor.call(ctx,ctx,curAnchors[i]);
-        }
-      },
-      _drawDiagramAnchor : function(ctx,curAnchor) {
-        let anchorHtml = '<div class="anchor-overlay"></div>';
-        let curCanvas = $("#" + this.diagramId);
-        let curCanvasLeft = parseFloat(curCanvas.css("left"));
-        let curCanvasTop = parseFloat(curCanvas.css("top"));
-        let w = diagramDesigner._tempVar._w;
-        let h = diagramDesigner._tempVar._h;
-        let curXY = {};
-
-        curXY = diagramUtil.evaluate(curAnchor,w,h);
-        $(".anchor-overlay-container").css({
-          left: curCanvasLeft,
-          top: curCanvasTop,
-          width : "0px",
-          height : "0px"
-        });
-        $(anchorHtml).appendTo(".anchor-overlay-container").css({
-          left: curXY.x - 4 + "px",
-          top:  curXY.y - 4 + "px"
-        });
-      },
-
-      _resolveStyle : function (ctx,argList) {
-        if(argList.hasOwnProperty("fillStyle")) {
-          let fillStyle = argList.fillStyle;
-
-          //set fill style here
-          switch (fillStyle.type) {
-            case "none":
-              ctx.fillStyle = "rgba(250, 250, 250, 0)";
-              ctx.fillStyleDefined = true;
-              break;
-            case "solid":
-              ctx.fillStyle = "rgb(" + fillStyle.color + ")";
-              ctx.fillStyleDefined = true;
-              break;
-            case "gradient":
-              ctx.fillStyle = "gradient";
-              ctx.fillStyleDefined = true;
-              break;
-            case "image":
-              break;
-            default:
-              throw new Error("Set fillStyle type error!");
-          }
-        }
-        if(argList.hasOwnProperty("lineStyle")) {
-          let lineStyle = argList.lineStyle;
-
-          //set line style here
-          if(lineStyle.lineWidth) {
-            switch (lineStyle.lineStyle) {
-              case "solid":
-                ctx.setLineDash([]);
-                break;
-              case "dashed":
-                ctx.setLineDash([lineStyle.lineWidth * 5 , lineStyle.lineWidth* 2])
-                break;
-              case "dot":
-                ctx.setLineDash([lineStyle.lineWidth, lineStyle.lineWidth * 2])
-                break;
-              case "dashdot":
-                ctx.setLineDash([lineStyle.lineWidth * 5, lineStyle.lineWidth * 2, lineStyle.lineWidth, lineStyle.lineWidth * 2])
-                break;
-              default:
-                throw new Error("Set lineStyle lineStyle error!");
-            }
-          }
-          else {
-            lineStyle.lineWidth = 0;
-          }
-
-          ctx.lineJoin = "round";
-          ctx.lineCap = "round";
-          ctx.lineWidth = lineStyle.lineWidth;
-          (lineStyle.lineWidth != 0) ?
-                ctx.strokeStyle = "rgb(" + lineStyle.lineColor + ")"
-               :ctx.strokeStyle = "rgba(255,255,255,0)";
-        }
-      },
-      _resolvePath : function (ctx,shapeName,diagramId) {
-        //draw template diagram
-        if(arguments.length == 2) {
-          let curActions = templateManager.getActionsByName(shapeName);
-
-          for(let eachaction in curActions) {
-            this.actions[curActions[eachaction].action].call(ctx,curActions[eachaction]);
-          }
-        }
-        //draw diagram object
-        else if(arguments.length == 3){
-
-        }
-      },
-      actions : {
-        move: function(action) {
-          this.beginPath();
-          let w = diagramDesigner._tempVar._w;
-          let h = diagramDesigner._tempVar._h;
-          let curXY = {};
-          let curProperties = templateManager.getProperties(this.shapeName);
-
-          if(w <= 40 || h <= 40) {
-            curXY.x = diagramUtil.evaluate(action.x,w,h,true);
-            curXY.y = diagramUtil.evaluate(action.y,w,h,true);
-          }
-          else {
-            curXY = diagramUtil.evaluate(action,w,h);
-          }
-
-          if(this.startX == null || this.startY == null) {
-            this.startX = curXY.x;
-            this.startY = curXY.y;
-          }
-
-          this.clearRect(0,0,w,h);
-          this.moveTo(curXY.x,curXY.y);
-  			},
-  			line: function(action) {
-          let w = diagramDesigner._tempVar._w;
-          let h = diagramDesigner._tempVar._h;
-          let curXY = {};
-          let curProperties = templateManager.getProperties(this.shapeName);
-
-          if(w <= 40 || h <= 40) {
-            curXY.x = diagramUtil.evaluate(action.x,w,h,true);
-            curXY.y = diagramUtil.evaluate(action.y,w,h,true);
-          }
-          else {
-            curXY = diagramUtil.evaluate(action,w,h);
-          }
-
-  				this.lineTo(curXY.x,curXY.y);
-  			},
-        close: function() {
-          this.lineTo(this.startX,this.startY);
-          this.startX = null;
-          this.startY = null;
-
-          this.fill();
-          this.stroke();
-          this.closePath();
-  			},
-      },
-
-      /**
-     * Get all Points given radius and centre of this circle(36 points)
-     * @param {number} x - The centre of this circle x value.
-     * @param {number} y - The centre of this circle y value.
-     * @param {number} r - The radius.
-     * @return {Array} Points in this circle(36 points).
-     */
-      getCirclePoints: function(x,y,r) {
-    		let theta = Math.PI / 18;
-    		let result = [];
-    		for (let i = 0; i < 36; i++) {
-    			let curAngle = theta * i;
-    			let point = {
-    				"x": x - Math.cos(curAngle) * r,
-    				"y": y - Math.sin(curAngle) * r,
-    				"angle": curAngle
-    			};
-    			result.push(point)
-    		}
-    		return result;
-    	},
-      /**
-     * check if a point within the border area of given diagram object.
-     * @param {call obj} ctx - diagram object canvas ctx
-     * @param {number} x - The point x value.(must be coordinate relative to canvas)
-     * @param {number} y - The point y value.
-     * @param {number} d - The max distance of the border area.
-     * @return {boolean} true if is within the border area.
-     */
-      isPointWithinBorderArea : function (x,y,d) {
-        let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
-
-        for(let i in circlePoints) {
-          if(this.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
-            return true;
-          }
-        }
-        return false;
-      },
-      /**
-     * Given a point within the border area, return the corresponding anchor position
-     * in this diagramObj/canvas.
-     */
-      getAnchorPosByCurPos : function (x,y,d) {
-        let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
-
-        //traverse the circlePoints and set isPointIn ctx's Path
-        for(let i in circlePoints) {
-          if(this.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
-            circlePoints[i].isPointInPath = true;
-          }
-          else {
-            circlePoints[i].isPointInPath = false;
-          }
-        }
-
-        //get two point in the boundary of InCtxPath Area / NotInCtxPath Area
-        let borderPointA,
-            borderPointB;
-        let length = circlePoints.length;
-        for (let i in circlePoints) {
-          if(circlePoints[i].isPointInPath == false) {
-            if (borderPointA == null) {
-              let prePoint = circlePoints[(i - 1 + length) % length]
-              if(prePoint.isPointInPath == true) { borderPointA = prePoint; }
-            }
-            if (borderPointB == null) {
-              let nextPoint = circlePoints[(i + 1 + length) % length];
-              if(nextPoint.isPointInPath == true) { borderPointB = nextPoint; }
-            }
-            if (borderPointA && borderPointB) { break; }
-          }
-        }
-
-        //get the farthest Point from given (x,y) point In diagram
-        let farthestPointIndiagram = {};
-        farthestPointIndiagram.x = (borderPointA.x + borderPointB.x) / 2;
-        farthestPointIndiagram.y = (borderPointA.y + borderPointB.y) / 2;
-
-        let record;
-        for(let lamda = 0.0; lamda <= 1.0; lamda += 0.1) {
-          let curX = lamda * x + (1 - lamda) * farthestPointIndiagram.x,
-              curY = lamda * y + (1 - lamda) * farthestPointIndiagram.y;
-          let iscurPointInPath = this.isPointInPath(curX,curY);
-
-          if(lamda == 0.0) {
-            record = iscurPointInPath;
-          }
-          if(record != iscurPointInPath) {
-            return {
-              x: curX,
-              y: curY,
-            }
-          }
-        }
-      },
-      /**
-      * Given a point in the diagramObj border area, return the closest default anchor position
-      * in this diagramObj
-      */
-      getClosestAnchor : function (x,y,diagramId) {
-        let jqueryEle = $("#" + diagramId);
-        let ctx = jqueryEle.find("canvas")[0].getContext("2d");
-        let closestAnchor = this.getClosestDefaultAnchor(x,y,diagramId);
-        if(closestAnchor) {
-          return closestAnchor;
-        }
-        else {
-          let relativePos = {
-            x : x - parseFloat(jqueryEle.css("left")),
-            y : y - parseFloat(jqueryEle.css("top")),
-          }
-          closestAnchor = this.getAnchorPosByCurPos.call(ctx,relativePos.x,relativePos.y,11);
-          closestAnchor.x = parseFloat(jqueryEle.css("left")) + closestAnchor.x;
-          closestAnchor.y = parseFloat(jqueryEle.css("top")) + closestAnchor.y;
-          return closestAnchor;
-        }
-      },
-      getClosestDefaultAnchor : function (x,y,diagramId) {
-        let jqueryEle = $("#" + diagramId);
-        let canvas = jqueryEle.find("canvas")[0];
-        let shapeName = objectManager.getShapeNameById(diagramId);
-        let curAnchors = objectManager.getAnchorsByName(shapeName);
-        let w = canvas.width;
-        let h = canvas.height;
-
-        for(let i in curAnchors) {
-          let curAnchorXY = {};
-
-          let relativePos = {
-            x: x - parseFloat(jqueryEle.css("left")),
-            y: y - parseFloat(jqueryEle.css("top")),
-          }
-          curAnchorXY = diagramUtil.evaluate(curAnchors[i],w,h);
-          if( (Math.abs(relativePos.x - curAnchorXY.x) <= 8)
-           && (Math.abs(relativePos.y - curAnchorXY.y) <= 8)) {
-             curAnchorXY.x = parseFloat(jqueryEle.css("left")) + curAnchorXY.x;
-             curAnchorXY.y = parseFloat(jqueryEle.css("top")) + curAnchorXY.y;
-
-             return curAnchorXY;
-          }
-        }
-      },
-      //when draw line, if a vertex is within the area of one diagramObj's anchor.
-      //Draw hightlight circle to notice.
-      //reference the arguments function resolvePointInContainedDiagram return
-      drawWithInAnchorAreaPointCircle : function (x,y,diagramId,posInfoposition) {
-        diagramDesigner.addDiagramAnchorOverlay(diagramId);
-        if(posInfoposition == "border" || posInfoposition == "anchor") {
-          let jqueryEle = $("#" + diagramId);
-          if($("#line-diagram-circle").length == 0) {
-            let circleHtml = "<canvas id='line-diagram-circle' width='32' height='32'></canvas>";
-            $(circleHtml).appendTo(".design-canvas");
-          }
-          $("#line-diagram-circle").css({
-                                      "opacity" : 0.3,
-                                      "background-color": "#833",
-                                      "border-color": "#833",
-                                      "border-radius": 16,
-                                      "border": "solid 1px #772E2E",
-                                      "width": 32,
-                                      "height": 32,
-                                      "left": x - 16,
-                                      "top": y - 16,
-                                    })
-                                    .show();
-        }
-        else {
-          $("#line-diagram-circle").hide();
-        }
-      },
-      resolvePointInContainedDiagram : function (x,y) {
-        let INdiagrams = diagramUtil.getElesAt(x,y);
-
-        if(INdiagrams.length == 0) { return; }
-        for(let i = 0; i < INdiagrams.length; i++) {
-          let curJqueryEle = $(INdiagrams[i]);
-          let curId = curJqueryEle.attr("id");
-          let ctx = curJqueryEle.find("canvas")[0].getContext("2d");
-          let pos = {
-            x : x - parseFloat(curJqueryEle.css("left")),
-            y : y - parseFloat(curJqueryEle.css("top")),
-          }
-
-          if(ctx.isPointInPath(pos.x,pos.y)) {
-            return {
-              id: curId,
-              position: "inpath",
-              x: x,
-              y: y,
-            }
-          }
-          else if(diagramDesigner.isPointWithinBorderArea.call(ctx,pos.x,pos.y,9)) {
-            let closestAnchor = diagramDesigner.getClosestDefaultAnchor(x,y,curId);
-            if(closestAnchor) {
-              return {
-                id: curId,
-                position: "anchor",
-                x: closestAnchor.x,
-                y: closestAnchor.y,
-              }
-            }
-            else {
-              closestAnchor = this.getAnchorPosByCurPos.call(ctx,pos.x,pos.y,11);
-              closestAnchor.x = parseFloat(curJqueryEle.css("left")) + closestAnchor.x;
-              closestAnchor.y = parseFloat(curJqueryEle.css("top")) + closestAnchor.y;
-              return {
-                id: curId,
-                position: "border",
-                x: closestAnchor.x,
-                y: closestAnchor.y,
-              }
-            }
-          }
-        }
-
-      },
-      /**
-     * calculate the vertical line from the diagram border.
-     * the distance from returned point on this vertical line to the border is 100.
-     * Used in creating curve line's control point when connect diagram.
-     * @param {number} x - diagram object id
-     * @param {number} y - draw line in which diagram state.
-     *                         default / move / resize / rotate
-     * @param {number} r - The radius,11
-     * @return {point} point on this vertical line
-     */
-      calVerticalLineFromBorder : function(x,y,d,diagramId) {
-        let jqueryEle = $("#" + diagramId);
-        let ctx = jqueryEle.find("canvas")[0].getContext("2d");
-        let relativePos = {
-          x : x - parseFloat(jqueryEle.css("left")),
-          y : y - parseFloat(jqueryEle.css("top")),
-        }
-        let circlePoints = diagramDesigner.getCirclePoints(relativePos.x,relativePos.y,d);
-        let pointsInDiagram = [],
-            tangentLinePoint = [];
-
-        for(let i in circlePoints) {
-          if(ctx.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
-            pointsInDiagram.push(circlePoints[i]);
-          }
-        }
-
-        let Xm,     //midpoint of tangentLinePoint
-            Ym,
-            Xr = x,     //central of the circle
-            Yr = y,
-            Xv,     //vertical line's point
-            Yv;
-        if(pointsInDiagram.length >= 2) {
-          tangentLinePoint.push(pointsInDiagram[0]);
-          tangentLinePoint.push(pointsInDiagram[pointsInDiagram.length-1]);
-          Xm = (tangentLinePoint[0].x + tangentLinePoint[1].x) / 2;
-          Ym = (tangentLinePoint[0].y + tangentLinePoint[1].y) / 2;
-        }
-        else if(pointsInDiagram.length == 1) {
-          tangentLinePoint.push(pointsInDiagram[0]);
-          Xm = tangentLinePoint[0].x;
-          Ym = tangentLinePoint[0].y;
-        }
-        else {
-          return ;
-        }
-        let lamda = (Math.sqrt(Math.pow((Xr - Xm),2) + Math.pow((Yr - Ym),2))) / 100;
-        //    lamda * M + (1 - lamda) * V = R
-        Xv = (Xr - lamda * Xm) / (1 - lamda);
-        Yv = (Yr - lamda * Ym) / (1 - lamda);
-
-        return {
-          x: parseFloat(jqueryEle.css("left")) + Xv,
-          y: parseFloat(jqueryEle.css("top")) + Yv,
-        }
-      },
-      calVerticalLineFromAnchor : function(x,y,anchorX,anchorY) {
-        let Xa = anchorX,     //anchor
-            Ya = anchorY,
-            Xr = x,     //central of the circle
-            Yr = y,
-            Xv,     //vertical line's point
-            Yv;
-        let lamda = (Math.sqrt(Math.pow((Xr - Xa),2) + Math.pow((Yr - Ya),2))) / 100;
-        lamda = 1 - lamda;
-        //    lamda * M + (1 - lamda) * V = R
-        Xv = (Xr - lamda * Xa) / (1 - lamda);
-        Yv = (Yr - lamda * Ya) / (1 - lamda);
-
-        return {
-          x: Math.round(Xv),
-          y: Math.round(Yv),
-        }
-      },
-      /**
-     * update a diagram's all linked line properties.
-     * @param {string} diagramId - diagram object id
-     * @param {string} action - draw line in which diagram state.
-     *                          move / resize / rotate
-     * @param {argList} y - reserved
-     * @return {boolean} true if is within the border area.
-     */
-      updateDiagramAllLinkLine : function (diagramId,action,argList) {
-        let allLinkLineIdArray = diagramManager.getAttrById(diagramId,{linkerList:[]});
-
-        if(!allLinkLineIdArray || allLinkLineIdArray.length == 0) { return; }
-        switch (action) {
-          case "move":
-            let originX = argList.originX,
-                originY = argList.originY,
-                currentX = argList.currentX,
-                currentY = argList.currentY;
-            let offsetX = currentX - originX,
-                offsetY = currentY - originY;
-            for(let curLineId in allLinkLineIdArray) {
-              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
-                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
-              let argList = {};
-              let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-              let end = {
-                x : curProperties["endX"],
-                y : curProperties["endY"],
-              };
-              let start = {
-                x : curProperties["startX"],
-                y : curProperties["startY"],
-              };
-              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "startX": start.x + offsetX,
-                  "startY": start.y + offsetY,
-                  "endX" : end.x + offsetX,
-                  "endY" : end.y + offsetY,
-                }});
-              }
-              //line start from this diagram
-              else if(fromId["fromId"] == diagramId) {
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "startX": start.x + offsetX,
-                  "startY": start.y + offsetY,
-                }});
-              }
-              //line end to this diagram
-              else if(toId["toId"] == diagramId) {
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "endX" : end.x + offsetX,
-                  "endY" : end.y + offsetY,
-                }});
-              }
-            }
-            break;
-          case "resize":
-            let jqueryEle = $("#" + diagramId);
-            let originW = argList.originW,
-                originH = argList.originH,
-                currentW = argList.currentW,
-                currentH = argList.currentH,
-                originLeft = argList.originLeft,
-                originTop = argList.originTop;
-
-            originW = originW - 20;
-            originH = originH - 20;
-            currentW = currentW - 20;
-            currentH = currentH - 20;
-            originTop = originTop + 10;
-            originLeft = originLeft + 10;
-            for(let curLineId in allLinkLineIdArray) {
-              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
-                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
-              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-                let end = {
-                    x : curProperties["endX"],
-                    y : curProperties["endY"],
-                  },
-                  start = {
-                    x : curProperties["startX"],
-                    y : curProperties["startY"],
-                  };
-                let relativeStartPos = {
-                      x : start.x - originLeft,
-                      y : start.y - originTop,
-                    },
-                    relativeEndPos = {
-                      x : end.x - originLeft,
-                      y : end.y - originTop,
-                    };
-                let startKx = relativeStartPos.x / originW,
-                    startKy = relativeStartPos.y / originH,
-                    endKx = relativeEndPos.x / originW,
-                    endKy = relativeEndPos.y / originH;
-                let curRelStartPos = {
-                      x: startKx * currentW + 10,
-                      y: startKy * currentH + 10,
-                    },
-                    curRelEndPos = {
-                      x: endKx * currentW + 10,
-                      y: endKy * currentH + 10,
-                    };
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "startX": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
-                  "startY": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
-                  "endX" : curRelEndPos.x + parseFloat(jqueryEle.css("left")),
-                  "endY" : curRelEndPos.y + parseFloat(jqueryEle.css("top")),
-                }});
-              }
-              //line start from this diagram
-              else if(fromId["fromId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY"]});
-                let start = {
-                  x : curProperties["startX"],
-                  y : curProperties["startY"],
-                };
-                let relativeStartPos = {
-                      x : start.x - originLeft,
-                      y : start.y - originTop,
-                    };
-                let startKx = relativeStartPos.x / originW,
-                    startKy = relativeStartPos.y / originH;
-                let curRelStartPos = {
-                      x: startKx * currentW + 10,
-                      y: startKy * currentH + 10,
-                    };
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "startX": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
-                  "startY": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
-                }});
-              }
-              //line end to this diagram
-              else if(toId["toId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["endX","endY"]});
-                let end = {
-                  x : curProperties["endX"],
-                  y : curProperties["endY"],
-                };
-                let relativeEndPos = {
-                      x : end.x - originLeft,
-                      y : end.y - originTop,
-                    };
-                let endKx = relativeEndPos.x / originW,
-                    endKy = relativeEndPos.y / originH;
-                let curRelEndPos = {
-                      x: endKx * currentW + 10,
-                      y: endKy * currentH + 10,
-                    };
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "endX" : curRelEndPos.x + parseFloat(jqueryEle.css("left")),
-                  "endY" : curRelEndPos.y + parseFloat(jqueryEle.css("top")),
-                }});
-              }
-            }
-            break;
-          case "rotate":
-
-            break;
-          default:
-
-        }
-      },
-      /**
-     * draw a diagram's all linked line.
-     * @param {string} diagramId - diagram object id
-     * @param {string} action - draw line in which diagram state.
-     *                         default / move / resize / rotate
-     * @param {argList} y - reserved
-     * @return {boolean} true if is within the border area.
-     */
-      drawDiagramAllLinkLine : function (diagramId,action,argList) {
-        let allLinkLineIdArray = diagramManager.getAttrById(diagramId,{linkerList:[]});
-
-        if(!allLinkLineIdArray || allLinkLineIdArray.length == 0) { return; }
-        switch (action) {
-          case "move":
-            let originX = argList.originX,
-                originY = argList.originY,
-                currentX = argList.currentX,
-                currentY = argList.currentY;
-            let offsetX = currentX - originX,
-                offsetY = currentY - originY;
-            for(let curLineId in allLinkLineIdArray) {
-              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
-                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
-              let curargList = {};
-              let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-              let end = {
-                x : curProperties["endX"],
-                y : curProperties["endY"],
-              };
-              let start = {
-                x : curProperties["startX"],
-                y : curProperties["startY"],
-              };
-              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
-                curargList = {
-                  "start" : {
-                    "x": start.x + offsetX,
-                    "y": start.y + offsetY,
-                  },
-                  "end" : {
-                    "x": end.x + offsetX,
-                    "y": end.y + offsetY,
-                  },
-                };
-              }
-              //line start from this diagram
-              else if(fromId["fromId"] == diagramId) {
-                curargList = {
-                  "start" : {
-                    "x": start.x + offsetX,
-                    "y": start.y + offsetY,
-                  },
-                  "end" : {
-                    "x": end.x,
-                    "y": end.y,
-                  },
-                };
-              }
-              //line end to this diagram
-              else if(toId["toId"] == diagramId) {
-                curargList = {
-                  "start" : {
-                    "x": start.x,
-                    "y": start.y,
-                  },
-                  "end" : {
-                    "x": end.x + offsetX,
-                    "y": end.y + offsetY,
-                  },
-                };
-              }
-              this.drawCanvasAndDiagram(allLinkLineIdArray[curLineId],curargList);
-            }
-            break;
-          case "resize":
-            let jqueryEle = $("#" + diagramId);
-            let originW = argList.originW,
-                originH = argList.originH,
-                currentW = argList.currentW,
-                currentH = argList.currentH,
-                originLeft = argList.originLeft,
-                originTop = argList.originTop;
-
-            originW = originW - 20;
-            originH = originH - 20;
-            currentW = currentW - 20;
-            currentH = currentH - 20;
-            originTop = originTop + 10;
-            originLeft = originLeft + 10;
-            for(let curLineId in allLinkLineIdArray) {
-              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
-                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
-              let curargList = {};
-
-              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-                let end = {
-                    x : curProperties["endX"],
-                    y : curProperties["endY"],
-                  },
-                  start = {
-                    x : curProperties["startX"],
-                    y : curProperties["startY"],
-                  };
-                let relativeStartPos = {
-                      x : start.x - originLeft,
-                      y : start.y - originTop,
-                    },
-                    relativeEndPos = {
-                      x : end.x - originLeft,
-                      y : end.y - originTop,
-                    };
-                let startKx = relativeStartPos.x / originW,
-                    startKy = relativeStartPos.y / originH,
-                    endKx = relativeEndPos.x / originW,
-                    endKy = relativeEndPos.y / originH;
-                let curRelStartPos = {
-                      x: startKx * currentW + 10,
-                      y: startKy * currentH + 10,
-                    },
-                    curRelEndPos = {
-                      x: endKx * currentW + 10,
-                      y: endKy * currentH + 10,
-                    };
-                curargList = {
-                  "start" : {
-                    "x": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
-                    "y": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
-                  },
-                  "end" : {
-                    "x": curRelEndPos.x + parseFloat(jqueryEle.css("left")),
-                    "y": curRelEndPos.y + parseFloat(jqueryEle.css("top")),
-                  },
-                };
-              }
-              //line start from this diagram
-              else if(fromId["fromId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-                let start = {
-                      x : curProperties["startX"],
-                      y : curProperties["startY"],
-                    },
-                    end = {
-                      x : curProperties["endX"],
-                      y : curProperties["endY"],
-                    };
-                let relativeStartPos = {
-                      x : start.x - originLeft,
-                      y : start.y - originTop,
-                };
-                let startKx = relativeStartPos.x / originW,
-                    startKy = relativeStartPos.y / originH;
-                let curRelStartPos = {
-                      x: startKx * currentW + 10,
-                      y: startKy * currentH + 10,
-                };
-                curargList = {
-                  "start" : {
-                    "x": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
-                    "y": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
-                  },
-                  "end" : {
-                    "x": end.x,
-                    "y": end.y,
-                  },
-                };
-              }
-              //line end to this diagram
-              else if(toId["toId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-                let end = {
-                      x : curProperties["endX"],
-                      y : curProperties["endY"],
-                    },
-                    start = {
-                      x : curProperties["startX"],
-                      y : curProperties["startY"],
-                    };
-                let relativeEndPos = {
-                      x : end.x - originLeft,
-                      y : end.y - originTop,
-                    };
-                let endKx = relativeEndPos.x / originW,
-                    endKy = relativeEndPos.y / originH;
-                let curRelEndPos = {
-                      x: endKx * currentW + 10,
-                      y: endKy * currentH + 10,
-                };
-                curargList = {
-                  "start" : {
-                    "x": start.x,
-                    "y": start.y,
-                  },
-                  "end" : {
-                    "x": curRelEndPos.x + parseFloat(jqueryEle.css("left")),
-                    "y": curRelEndPos.y + parseFloat(jqueryEle.css("top")),
-                  },
-                };
-              }
-              this.drawCanvasAndDiagram(allLinkLineIdArray[curLineId],curargList);
-            }
-            break;
-          case "rotate":
-
-            break;
-          case "default":
-            for(let curLineId in allLinkLineIdArray) {
-              this.drawDiagramById(allLinkLineIdArray[curLineId]);
-            }
-            break;
-          default:
-
-        }
-      },
+      //-start-----------position info floating op-----------------------
       drawPositionFloat : function(diagramId) {
         let positionFloatEle = $("#position-float");
         let jqueryEle = $("#" + diagramId);
@@ -1365,7 +494,209 @@ define(function(require, exports, module) {
       hidePositionFloat: function() {
         $("#position-float").fadeOut(10);
       },
+      //-end-----------position info floating op-----------------------
 
+      //-start-----------text area op-----------------------
+      drawTextAreaById : function (diagramId) {
+        let diagramEle = $("#" + diagramId),
+            textareajqObj = diagramEle.find("textarea");
+        let curshapeName = objectManager.getShapeNameById(diagramId);
+
+        if(textareajqObj.length == 0) {
+          return;
+        }
+        if(curshapeName == "line") {
+          lineDesigner.drawTextAreaById(diagramId);
+        }
+        else {
+          let diagramFontStyle = diagramManager.getAttrById(diagramId,{fontStyle:[]});
+          let textAlignTB = diagramFontStyle["vAlign"],
+              textAlignLMR = diagramFontStyle["textAlign"];
+          let w = textareajqObj.siblings("canvas")[0].width,
+              h = textareajqObj.siblings("canvas")[0].height;
+          let text;
+          let textAreaStyle = {
+            "width"          : w - 40 + "px",
+            "z-index"        : "50",
+            "line-height"    : Math.round(diagramFontStyle.size * 1.25) + "px",
+            "font-size"      : diagramFontStyle.size + "px",
+            "font-family"    : diagramFontStyle.fontFamily,
+            "font-weight"    : diagramFontStyle.bold ? "bold" : "normal",
+            "font-style"     : diagramFontStyle.italic ? "italic" : "normal",
+            "text-align"     : textAlignLMR,
+            "color"          : "rgb(" + diagramFontStyle.color + ")",
+            "text-decoration": diagramFontStyle.underline ? "underline" : "none"
+          }
+          text = textareajqObj.val();
+          text = (text == undefined) ? "" : text ;
+          switch (textAlignTB) {
+            case "top":
+              anchor = templateManager.getDefaultAnchor("n");
+              curanchorXY = diagramUtil.evaluate(anchor,w,h);
+              textareajqObj.css({
+                        "left": curanchorXY.x - w/2 + 20,
+                        "top": curanchorXY.y,
+                      })
+                     .css(textAreaStyle)
+                     .val(text);
+              break;
+            case "bottom":
+              anchor = templateManager.getDefaultAnchor("s");
+              curanchorXY = diagramUtil.evaluate(anchor,w,h);
+              textareajqObj.css({
+                       "left": curanchorXY.x - w/2 + 20,
+                       "top": curanchorXY.y - parseInt(textAreaStyle["line-height"])*2,
+                      })
+                     .css(textAreaStyle)
+                     .val(text);
+              break;
+            case "middle":
+              textareajqObj.css({
+                         "left": 20,
+                         "top": h/2 - parseInt(textAreaStyle["line-height"])/2,
+                       })
+                       .css(textAreaStyle)
+                       .val(text);
+              break;
+            default:
+          }
+        }
+      },
+      addTextarea : function (diagramId) {
+        let curshapeName = objectManager.getShapeNameById(diagramId);
+        if(curshapeName == "line") {
+          lineDesigner.addLineTextArea(diagramId);
+        }
+        else {
+          this._addDiagramTextArea(diagramId);
+        }
+      },
+      _addDiagramTextArea: function (diagramId) {
+        let diagramEle = $("#" + diagramId);
+        let canvas = diagramEle.find("canvas")[0];
+        let textAreaHtml = "<textarea id='shape-textarea-editing' target='" + diagramId + "'></textarea>";
+        let diagramTextArea = diagramManager.getAttrById(diagramId,{textArea:[]});
+        let diagramFontStyle = diagramManager.getAttrById(diagramId,{fontStyle:[]});
+        let textAlignTB = diagramFontStyle["vAlign"];
+        let textAlignLMR = diagramFontStyle["textAlign"];
+        let anchor;
+        let w = canvas.width;
+        let h = canvas.height;
+        let curanchorXY = {};
+        let text;
+        let textAreaStyle = {
+          "width"          : w - 40 + "px",
+          "z-index"        : "50",
+          "line-height"    : Math.round(diagramFontStyle.size * 1.25) + "px",
+          "font-size"      : diagramFontStyle.size + "px",
+          "font-family"    : diagramFontStyle.fontFamily,
+          "font-weight"    : diagramFontStyle.bold ? "bold" : "normal",
+          "font-style"     : diagramFontStyle.italic ? "italic" : "normal",
+          "text-align"     : textAlignLMR,
+          "color"          : "rgb(" + diagramFontStyle.color + ")",
+          "text-decoration": diagramFontStyle.underline ? "underline" : "none"
+        }
+        text = diagramEle.find("textarea").val();
+        text = (text == undefined) ? "" : text ;
+        diagramEle.find("textarea").remove();
+
+        switch (textAlignTB) {
+          case "top":
+            anchor = templateManager.getDefaultAnchor("n");
+            curanchorXY = diagramUtil.evaluate(anchor,w,h);
+            $(textAreaHtml).appendTo($(".design-canvas"))
+                            .css({
+                              "left": parseInt(diagramEle.css("left")) + curanchorXY.x - w/2 + 20,
+                              "top": parseInt(diagramEle.css("top")) + curanchorXY.y,
+                            })
+                           .css(textAreaStyle)
+                           .val(text)
+                           .select();
+            break;
+          case "bottom":
+            anchor = templateManager.getDefaultAnchor("s");
+            curanchorXY = diagramUtil.evaluate(anchor,w,h);
+            $(textAreaHtml).appendTo($(".design-canvas"))
+                           .css({
+                             "left": parseInt(diagramEle.css("left")) + curanchorXY.x - w/2 + 20,
+                             "top": parseInt(diagramEle.css("top")) + curanchorXY.y - parseInt(textAreaStyle["line-height"])*2,
+                           })
+                           .css(textAreaStyle)
+                           .val(text)
+                           .select();
+            break;
+          case "middle":
+            $(textAreaHtml).appendTo($(".design-canvas"))
+                           .css({
+                             "left": parseInt(diagramEle.css("left")) + 20,
+                             "top": parseInt(diagramEle.css("top")) + h/2 - parseInt(textAreaStyle["line-height"])/2,
+                           })
+                           .css(textAreaStyle)
+                           .val(text)
+                           .select();
+            break;
+          default:
+        }
+
+      },
+      //-end-----------text area op-----------------------
+
+      drawPageAndGrid : function(canvas){
+        let ctx = canvas.getContext('2d');
+        let w = pageManager.get("width");
+        let h = pageManager.get("height");
+        let padding = pageManager.get("padding");
+        let gridSize = pageManager.get("gridSize");
+        if(pageManager.get("orientation") == "landscape") {
+          let temp = w;
+          w = h;
+          h = temp;
+        }
+        let curW = w - padding * 2;
+        let curH = h - padding * 2;
+        let backgroundColor =
+              (pageManager.get("backgroundColor") == "transparent")
+              ?  "rgb(255,255,255)" : pageManager.get("backgroundColor");
+        let darkerColor = diagramUtil.shadeBlendConvert(-0.05,backgroundColor);
+        let darkererColor = diagramUtil.shadeBlendConvert(-0.05,darkerColor);
+
+        (gridSize <= 10) ? gridSize = 10 : "";
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = backgroundColor;
+        ctx.beginPath();
+        ctx.rect(padding, padding, curW, curH);
+        ctx.fill();
+        if(pageManager.get("showGrid")) {
+          ctx.translate(padding,padding);
+          ctx.lineWidth = 1;
+          ctx.save();
+          //http://stackoverflow.com/questions/4172246/grid-drawn-using-a-canvas-element-looking-stretched
+          //this i should be 0.5
+          let count = 0;    //use for count darken line
+          for(let i = 0.5; i <=  curH + 1; i+= pageManager.get("gridSize")) {
+            ctx.restore();
+            (count % 4 == 0) ? ctx.strokeStyle = darkererColor: ctx.strokeStyle = darkerColor;
+            ctx.beginPath();
+            ctx.moveTo(0, i);
+            ctx.lineTo(curW, i);
+            ctx.stroke();
+
+            count++;
+          }
+          count = 0;
+          for(let i = 0.5; i <=  curW + 1; i+= pageManager.get("gridSize")) {
+            ctx.restore();
+            (count % 4 == 0) ? ctx.strokeStyle = darkererColor : ctx.strokeStyle = darkerColor;
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, curH);
+            ctx.stroke();
+
+            count++;
+          }
+        }
+      },
 
     };
 

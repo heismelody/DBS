@@ -24,8 +24,14 @@ define(function(require, exports, module) {
         group: "",
         groupName: null,
         locked: false,
-        fromId: null,
-        toId: null,
+        from : {
+          id: null,
+          angle: 0,
+        },
+        to : {
+          id: null,
+          angle: 0,
+        },
         properties: {
           startX: 0,
           startY: 0,
@@ -53,17 +59,19 @@ define(function(require, exports, module) {
         group: "",
         groupName: null,
         locked: false,
-        fromId: null,
-        toId: null,
+        from : {
+          id: null,
+          angle: 0,
+        },
+        to : {
+          id: null,
+          angle: 0,
+        },
         properties: {
           startX: 0,
           startY: 0,
           endX : 120,
           endY : 80,
-          startControlX: 100,
-          startControlY: 100,
-          endControlX: 100,
-          endControlY: 100,
           width : 0,
           height : 0,
           zindex: 0,
@@ -86,8 +94,14 @@ define(function(require, exports, module) {
         group: "",
         groupName: null,
         locked: false,
-        fromId: null,
-        toId: null,
+        from : {
+          id: null,
+          angle: 0,
+        },
+        to : {
+          id: null,
+          angle: 0,
+        },
         properties: {
           startX: 0,
           startY: 0,

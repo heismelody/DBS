@@ -142,10 +142,10 @@ define(function(require, exports, module) {
         switch (lineType) {
           case "basic":
             let result = {};
-            let startX = arg.startX;
-            let startY = arg.startY;
-            let endX = arg.endX;
-            let endY = arg.endY;
+            let startX = arg.from.x,
+                startY = arg.from.y,
+                endX = arg.to.x,
+                endY = arg.to.y,
 
             for(let exp in expression) {
               result[exp] = eval(expression[exp]);
@@ -221,6 +221,36 @@ define(function(require, exports, module) {
                            return (y >= top) && (y <= (top + height))
                                && (x >= left) && (x <= (left + width));
                      });
+      },
+      calDistance : function (a1,a2) {
+        let dx = a1.x - a2.x,
+            dy = a1.y - a2.y;
+        return Math.pow((dx * dx + dy * dy), 0.5);
+      },
+
+      /**
+      * http://stackoverflow.com/questions/4270485/drawing-lines-on-html-page
+      */
+      drawLineUsingCSS : function(start,end,className,appendedElement) {
+        let lineHtml = "<div class=" + className + "></div>";
+        let a = start.x - end.x,
+            b = start.y - end.y,
+            length = Math.sqrt(a * a + b * b);
+        let sx = (start.x + end.x) / 2,
+            sy = (start.y + end.y) / 2;
+        let x = sx - length / 2,
+            y = sy;
+        let angle = Math.PI - Math.atan2(-b, a);
+
+        $(lineHtml).appendTo($(appendedElement))
+                   .attr("style",'width: ' + length + 'px; '
+                                + '-moz-transform: rotate(' + angle + 'rad); '
+                                + '-webkit-transform: rotate(' + angle + 'rad); '
+                                + '-o-transform: rotate(' + angle + 'rad); '
+                                + '-ms-transform: rotate(' + angle + 'rad); '
+                                + 'top: ' + y + 'px; '
+                                + 'left: ' + x + 'px; ');
+        return $(lineHtml);
       },
 
     };
