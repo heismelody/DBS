@@ -145,7 +145,7 @@ define(function(require, exports, module) {
             let startX = arg.from.x,
                 startY = arg.from.y,
                 endX = arg.to.x,
-                endY = arg.to.y,
+                endY = arg.to.y;
 
             for(let exp in expression) {
               result[exp] = eval(expression[exp]);

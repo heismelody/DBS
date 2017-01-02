@@ -30,21 +30,17 @@ define(function(require, exports, module) {
         _w : 0,
         _h : 0,
       },
-
-      drawPanelItemDiagram : function (canvas,shapeName) {
-        let ctx = canvas.getContext("2d");
-        ctx.clearRect(0,0,30,30);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.lineWidth = 2;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-
-        this.drawDiagram(canvas,shapeName);
-      },
+      //-start-------most used diagram draw function ---------------
       /**
-     * this function used for creating diagram from the left panel item.
-     * when you drag the left panel item to the right canvas,once the mouse
-     * moved into the right canvas, you can use this function to draw new diagram.
+     * this function used for creating diagram
+     * (Ex:
+     * 1.create diagram from left panel items:
+     * When you drag the left panel item to the right canvas,you can't draw
+     * this diagram with drawDiagramById(),because it doesn't have an id.So once the mouse
+     * moved into the right canvas, you can use this function to draw this new diagram.
+     * 2.create line
+     * As shown above,when you create a line before it has an exact id, you can't draw it
+     * with  drawDiagramById() ,so you can use this function.
      */
       drawThemeDiagram : function (canvas,shapeName,argList) {
         let curTheme = themeManager.getCurrentThemeObj();
@@ -54,11 +50,24 @@ define(function(require, exports, module) {
         let ctx = canvas.getContext("2d");
         ctx.shapeName = shapeName;
         if(shapeName == "line") {
+          let linetype = diagramManager.configManager.getLineType(),
+              lineStyle = curThemeConfig.lineStyle;
+          let from = argList.from,
+              to = argList.to;
 
+          //1,set line style
+          lineDesigner._resolveStyle(ctx,{"lineStyle":lineStyle});
+          //2.draw text area(Not need here when creating new line)
+          //this.drawTextAreaById(lineId);
+          //3.set arrow
+          from.beginArrow = lineStyle.beginArrow;
+          to.endArrow = lineStyle.endArrow;
+          //4.draw line
+          lineDesigner.drawLine(canvas,linetype,from,to);
         }
         else {
-          let fillStyle = curThemeConfig.fillStyle;
-          let lineStyle = curThemeConfig.lineStyle;
+          let fillStyle = curThemeConfig.fillStyle,
+              lineStyle = curThemeConfig.lineStyle;
 
           this._resolveStyle(ctx,{
             "fillStyle" : fillStyle,
@@ -68,69 +77,22 @@ define(function(require, exports, module) {
           this.drawDiagram(canvas,shapeName);
         }
       },
-
-      drawDiagram : function drawDiagram(canvas,shapeName,argList) {
-        let ctx = canvas.getContext("2d");
-        ctx.shapeName = shapeName;
-        if(shapeName == "line") {
-          let curjqDiaggram = $(canvas).parent();
-          let curStartRelative,
-              curEndRelative;
-          let curLineTypeConfig = diagramManager.configManager.getLineType();
-          let lineArguList = {};
-          let eleLeft = parseInt(curjqDiaggram.css("left")),
-              eleTop = parseInt(curjqDiaggram.css("top"));
-
-          curStartRelative = {
-            x: argList["start"].x - eleLeft,
-            y: argList["start"].y - eleTop,
-          }
-          curEndRelative = {
-            x: argList["end"].x - eleLeft,
-            y: argList["end"].y - eleTop,
-          }
-
-          if(argList && argList.hasOwnProperty("startControlX") && argList.startControlX) {
-            lineArguList.startControlX = argList.startControlX - eleLeft;
-            lineArguList.startControlY = argList.startControlY - eleTop;
-          }
-          if(argList && argList.hasOwnProperty("endControlX") && argList.endControlX) {
-            lineArguList.endControlX = argList.endControlX - eleLeft;
-            lineArguList.endControlY = argList.endControlY - eleTop;
-          }
-          lineDesigner.drawLine(canvas,curLineTypeConfig,curStartRelative,curEndRelative,lineArguList);
-        }
-        else {
-          if(!ctx.fillStyleDefined || ctx.fillStyleDefined == false) {
-            ctx.fillStyle = "#FFFFFF";
-          }
-          this._tempVar._w = canvas.width;
-          this._tempVar._h = canvas.height;
-          this._resolvePath(ctx,shapeName);
-        }
-      },
-      //you should notice that after you change the size of canvas, the context change so you have to
-      //reset the lineStyle and other properties.
-      drawCanvasAndDiagram : function (diagramId,argList) {
-        let shapeName = objectManager.getShapeNameById(diagramId);
-
-        if(shapeName == "line") {
-          lineDesigner.drawCanvasAndLine(diagramId,argList);
-        }
-      },
       drawDiagramById : function (diagramId) {
         let jqObj = $("#" + diagramId);
         let canvas = jqObj.find("canvas")[0];
         let ctx = canvas.getContext("2d");
+
         let shapeName = objectManager.getShapeNameById(diagramId);
 
         if(shapeName == "line") {
           lineDesigner.drawLineById(diagramId);
         }
         else {
+          //1.draw text area if textarea exist
           if(jqObj.find("textarea").length != 0) {
             this.drawTextAreaById(diagramId);
           }
+          //2.set style
           let fillStyle = diagramManager.getAttrById(diagramId,{fillStyle:[]}),
               lineStyle = diagramManager.getAttrById(diagramId,{lineStyle:[]});
 
@@ -138,12 +100,34 @@ define(function(require, exports, module) {
             "fillStyle" : fillStyle,
             "lineStyle" : lineStyle,
           });
-
+          //3.draw diagram
           this.drawDiagram(canvas,shapeName);
         }
       },
-
-
+      /**
+      * only draw diagram, not draw line.Use drawDiagramById() to draw line
+      */
+      drawDiagram : function(canvas,shapeName) {
+        let ctx = canvas.getContext("2d");
+        ctx.shapeName = shapeName;
+        if(!ctx.fillStyleDefined || ctx.fillStyleDefined == false) {
+          ctx.fillStyle = "#FFFFFF";
+        }
+        this._tempVar._w = canvas.width;
+        this._tempVar._h = canvas.height;
+        this._resolvePath(ctx,shapeName);
+      },
+      // Not need at present, use lineDesigner.drawCanvasAndLine(lineId,from,to)
+      //you should notice that after you change the size of canvas, the context change so you have to
+      //reset the lineStyle and other properties.
+      // drawCanvasAndDiagram : function (diagramId,argList) {
+      //   let shapeName = objectManager.getShapeNameById(diagramId);
+      //
+      //   if(shapeName == "line") {
+      //     lineDesigner.drawCanvasAndLine(lineId,from,to);
+      //   }
+      // },
+      //-start-------most used diagram draw function ---------------
 
       _resolvePath : function (ctx,shapeName,diagramId) {
         //draw template diagram
@@ -696,6 +680,16 @@ define(function(require, exports, module) {
             count++;
           }
         }
+      },
+      drawPanelItemDiagram : function (canvas,shapeName) {
+        let ctx = canvas.getContext("2d");
+        ctx.clearRect(0,0,30,30);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.lineWidth = 2;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+
+        this.drawDiagram(canvas,shapeName);
       },
 
     };

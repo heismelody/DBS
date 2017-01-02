@@ -187,18 +187,17 @@ define(function(require, exports, module) {
       posToRelative : function (canvas,pos) {
         let left = parseFloat($(canvas).parent().css("left")),
             top = parseFloat($(canvas).parent().css("top"));
+        let result = {};
 
-        pos.x = pos.x - left;
-        pos.y = pos.y - top;
-        return pos;
+        result.x = pos.x - left;
+        result.y = pos.y - top;
+        return result;
       },
 
       //-start-------------most used draw functions------------------
-      drawLineContainerById : function (lineId,from,to) {
-        let jqObj = $("#" + lineId),
-            jqCanvas = jqObj.find("canvas");
-
-        let linetype = objectManager.getLineTypeById(lineId);
+      drawContainer : function (canvas,linetype,from,to) {
+        let jqCanvas = $(canvas),
+            jqObj = jqCanvas.parent();
 
         if(linetype == "basic") {
           jqCanvas.attr({
@@ -236,6 +235,14 @@ define(function(require, exports, module) {
 
         }
       },
+      drawLineContainerById : function (lineId,from,to) {
+        let jqObj = $("#" + lineId),
+            jqCanvas = jqObj.find("canvas");
+
+        let linetype = objectManager.getLineTypeById(lineId);
+
+        this.drawContainer(jqCanvas[0],linetype,from,to);
+      },
       drawLineById : function (lineId) {
         let jqObj = $("#" + lineId),
             canvas = jqObj.find("canvas")[0],
@@ -250,8 +257,8 @@ define(function(require, exports, module) {
         //2.draw text area
         this.drawTextAreaById(lineId);
         //3.set arrow
-        from.beginArrow = lineStyle.beginArrow;
-        to.endArrow = lineStyle.endArrow;
+        fromAndTo.from.beginArrow = lineStyle.beginArrow;
+        fromAndTo.to.endArrow = lineStyle.endArrow;
         //4.draw line
         this.drawLine(canvas,linetype,fromAndTo.from,fromAndTo.to)
       },
@@ -275,8 +282,8 @@ define(function(require, exports, module) {
         let textAreaPos;
 
         textAreaPos = diagramUtil.evaluateLineTextArea(textArea["position"],linetype,{
-          "from" : fromAndTo.from,
-          "to" : fromAndTo.to,
+          "from" : from,
+          "to" : to,
         });
         this.drawTextArea(textareajqObj,textAreaPos,fontStyle);
         //3,set line style
@@ -305,11 +312,11 @@ define(function(require, exports, module) {
      *                          endArrow : "",
      *                      }
      */
-      drawLine : function (canvas,linetype,from,to) {
+      drawLine : function (canvas,linetype,start,end) {
         let ctx = canvas.getContext("2d");
 
-        from = this.posToRelative(canvas,from);
-        to = this.posToRelative(canvas,to);
+        let from = this.posToRelative(canvas,start),
+            to = this.posToRelative(canvas,end);
 
         switch (linetype) {
           case "basic":
@@ -745,6 +752,8 @@ define(function(require, exports, module) {
       _isPointOnBasicLine : function(lineId,currPoint) {
         let point1 = this.getFromObjectById(lineId),
             point2 = this.getToObjectById(lineId);
+        point1 = point1.from;
+        point2 = point2.to;
 
         if((currPoint.x >= Math.min(point1.x,point2.x) && currPoint.x <= Math.max(point1.x,point2.x))
            && (currPoint.y >= Math.min(point1.y,point2.y) && currPoint.y <= Math.max(point1.y,point2.y)) ) {
@@ -804,7 +813,7 @@ define(function(require, exports, module) {
      * @return {boolean} true if is within the border area.
      */
       isPointWithinBorderArea : function (x,y,d) {
-        let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
+        let circlePoints = lineDesigner.getCirclePoints(x,y,d);
 
         for(let i in circlePoints) {
           if(this.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
@@ -818,7 +827,7 @@ define(function(require, exports, module) {
      * in this diagramObj/canvas.
      */
       getAnchorPosByCurPos : function (x,y,d) {
-        let circlePoints = diagramDesigner.getCirclePoints(x,y,d);
+        let circlePoints = lineDesigner.getCirclePoints(x,y,d);
 
         //traverse the circlePoints and set isPointIn ctx's Path
         for(let i in circlePoints) {
@@ -838,15 +847,17 @@ define(function(require, exports, module) {
           if(circlePoints[i].isPointInPath == false) {
             if (borderPointA == null) {
               let prePoint = circlePoints[(i - 1 + length) % length]
-              if(prePoint.isPointInPath == true) { borderPointA = prePoint; }
+              if(prePoint.isPointInPath == true) { borderPointA = circlePoints[i]; }
             }
             if (borderPointB == null) {
               let nextPoint = circlePoints[(i + 1 + length) % length];
-              if(nextPoint.isPointInPath == true) { borderPointB = nextPoint; }
+              if(nextPoint.isPointInPath == true) { borderPointB = circlePoints[i]; }
             }
             if (borderPointA && borderPointB) { break; }
           }
         }
+    		let theta = (borderPointA.angle - borderPointB.angle + Math.PI * 2) % (Math.PI * 2) / 2;
+    		let Anchorangle = (borderPointB.angle + theta) % (Math.PI * 2);
 
         //get the farthest Point from given (x,y) point In diagram
         let farthestPointIndiagram = {};
@@ -864,8 +875,9 @@ define(function(require, exports, module) {
           }
           if(record != iscurPointInPath) {
             return {
-              x: curX,
-              y: curY,
+              "x": curX,
+              "y": curY,
+              "angle" : Anchorangle,
             }
           }
         }
@@ -894,7 +906,8 @@ define(function(require, exports, module) {
       },
       getClosestDefaultAnchor : function (x,y,diagramId) {
         let jqueryEle = $("#" + diagramId);
-        let canvas = jqueryEle.find("canvas")[0];
+        let canvas = jqueryEle.find("canvas")[0],
+            ctx = canvas.getContext("2d");
         let shapeName = objectManager.getShapeNameById(diagramId);
         let curAnchors = objectManager.getAnchorsByName(shapeName);
         let w = canvas.width;
@@ -910,6 +923,7 @@ define(function(require, exports, module) {
           curAnchorXY = diagramUtil.evaluate(curAnchors[i],w,h);
           if( (Math.abs(relativePos.x - curAnchorXY.x) <= 8)
            && (Math.abs(relativePos.y - curAnchorXY.y) <= 8)) {
+             curAnchorXY.angle = this.getDefaultAnchorAngle.call(ctx,curAnchorXY.x,curAnchorXY.y),
              curAnchorXY.x = parseFloat(jqueryEle.css("left")) + curAnchorXY.x;
              curAnchorXY.y = parseFloat(jqueryEle.css("top")) + curAnchorXY.y;
 
@@ -917,11 +931,46 @@ define(function(require, exports, module) {
           }
         }
       },
+      getDefaultAnchorAngle : function (x,y) {
+        let circlePoints = lineDesigner.getCirclePoints(x,y,11);
+
+        //traverse the circlePoints and set isPointIn ctx's Path
+        for(let i in circlePoints) {
+          if(this.isPointInPath(circlePoints[i].x,circlePoints[i].y)) {
+            circlePoints[i].isPointInPath = true;
+          }
+          else {
+            circlePoints[i].isPointInPath = false;
+          }
+        }
+
+        //get two point in the boundary of InCtxPath Area / NotInCtxPath Area
+        let borderPointA,
+            borderPointB;
+        let length = circlePoints.length;
+        for (let i in circlePoints) {
+          if(circlePoints[i].isPointInPath == false) {
+            if (borderPointA == null) {
+              let prePoint = circlePoints[(i - 1 + length) % length]
+              if(prePoint.isPointInPath == true) { borderPointA = circlePoints[i]; }
+            }
+            if (borderPointB == null) {
+              let nextPoint = circlePoints[(i + 1 + length) % length];
+              if(nextPoint.isPointInPath == true) { borderPointB = circlePoints[i]; }
+            }
+            if (borderPointA && borderPointB) { break; }
+          }
+        }
+        let theta = (borderPointA.angle - borderPointB.angle + Math.PI * 2) % (Math.PI * 2) / 2;
+        let Anchorangle = (borderPointB.angle + theta) % (Math.PI * 2);
+
+        return Anchorangle;
+      },
       //when draw line, if a vertex is within the area of one diagramObj's anchor.
       //Draw hightlight circle to notice.
       //reference the arguments function resolvePointInContainedDiagram return
       drawWithInAnchorAreaPointCircle : function (x,y,diagramId,posInfoposition) {
-        diagramDesigner.addDiagramAnchorOverlay(diagramId);
+        lineDesigner.addDiagramAnchorOverlay(diagramId);
         if(posInfoposition == "border" || posInfoposition == "anchor") {
           let jqueryEle = $("#" + diagramId);
           if($("#line-diagram-circle").length == 0) {
@@ -964,16 +1013,18 @@ define(function(require, exports, module) {
               position: "inpath",
               x: x,
               y: y,
+              angle: 0,
             }
           }
-          else if(diagramDesigner.isPointWithinBorderArea.call(ctx,pos.x,pos.y,9)) {
-            let closestAnchor = diagramDesigner.getClosestDefaultAnchor(x,y,curId);
+          else if(lineDesigner.isPointWithinBorderArea.call(ctx,pos.x,pos.y,9)) {
+            let closestAnchor = lineDesigner.getClosestDefaultAnchor(x,y,curId);
             if(closestAnchor) {
               return {
                 id: curId,
                 position: "anchor",
                 x: closestAnchor.x,
                 y: closestAnchor.y,
+                angle: closestAnchor.angle,
               }
             }
             else {
@@ -985,12 +1036,298 @@ define(function(require, exports, module) {
                 position: "border",
                 x: closestAnchor.x,
                 y: closestAnchor.y,
+                angle: closestAnchor.angle,
               }
             }
           }
         }
 
       },
+      /**
+     * update a diagram's all linked line properties.
+     * @param {string} diagramId - diagram object id
+     * @param {string} action - draw line in which diagram state.
+     *                          move / resize / rotate
+     * @param {argList} y - reserved
+     * @return {boolean} true if is within the border area.
+     */
+      updateDiagramAllLinkLine : function (diagramId,action,argList) {
+        let allLinkLineIdArray = diagramManager.getAttrById(diagramId,{linkerList:[]});
+
+        if(!allLinkLineIdArray || allLinkLineIdArray.length == 0) { return; }
+        switch (action) {
+          case "move":
+            let originX = argList.originX,
+                originY = argList.originY,
+                currentX = argList.currentX,
+                currentY = argList.currentY;
+            let offsetX = currentX - originX,
+                offsetY = currentY - originY;
+            for(let curLineId in allLinkLineIdArray) {
+              let from = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{from:["id"]}),
+                  to = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{to:["id"]}),
+                  fromAndTo = this.getFromToObjectById(allLinkLineIdArray[curLineId]);
+
+              fromAndTo.from.id = from.id;
+              fromAndTo.to.id = to.id;
+              if(fromAndTo.from.id == diagramId && fromAndTo.to.id == diagramId) {
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "startX": fromAndTo.from.x + offsetX,
+                  "startY": fromAndTo.from.y + offsetY,
+                  "endX" : fromAndTo.to.x + offsetX,
+                  "endY" : fromAndTo.to.y + offsetY,
+                }});
+              }
+              //line start from this diagram
+              else if(fromAndTo.from.id == diagramId) {
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "startX": fromAndTo.from.x + offsetX,
+                  "startY": fromAndTo.from.y + offsetY,
+                }});
+              }
+              //line end to this diagram
+              else if(fromAndTo.to.id == diagramId) {
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "endX" : fromAndTo.to.x + offsetX,
+                  "endY" : fromAndTo.to.y + offsetY,
+                }});
+              }
+            }
+            break;
+          case "resize":
+            let jqueryEle = $("#" + diagramId);
+            let originW = argList.originW,
+                originH = argList.originH,
+                currentW = argList.currentW,
+                currentH = argList.currentH,
+                originLeft = argList.originLeft,
+                originTop = argList.originTop;
+
+            originW = originW - 20;
+            originH = originH - 20;
+            currentW = currentW - 20;
+            currentH = currentH - 20;
+            originTop = originTop + 10;
+            originLeft = originLeft + 10;
+            for(let curLineId in allLinkLineIdArray) {
+              let from = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{from:["id"]}),
+                  to = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{to:["id"]}),
+                  fromAndTo = this.getFromToObjectById(allLinkLineIdArray[curLineId]);
+
+              fromAndTo.from.id = from.id;
+              fromAndTo.to.id = to.id;
+              if(fromAndTo.from.id == diagramId && fromAndTo.to.id == diagramId) {
+                let relativeStartPos = {
+                      x : fromAndTo.from.x - originLeft,
+                      y : fromAndTo.from.y - originTop,
+                    },
+                    relativeEndPos = {
+                      x : fromAndTo.to.x - originLeft,
+                      y : fromAndTo.to.y - originTop,
+                    };
+                let startKx = relativeStartPos.x / originW,
+                    startKy = relativeStartPos.y / originH,
+                    endKx = relativeEndPos.x / originW,
+                    endKy = relativeEndPos.y / originH;
+                let curRelStartPos = {
+                      x: startKx * currentW + 10,
+                      y: startKy * currentH + 10,
+                    },
+                    curRelEndPos = {
+                      x: endKx * currentW + 10,
+                      y: endKy * currentH + 10,
+                    };
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "startX": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
+                  "startY": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
+                  "endX" : curRelEndPos.x + parseFloat(jqueryEle.css("left")),
+                  "endY" : curRelEndPos.y + parseFloat(jqueryEle.css("top")),
+                }});
+              }
+              //line start from this diagram
+              else if(fromAndTo.from.id == diagramId) {
+                let relativeStartPos = {
+                      x : fromAndTo.from.x - originLeft,
+                      y : fromAndTo.from.y - originTop,
+                    };
+                let startKx = relativeStartPos.x / originW,
+                    startKy = relativeStartPos.y / originH;
+                let curRelStartPos = {
+                      x: startKx * currentW + 10,
+                      y: startKy * currentH + 10,
+                    };
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "startX": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
+                  "startY": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
+                }});
+              }
+              //line end to this diagram
+              else if(fromAndTo.to.id == diagramId) {
+                let relativeEndPos = {
+                      x : fromAndTo.to.x - originLeft,
+                      y : fromAndTo.to.y - originTop,
+                    };
+                let endKx = relativeEndPos.x / originW,
+                    endKy = relativeEndPos.y / originH;
+                let curRelEndPos = {
+                      x: endKx * currentW + 10,
+                      y: endKy * currentH + 10,
+                    };
+                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
+                  "endX" : curRelEndPos.x + parseFloat(jqueryEle.css("left")),
+                  "endY" : curRelEndPos.y + parseFloat(jqueryEle.css("top")),
+                }});
+              }
+            }
+            break;
+          case "rotate":
+
+            break;
+          default:
+
+        }
+      },
+      /**
+     * draw a diagram's all linked line.
+     * @param {string} diagramId - diagram object id
+     * @param {string} action - draw line in which diagram state.
+     *                         default / move / resize / rotate
+     * @param {argList} y - reserved
+     * @return {boolean} true if is within the border area.
+     */
+      drawDiagramAllLinkLine : function (diagramId,action,argList) {
+        let allLinkLineIdArray = diagramManager.getAttrById(diagramId,{linkerList:[]});
+
+        if(!allLinkLineIdArray || allLinkLineIdArray.length == 0) { return; }
+        switch (action) {
+          case "move":
+            let originX = argList.originX,
+                originY = argList.originY,
+                currentX = argList.currentX,
+                currentY = argList.currentY;
+            let offsetX = currentX - originX,
+                offsetY = currentY - originY;
+            for(let curLineId in allLinkLineIdArray) {
+              let from = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{from:["id"]}),
+                  to = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{to:["id"]}),
+                  fromAndTo = this.getFromToObjectById(allLinkLineIdArray[curLineId]);
+
+              fromAndTo.from.id = from.id;
+              fromAndTo.to.id = to.id;
+              if(fromAndTo.from.id == diagramId && fromAndTo.to == diagramId) {
+                fromAndTo.from.x = fromAndTo.from.x  + offsetX;
+                fromAndTo.from.y = fromAndTo.from.y  + offsetY;
+                fromAndTo.to.x = fromAndTo.to.x  + offsetX;
+                fromAndTo.to.y = fromAndTo.to.y  + offsetY;
+              }
+              //line start from this diagram
+              else if(fromAndTo.from.id == diagramId) {
+                fromAndTo.from.x = fromAndTo.from.x  + offsetX;
+                fromAndTo.from.y = fromAndTo.from.y  + offsetY;
+              }
+              //line end to this diagram
+              else if(fromAndTo.to.id == diagramId) {
+                fromAndTo.to.x = fromAndTo.to.x  + offsetX;
+                fromAndTo.to.y = fromAndTo.to.y  + offsetY;
+              }
+              this.drawCanvasAndLine(allLinkLineIdArray[curLineId],fromAndTo.from,fromAndTo.to);
+            }
+            break;
+          case "resize":
+            let jqueryEle = $("#" + diagramId);
+            let originW = argList.originW,
+                originH = argList.originH,
+                currentW = argList.currentW,
+                currentH = argList.currentH,
+                originLeft = argList.originLeft,
+                originTop = argList.originTop;
+
+            originW = originW - 20;
+            originH = originH - 20;
+            currentW = currentW - 20;
+            currentH = currentH - 20;
+            originTop = originTop + 10;
+            originLeft = originLeft + 10;
+            for(let curLineId in allLinkLineIdArray) {
+              let from = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{from:["id"]}),
+                  to = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{to:["id"]}),
+                  fromAndTo = this.getFromToObjectById(allLinkLineIdArray[curLineId]);
+
+              fromAndTo.from.id = from.id;
+              fromAndTo.to.id = to.id;
+              if(fromAndTo.from.id == diagramId && fromAndTo.to.id == to.id) {
+                let relativeStartPos = {
+                      x : fromAndTo.from.x - originLeft,
+                      y : fromAndTo.from.y - originTop,
+                    },
+                    relativeEndPos = {
+                      x : fromAndTo.to.x - originLeft,
+                      y : fromAndTo.to.y - originTop,
+                    };
+                let startKx = relativeStartPos.x / originW,
+                    startKy = relativeStartPos.y / originH,
+                    endKx = relativeEndPos.x / originW,
+                    endKy = relativeEndPos.y / originH;
+                let curRelStartPos = {
+                      x: startKx * currentW + 10,
+                      y: startKy * currentH + 10,
+                    },
+                    curRelEndPos = {
+                      x: endKx * currentW + 10,
+                      y: endKy * currentH + 10,
+                    };
+                fromAndTo.from.x = curRelStartPos.x + parseFloat(jqueryEle.css("left"));
+                fromAndTo.from.y = curRelStartPos.y + parseFloat(jqueryEle.css("top"));
+                fromAndTo.to.x = curRelEndPos.x + parseFloat(jqueryEle.css("left"));
+                fromAndTo.to.y = curRelEndPos.y + parseFloat(jqueryEle.css("top"));
+              }
+              //line start from this diagram
+              else if(fromAndTo.from.id == diagramId) {
+                let relativeStartPos = {
+                      x : fromAndTo.from.x - originLeft,
+                      y : fromAndTo.from.y - originTop,
+                    };
+                let startKx = relativeStartPos.x / originW,
+                    startKy = relativeStartPos.y / originH;
+                let curRelStartPos = {
+                      x: startKx * currentW + 10,
+                      y: startKy * currentH + 10,
+                    };
+                fromAndTo.from.x = curRelStartPos.x + parseFloat(jqueryEle.css("left"));
+                fromAndTo.from.y = curRelStartPos.y + parseFloat(jqueryEle.css("top"));
+              }
+              //line end to this diagram
+              else if(fromAndTo.to.id == diagramId) {
+                let relativeEndPos = {
+                      x : fromAndTo.to.x - originLeft,
+                      y : fromAndTo.to.y - originTop,
+                    };
+                let endKx = relativeEndPos.x / originW,
+                    endKy = relativeEndPos.y / originH;
+                let curRelEndPos = {
+                      x: endKx * currentW + 10,
+                      y: endKy * currentH + 10,
+                    };
+                fromAndTo.to.x = curRelEndPos.x + parseFloat(jqueryEle.css("left"));
+                fromAndTo.to.y = curRelEndPos.y + parseFloat(jqueryEle.css("top"));
+              }
+              this.drawCanvasAndDiagram(allLinkLineIdArray[curLineId],fromAndTo.from,fromAndTo.to);
+            }
+            break;
+          case "rotate":
+
+            break;
+          case "default":
+            for(let curLineId in allLinkLineIdArray) {
+              this.drawDiagramById(allLinkLineIdArray[curLineId]);
+            }
+            break;
+          default:
+
+        }
+      },
+
+
       /**
      * calculate the vertical line from the diagram border.
      * the distance from returned point on this vertical line to the border is 100.
@@ -1008,7 +1345,7 @@ define(function(require, exports, module) {
           x : x - parseFloat(jqueryEle.css("left")),
           y : y - parseFloat(jqueryEle.css("top")),
         }
-        let circlePoints = diagramDesigner.getCirclePoints(relativePos.x,relativePos.y,d);
+        let circlePoints = lineDesigner.getCirclePoints(relativePos.x,relativePos.y,d);
         let pointsInDiagram = [],
             tangentLinePoint = [];
 
@@ -1064,385 +1401,6 @@ define(function(require, exports, module) {
         return {
           x: Math.round(Xv),
           y: Math.round(Yv),
-        }
-      },
-      /**
-     * update a diagram's all linked line properties.
-     * @param {string} diagramId - diagram object id
-     * @param {string} action - draw line in which diagram state.
-     *                          move / resize / rotate
-     * @param {argList} y - reserved
-     * @return {boolean} true if is within the border area.
-     */
-      updateDiagramAllLinkLine : function (diagramId,action,argList) {
-        let allLinkLineIdArray = diagramManager.getAttrById(diagramId,{linkerList:[]});
-
-        if(!allLinkLineIdArray || allLinkLineIdArray.length == 0) { return; }
-        switch (action) {
-          case "move":
-            let originX = argList.originX,
-                originY = argList.originY,
-                currentX = argList.currentX,
-                currentY = argList.currentY;
-            let offsetX = currentX - originX,
-                offsetY = currentY - originY;
-            for(let curLineId in allLinkLineIdArray) {
-              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
-                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
-              let argList = {};
-              let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-              let end = {
-                x : curProperties["endX"],
-                y : curProperties["endY"],
-              };
-              let start = {
-                x : curProperties["startX"],
-                y : curProperties["startY"],
-              };
-              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "startX": start.x + offsetX,
-                  "startY": start.y + offsetY,
-                  "endX" : end.x + offsetX,
-                  "endY" : end.y + offsetY,
-                }});
-              }
-              //line start from this diagram
-              else if(fromId["fromId"] == diagramId) {
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "startX": start.x + offsetX,
-                  "startY": start.y + offsetY,
-                }});
-              }
-              //line end to this diagram
-              else if(toId["toId"] == diagramId) {
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "endX" : end.x + offsetX,
-                  "endY" : end.y + offsetY,
-                }});
-              }
-            }
-            break;
-          case "resize":
-            let jqueryEle = $("#" + diagramId);
-            let originW = argList.originW,
-                originH = argList.originH,
-                currentW = argList.currentW,
-                currentH = argList.currentH,
-                originLeft = argList.originLeft,
-                originTop = argList.originTop;
-
-            originW = originW - 20;
-            originH = originH - 20;
-            currentW = currentW - 20;
-            currentH = currentH - 20;
-            originTop = originTop + 10;
-            originLeft = originLeft + 10;
-            for(let curLineId in allLinkLineIdArray) {
-              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
-                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
-              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-                let end = {
-                    x : curProperties["endX"],
-                    y : curProperties["endY"],
-                  },
-                  start = {
-                    x : curProperties["startX"],
-                    y : curProperties["startY"],
-                  };
-                let relativeStartPos = {
-                      x : start.x - originLeft,
-                      y : start.y - originTop,
-                    },
-                    relativeEndPos = {
-                      x : end.x - originLeft,
-                      y : end.y - originTop,
-                    };
-                let startKx = relativeStartPos.x / originW,
-                    startKy = relativeStartPos.y / originH,
-                    endKx = relativeEndPos.x / originW,
-                    endKy = relativeEndPos.y / originH;
-                let curRelStartPos = {
-                      x: startKx * currentW + 10,
-                      y: startKy * currentH + 10,
-                    },
-                    curRelEndPos = {
-                      x: endKx * currentW + 10,
-                      y: endKy * currentH + 10,
-                    };
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "startX": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
-                  "startY": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
-                  "endX" : curRelEndPos.x + parseFloat(jqueryEle.css("left")),
-                  "endY" : curRelEndPos.y + parseFloat(jqueryEle.css("top")),
-                }});
-              }
-              //line start from this diagram
-              else if(fromId["fromId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY"]});
-                let start = {
-                  x : curProperties["startX"],
-                  y : curProperties["startY"],
-                };
-                let relativeStartPos = {
-                      x : start.x - originLeft,
-                      y : start.y - originTop,
-                    };
-                let startKx = relativeStartPos.x / originW,
-                    startKy = relativeStartPos.y / originH;
-                let curRelStartPos = {
-                      x: startKx * currentW + 10,
-                      y: startKy * currentH + 10,
-                    };
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "startX": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
-                  "startY": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
-                }});
-              }
-              //line end to this diagram
-              else if(toId["toId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["endX","endY"]});
-                let end = {
-                  x : curProperties["endX"],
-                  y : curProperties["endY"],
-                };
-                let relativeEndPos = {
-                      x : end.x - originLeft,
-                      y : end.y - originTop,
-                    };
-                let endKx = relativeEndPos.x / originW,
-                    endKy = relativeEndPos.y / originH;
-                let curRelEndPos = {
-                      x: endKx * currentW + 10,
-                      y: endKy * currentH + 10,
-                    };
-                diagramManager.setAttr(allLinkLineIdArray[curLineId],{properties:{
-                  "endX" : curRelEndPos.x + parseFloat(jqueryEle.css("left")),
-                  "endY" : curRelEndPos.y + parseFloat(jqueryEle.css("top")),
-                }});
-              }
-            }
-            break;
-          case "rotate":
-
-            break;
-          default:
-
-        }
-      },
-      /**
-     * draw a diagram's all linked line.
-     * @param {string} diagramId - diagram object id
-     * @param {string} action - draw line in which diagram state.
-     *                         default / move / resize / rotate
-     * @param {argList} y - reserved
-     * @return {boolean} true if is within the border area.
-     */
-      drawDiagramAllLinkLine : function (diagramId,action,argList) {
-        let allLinkLineIdArray = diagramManager.getAttrById(diagramId,{linkerList:[]});
-
-        if(!allLinkLineIdArray || allLinkLineIdArray.length == 0) { return; }
-        switch (action) {
-          case "move":
-            let originX = argList.originX,
-                originY = argList.originY,
-                currentX = argList.currentX,
-                currentY = argList.currentY;
-            let offsetX = currentX - originX,
-                offsetY = currentY - originY;
-            for(let curLineId in allLinkLineIdArray) {
-              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
-                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
-              let curargList = {};
-              let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-              let end = {
-                x : curProperties["endX"],
-                y : curProperties["endY"],
-              };
-              let start = {
-                x : curProperties["startX"],
-                y : curProperties["startY"],
-              };
-              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
-                curargList = {
-                  "start" : {
-                    "x": start.x + offsetX,
-                    "y": start.y + offsetY,
-                  },
-                  "end" : {
-                    "x": end.x + offsetX,
-                    "y": end.y + offsetY,
-                  },
-                };
-              }
-              //line start from this diagram
-              else if(fromId["fromId"] == diagramId) {
-                curargList = {
-                  "start" : {
-                    "x": start.x + offsetX,
-                    "y": start.y + offsetY,
-                  },
-                  "end" : {
-                    "x": end.x,
-                    "y": end.y,
-                  },
-                };
-              }
-              //line end to this diagram
-              else if(toId["toId"] == diagramId) {
-                curargList = {
-                  "start" : {
-                    "x": start.x,
-                    "y": start.y,
-                  },
-                  "end" : {
-                    "x": end.x + offsetX,
-                    "y": end.y + offsetY,
-                  },
-                };
-              }
-              this.drawCanvasAndDiagram(allLinkLineIdArray[curLineId],curargList);
-            }
-            break;
-          case "resize":
-            let jqueryEle = $("#" + diagramId);
-            let originW = argList.originW,
-                originH = argList.originH,
-                currentW = argList.currentW,
-                currentH = argList.currentH,
-                originLeft = argList.originLeft,
-                originTop = argList.originTop;
-
-            originW = originW - 20;
-            originH = originH - 20;
-            currentW = currentW - 20;
-            currentH = currentH - 20;
-            originTop = originTop + 10;
-            originLeft = originLeft + 10;
-            for(let curLineId in allLinkLineIdArray) {
-              let fromId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{fromId:[]}),
-                  toId = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{toId:[]});
-              let curargList = {};
-
-              if(fromId["fromId"] == diagramId && toId["toId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-                let end = {
-                    x : curProperties["endX"],
-                    y : curProperties["endY"],
-                  },
-                  start = {
-                    x : curProperties["startX"],
-                    y : curProperties["startY"],
-                  };
-                let relativeStartPos = {
-                      x : start.x - originLeft,
-                      y : start.y - originTop,
-                    },
-                    relativeEndPos = {
-                      x : end.x - originLeft,
-                      y : end.y - originTop,
-                    };
-                let startKx = relativeStartPos.x / originW,
-                    startKy = relativeStartPos.y / originH,
-                    endKx = relativeEndPos.x / originW,
-                    endKy = relativeEndPos.y / originH;
-                let curRelStartPos = {
-                      x: startKx * currentW + 10,
-                      y: startKy * currentH + 10,
-                    },
-                    curRelEndPos = {
-                      x: endKx * currentW + 10,
-                      y: endKy * currentH + 10,
-                    };
-                curargList = {
-                  "start" : {
-                    "x": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
-                    "y": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
-                  },
-                  "end" : {
-                    "x": curRelEndPos.x + parseFloat(jqueryEle.css("left")),
-                    "y": curRelEndPos.y + parseFloat(jqueryEle.css("top")),
-                  },
-                };
-              }
-              //line start from this diagram
-              else if(fromId["fromId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-                let start = {
-                      x : curProperties["startX"],
-                      y : curProperties["startY"],
-                    },
-                    end = {
-                      x : curProperties["endX"],
-                      y : curProperties["endY"],
-                    };
-                let relativeStartPos = {
-                      x : start.x - originLeft,
-                      y : start.y - originTop,
-                };
-                let startKx = relativeStartPos.x / originW,
-                    startKy = relativeStartPos.y / originH;
-                let curRelStartPos = {
-                      x: startKx * currentW + 10,
-                      y: startKy * currentH + 10,
-                };
-                curargList = {
-                  "start" : {
-                    "x": curRelStartPos.x + parseFloat(jqueryEle.css("left")),
-                    "y": curRelStartPos.y + parseFloat(jqueryEle.css("top")),
-                  },
-                  "end" : {
-                    "x": end.x,
-                    "y": end.y,
-                  },
-                };
-              }
-              //line end to this diagram
-              else if(toId["toId"] == diagramId) {
-                let curProperties = diagramManager.getAttrById(allLinkLineIdArray[curLineId],{properties: ["startX","startY","endX","endY"]});
-                let end = {
-                      x : curProperties["endX"],
-                      y : curProperties["endY"],
-                    },
-                    start = {
-                      x : curProperties["startX"],
-                      y : curProperties["startY"],
-                    };
-                let relativeEndPos = {
-                      x : end.x - originLeft,
-                      y : end.y - originTop,
-                    };
-                let endKx = relativeEndPos.x / originW,
-                    endKy = relativeEndPos.y / originH;
-                let curRelEndPos = {
-                      x: endKx * currentW + 10,
-                      y: endKy * currentH + 10,
-                };
-                curargList = {
-                  "start" : {
-                    "x": start.x,
-                    "y": start.y,
-                  },
-                  "end" : {
-                    "x": curRelEndPos.x + parseFloat(jqueryEle.css("left")),
-                    "y": curRelEndPos.y + parseFloat(jqueryEle.css("top")),
-                  },
-                };
-              }
-              this.drawCanvasAndDiagram(allLinkLineIdArray[curLineId],curargList);
-            }
-            break;
-          case "rotate":
-
-            break;
-          case "default":
-            for(let curLineId in allLinkLineIdArray) {
-              this.drawDiagramById(allLinkLineIdArray[curLineId]);
-            }
-            break;
-          default:
-
         }
       },
 
